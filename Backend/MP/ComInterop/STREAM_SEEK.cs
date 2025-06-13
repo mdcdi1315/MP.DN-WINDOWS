@@ -1,0 +1,10 @@
+﻿
+namespace MP.ComInterop
+{
+    public enum STREAM_SEEK : System.UInt32
+    {
+        STREAM_SEEK_SET = 0,
+        STREAM_SEEK_CUR = 1,
+        STREAM_SEEK_END = 2
+    }
+}

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<LangVersion>11</LangVersion>
+	<AssemblyName>MP.BuildTasks</AssemblyName>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	<DefineConstants>$(DefineConstants);MP_PROJECT_BUILDTASKS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.13.9" />
+	<PackageReference Include="DotNetResourcesExtensions" Version="1.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Compile Include="$(MSBuildThisFileDirectory)../Abstractions/MP/UnsafeMethods.cs" />
+	  <Compile Include="$(MSBuildThisFileDirectory)../Abstractions/MP/StreamMethods.cs" />
+  </ItemGroup>
+
+</Project>

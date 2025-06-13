@@ -1,0 +1,161 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+	<SignAssembly>true</SignAssembly>
+	<RootNamespace></RootNamespace>
+	<ImplicitUsings>disable</ImplicitUsings>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	<AssemblyName>MP.AbstractionsLib</AssemblyName>
+	<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+	<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<!-- The abstractions library uses a different key than the rest of the project and this key is accessible by everyone who has a copy of the project. -->
+	<AssemblyOriginatorKeyFile>AbstractionsKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="Microsoft\IO\InternalMemoryStream.cs" />
+		<Compile Include="Microsoft\Win32\SafeHandles\SafeNativeMemoryEnumerator.cs" />
+		<Compile Include="MP\AbstractPlatformLayer.cs" />
+		<Compile Include="MP\AbstractPlayerInstance.cs" />
+		<Compile Include="MP\AbstractPropertyStream.cs" />
+		<Compile Include="MP\Annotations\AlwaysReturnsTypeThroughBoxedObjectAttribute.cs" />
+		<Compile Include="MP\Annotations\DefaultCOMInterfaceObjectGuidAttribute.cs" />
+		<Compile Include="MP\Annotations\DeprecatedMayBeRemovedAttribute.cs" />
+		<Compile Include="MP\Annotations\NativeLayerAttribute.cs" />
+		<Compile Include="MP\Annotations\IsPointerToCOMInterfaceTypeAttribute.cs" />
+		<Compile Include="MP\Annotations\PreliminaryAttribute.cs" />
+		<Compile Include="MP\ArchivedPlaylistAttribute.cs" />
+		<Compile Include="MP\ArchivedPlaylistAttributeCollection.cs" />
+		<Compile Include="MP\AudioLibrary\AudioFormat.cs" />
+		<Compile Include="MP\AudioLibrary\AudioFormatConverter.cs" />
+		<Compile Include="MP\AudioLibrary\AudioRenderingBuffer.cs" />
+		<Compile Include="MP\AudioLibrary\AudioStream.cs" />
+		<Compile Include="MP\AudioLibrary\ChannelType.cs" />
+		<Compile Include="MP\AudioLibrary\CommonAudioFormat.cs" />
+		<Compile Include="MP\AudioLibrary\CommonChannelTypes.cs" />
+		<Compile Include="MP\AudioLibrary\IAudioPlayer.cs" />
+		<Compile Include="MP\AudioLibrary\IAudioProvider.cs" />
+		<Compile Include="MP\AudioLibrary\MonoToStereoAudioProvider.cs" />
+		<Compile Include="MP\AudioLibrary\PlaybackState.cs" />
+		<Compile Include="MP\AudioLibrary\PlaybackStoppedDelegate.cs" />
+		<Compile Include="MP\AudioLibrary\PlaybackStoppedEventInfo.cs" />
+		<Compile Include="MP\BinaryPlaylist\BinaryPlaylistReader.cs" />
+		<Compile Include="MP\BinaryPlaylist\BinaryPlaylistWriter.cs" />
+		<Compile Include="MP\BinaryPlaylist\BlobFlags.cs" />
+		<Compile Include="MP\BinaryPlaylist\BlobTypes.cs" />
+		<Compile Include="MP\BinaryPlaylist\Exceptions.cs" />
+		<Compile Include="MP\BinaryPlaylist\InteropabilityStructs.cs" />
+		<Compile Include="MP\BinaryPlaylist\PlaylistBlobReader.cs" />
+		<Compile Include="MP\BinaryPlaylist\PlaylistBlobWriter.cs" />
+		<Compile Include="MP\BinaryPlaylist\BPLHelpers.cs" />
+		<Compile Include="MP\Caches\CacheInstance.cs" />
+		<Compile Include="MP\Caches\CacheReader.cs" />
+		<Compile Include="MP\Caches\CacheWriter.cs" />
+		<Compile Include="MP\Caches\ICacheInstanceOfTWAndTR.cs" />
+		<Compile Include="MP\Caches\MPCACHEHEADER.cs" />
+		<Compile Include="MP\Caches\Exceptions.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsLoaderDelegates.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsEnumerator.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsReader.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsReaderLoader.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsReaderWriterExtensions.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsWriter.cs" />
+		<Compile Include="MP\CGISettings\CGISettingsWriterLoader.cs" />
+		<Compile Include="MP\CGISettings\CGISettingType.cs" />
+		<Compile Include="MP\CGISettings\CGIStructs.cs" />
+		<Compile Include="MP\CGISettings\DataSourceMode.cs" />
+		<Compile Include="MP\CGISettings\ICGISettingExtension.cs" />
+		<Compile Include="MP\CGISettings\ICGISettingExtensionDataSource.cs" />
+		<Compile Include="MP\CGISettings\ICGISettingsReaderOfT.cs" />
+		<Compile Include="MP\CGISettings\ICGISettingsWriterOfT.cs" />
+		<Compile Include="MP\CGISettings\LoaderAttributes.cs" />
+		<Compile Include="MP\CGISettings\SettingEntry.cs" />
+		<Compile Include="MP\CGISettings\StreamProvidedCGIExtensionDataSource.cs" />
+		<Compile Include="MP\Collections\CollectionExtensions.cs" />
+		<Compile Include="MP\Collections\DelegateComparerOfTD.cs" />
+		<Compile Include="MP\Collections\DelegateEqualityComparerOfTD.cs" />
+		<Compile Include="MP\Collections\DisposableListOfT.cs" />
+		<Compile Include="MP\Collections\ReadOnlyListOfT.cs" />
+		<Compile Include="MP\CommandMetadata.cs" />
+		<Compile Include="AssemblyInfo.cs" />
+		<Compile Include="MP\CommandMetadataItem.cs" />
+		<Compile Include="MP\DebugProvider.cs" />
+		<Compile Include="MP\DebugSink.cs" />
+		<Compile Include="MP\DebugSource.cs" />
+		<Compile Include="MP\ExceptionSystem\ArchiveAttributeDefinedException.cs" />
+		<Compile Include="MP\ExceptionSystem\AttributeNotFoundException.cs" />
+		<Compile Include="MP\ExceptionSystem\BaseException.cs" />
+		<Compile Include="MP\ExceptionSystem\CGIInvalidFormatException.cs" />
+		<Compile Include="MP\ExceptionSystem\ExceptionExtensions.cs" />
+		<Compile Include="MP\ExceptionSystem\IMusicPlayerException.cs" />
+		<Compile Include="MP\ExceptionSystem\INativeException.cs" />
+		<Compile Include="MP\ExceptionSystem\MetadataItemNotFoundException.cs" />
+		<Compile Include="MP\ExceptionSystem\ReadOnlyArchiveAttributeException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\AssetIntegrityFailedException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\AssetVerificationHashType.cs" />
+		<Compile Include="MP\ExtensibilitySystem\EngineVersioningInformation.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ExtensibilitySystemException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ExtensibilitySystemExtension.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ExtensionEngine.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ExtensionPackage.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ExtensionsSettingsHolder.cs" />
+		<Compile Include="MP\ExtensibilitySystem\IAsset.cs" />
+		<Compile Include="MP\ExtensibilitySystem\InvalidAssetDefinitionException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\InvalidManagedAssetLayoutException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\InvalidPackageLayoutException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ManagedAsset.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ManagedExtensibilityModuleLoaderClassAttribute.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ManagedExtensionAssemblyAttribute.cs" />
+		<Compile Include="MP\ExtensibilitySystem\ManagedExtensionLoadFailedException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\SystemRequestType.cs" />
+		<Compile Include="MP\ExtensibilitySystem\UnloadableManagedAssetException.cs" />
+		<Compile Include="MP\ExtensibilitySystem\UnreachableAssetException.cs" />
+		<Compile Include="MP\IAttributeable.cs" />
+		<Compile Include="MP\IID3V2TagReaderBase.cs" />
+		<Compile Include="MP\ILibraryHandle.cs" />
+		<Compile Include="MP\IMemoryHandle.cs" />
+		<Compile Include="MP\IOggTagReaderBase.cs" />
+		<Compile Include="MP\IPlayerInstanceData.cs" />
+		<Compile Include="MP\IPlaylist.cs" />
+		<Compile Include="MP\IPlaylistFile.cs" />
+		<Compile Include="MP\ITagReader.cs" />
+		<Compile Include="MP\ITagReader2.cs" />
+		<Compile Include="Microsoft\Win32\SafeHandles\SafeBaseMemoryHandle.cs" />
+		<Compile Include="MP\PlaylistMetadataItem.cs" />
+		<Compile Include="MP\PlaylistMetadataItemCollection.cs" />
+		<Compile Include="MP\PlaylistPreferences.cs" />
+		<Compile Include="MP\Preference.cs" />
+		<Compile Include="MP\Random\IRandomSource.cs" />
+		<Compile Include="MP\Random\IRandomSourceExtensions.cs" />
+		<Compile Include="MP\Random\Xoroshiro256PlusPlus.cs" />
+		<Compile Include="MP\RCUEngine.cs" />
+		<Compile Include="MP\RCUEngineRecieveCommand.cs" />
+		<Compile Include="MP\RCUEngineSendCommand.cs" />
+		<Compile Include="MP\SavedDataTagProperty.cs" />
+		<Compile Include="MP\SavedDataTagReader.cs" />
+		<Compile Include="MP\StreamMethods.cs" />
+		<Compile Include="MP\StreamMethods.SpanSupport.cs" />
+		<Compile Include="MP\SystemInfo.cs" />
+		<Compile Include="MP\SystemInfoHelpers.cs" />
+		<Compile Include="MP\Threading\ICancellationTokenOfT.cs" />
+		<Compile Include="MP\Threading\IOperationsTasker.cs" />
+		<Compile Include="MP\Threading\IOperationsTaskerExtensions.cs" />
+		<Compile Include="MP\Threading\OperationsTasker.cs" />
+		<Compile Include="MP\Threading\OperationsTaskerWorkItem.cs" />
+		<Compile Include="MP\Threading\OperationsTaskerWorkItemFailureData.cs" />
+		<Compile Include="MP\UnsafeMethods.cs" />
+		<Compile Include="MP\UnsafeMethods.SpanSupport.cs" />
+		<Compile Include="MP\Utilities\CharOccurence.cs" />
+		<Compile Include="MP\Utilities\INullable.cs" />
+		<Compile Include="MP\Utilities\IPlaylistFileExtensions.cs" />
+		<Compile Include="MP\Utilities\IStreamOwnerBase.cs" />
+		<Compile Include="MP\Utilities\PercentageHelpers.cs" />
+		<Compile Include="MP\Utilities\StreamExtensions.cs" />
+		<Compile Include="MP\Utilities\StringExtensions.cs" />
+		<Compile Include="MP\Utilities\TypeExtensions.cs" />
+	</ItemGroup>
+	
+</Project>

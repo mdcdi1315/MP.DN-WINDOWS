@@ -1,0 +1,33 @@
+
+Last Update: 2025-04-07
+
+Copyright (©) 2025 mdcdi1315
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+-> The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+-> The RCU Engine and the Binary Playlist Format are code created by mdcdi1315 and can be used, even modified, on any kind of Software,
+but their names and their underlying technology should not be modified for standalone public distribution unless:
+	1) mdcdi1315 is aware of and has permitted such case.
+	or
+	2) the code modified is code contributed to the official repository where this notice can be obtained from.
+
+-> For all other code except the aforementioned components, it can be normally distributed as stated in the opening excerpt.
+
+-> The provided library is accompanied by full documentation describing thoroughly how the library should be used. 
+	mdcdi1315 does not bring any responsibility for any incorrect usage of the library components.
+	However, if something is considered that is not documented properly, mdcdi1315 could be notified. 
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

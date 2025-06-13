@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<Import Project="../Directory.Build.props" />
+	
+	<PropertyGroup>
+		<__II_InternalOutDirectory>$(MSBuildThisFileDirectory)/bin</__II_InternalOutDirectory>
+		<MP_OutputResFilePath>$(__II_InternalOutDirectory)/MP.NativeAssets.pkgrsrc</MP_OutputResFilePath>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<MP_InputFileReference Include="NativeAssets/discord_game_sdk.dll">
+			<Name>discord_game_sdk.dll</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="NativeAssets/vorbis.dll">
+			<Name>vorbis.dll</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="NativeAssets/vorbisfile.dll">
+			<Name>vorbisfile.dll</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="NativeAssets/Package.json">
+			<Name>Package.json</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="NativeAssets/README.txt">
+			<Name>README.txt</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+	</ItemGroup>
+
+	<Target Name="Build">
+		<MakeDir Directories="$(__II_InternalOutDirectory)" />
+		<CallTarget Targets="MP_ResourceGeneration" Condition="'$(MP_OnlyDryRestoreRun)' != 'true'" />
+	</Target>
+	
+</Project>

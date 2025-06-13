@@ -1,0 +1,428 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+		Microsoft ResX Schema
+
+		Version 1.3
+
+		The primary goals of this format is to allow a simple XML format 
+		that is mostly human readable. The generation and parsing of the 
+		various data types are done through the TypeConverter classes 
+		associated with the data types.
+
+		Example:
+
+		... ado.net/XML headers & schema ...
+		<resheader name="resmimetype">text/microsoft-resx</resheader>
+		<resheader name="version">1.3</resheader>
+		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+		<data name="Name1">this is my long string</data>
+		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+			[base64 mime encoded serialized .NET Framework object]
+		</data>
+		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+			[base64 mime encoded string representing a byte array form of the .NET Framework object]
+		</data>
+
+		There are any number of "resheader" rows that contain simple 
+		name/value pairs.
+
+		Each data row contains a name, and value. The row also contains a 
+		type or mimetype. Type corresponds to a .NET class that support 
+		text/value conversion through the TypeConverter architecture. 
+		Classes that don't support this are serialized and stored with the 
+		mimetype set.
+
+		The mimetype is used for serialized objects, and tells the 
+		ResXResourceReader how to depersist the object. This is currently not 
+		extensible. For a given mimetype the value must be set accordingly:
+
+		Note - application/x-microsoft.net.object.binary.base64 is the format 
+		that the ResXResourceWriter will generate, however the reader can 
+		read any of the formats listed below.
+
+		mimetype: application/x-microsoft.net.object.binary.base64
+		value   : The object must be serialized with 
+			: System.Serialization.Formatters.Binary.BinaryFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.soap.base64
+		value   : The object must be serialized with 
+			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.bytearray.base64
+		value   : The object must be serialized into a byte array 
+			: using a System.ComponentModel.TypeConverter
+			: and then encoded with base64 encoding.
+	-->
+	
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<!-- Microsoft.IO.Redist strings -->
+	<data name="Arg_FileIsDirectory_Name" xml:space="preserve">
+		<value>The target file '{0}' is a directory, not a file.</value>
+	</data>
+	<data name="Arg_HandleNotAsync" xml:space="preserve">
+		<value>Handle does not support asynchronous operations. The parameters to the FileStream constructor may need to be changed to indicate that the handle was opened synchronously (that is, it was not opened for overlapped I/O).</value>
+	</data>
+	<data name="Arg_HandleNotSync" xml:space="preserve">
+		<value>Handle does not support synchronous operations. The parameters to the FileStream constructor may need to be changed to indicate that the handle was opened asynchronously (that is, it was opened explicitly for overlapped I/O).</value>
+	</data>
+	<data name="Arg_InvalidFileAttrs" xml:space="preserve">
+		<value>Invalid File or Directory attributes value.</value>
+	</data>
+	<data name="Arg_InvalidHandle" xml:space="preserve">
+		<value>Invalid handle.</value>
+	</data>
+	<data name="Arg_MustBeDriveLetterOrRootDir" xml:space="preserve">
+		<value>Drive name must be a root directory (i.e. 'C:\') or a drive letter ('C').</value>
+	</data>
+	<data name="Arg_Path2IsRooted" xml:space="preserve">
+		<value>Second path fragment must not be a drive or UNC name.</value>
+	</data>
+	<data name="Arg_PathIsVolume" xml:space="preserve">
+		<value>Path must not be a drive.</value>
+	</data>
+	<data name="ArgumentNull_Buffer" xml:space="preserve">
+		<value>Buffer cannot be null.</value>
+	</data>
+	<data name="ArgumentNull_FileName" xml:space="preserve">
+		<value>File name cannot be null.</value>
+	</data>
+	<data name="ArgumentNull_Path" xml:space="preserve">
+		<value>Path cannot be null.</value>
+	</data>
+	<data name="ArgumentOutOfRange_Enum" xml:space="preserve">
+		<value>Enum value was out of legal range.</value>
+	</data>
+	<data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
+		<value>Specified file length was too large for the file system.</value>
+	</data>
+	<data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
+		<value>Non-negative number required.</value>
+	</data>
+	<data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+		<value>Positive number required.</value>
+	</data>
+	<data name="Argument_EmptyFileName" xml:space="preserve">
+		<value>Empty file name is not legal.</value>
+	</data>
+	<data name="Argument_EmptyPath" xml:space="preserve">
+		<value>Empty path name is not legal.</value>
+	</data>
+	<data name="Argument_FileNotResized" xml:space="preserve">
+		<value>The stream's length cannot be changed.</value>
+	</data>
+	<data name="Argument_InvalidAppendMode" xml:space="preserve">
+		<value>Append access can be requested only in write-only mode.</value>
+	</data>
+	<data name="Argument_InvalidFileModeAndAccessCombo" xml:space="preserve">
+		<value>Combining FileMode: {0} with FileAccess: {1} is invalid.</value>
+	</data>
+	<data name="Argument_InvalidOffLen" xml:space="preserve">
+		<value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
+	</data>
+	<data name="Argument_InvalidPathChars" xml:space="preserve">
+		<value>Illegal characters in path '{0}'.</value>
+	</data>
+	<data name="Argument_InvalidSeekOrigin" xml:space="preserve">
+		<value>Invalid seek origin.</value>
+	</data>
+	<data name="Argument_InvalidSubPath" xml:space="preserve">
+		<value>The directory specified, '{0}', is not a subdirectory of '{1}'.</value>
+	</data>
+	<data name="Argument_PathEmpty" xml:space="preserve">
+		<value>Path cannot be the empty string or all whitespace.</value>
+	</data>
+	<data name="IO_AlreadyExists_Name" xml:space="preserve">
+		<value>Cannot create '{0}' because a file or directory with the same name already exists.</value>
+	</data>
+	<data name="IO_BindHandleFailed" xml:space="preserve">
+		<value>BindHandle for ThreadPool failed on this handle.</value>
+	</data>
+	<data name="IO_CannotCreateDirectory" xml:space="preserve">
+		<value>The specified directory '{0}' cannot be created.</value>
+	</data>
+	<data name="IO_EOF_ReadBeyondEOF" xml:space="preserve">
+		<value>Unable to read beyond the end of the stream.</value>
+	</data>
+	<data name="IO_FileExists_Name" xml:space="preserve">
+		<value>The file '{0}' already exists.</value>
+	</data>
+	<data name="IO_FileNotFound" xml:space="preserve">
+		<value>Unable to find the specified file.</value>
+	</data>
+	<data name="IO_FileNotFound_FileName" xml:space="preserve">
+		<value>Could not find file '{0}'.</value>
+	</data>
+	<data name="IO_FileStreamHandlePosition" xml:space="preserve">
+		<value>The OS handle's position is not what FileStream expected. Do not use a handle simultaneously in one FileStream and in Win32 code or another FileStream. This may cause data loss.</value>
+	</data>
+	<data name="IO_FileTooLong2GB" xml:space="preserve">
+		<value>The file is too long. This operation is currently limited to supporting files less than 2 gigabytes in size.</value>
+	</data>
+	<data name="IO_FileTooLongOrHandleNotSync" xml:space="preserve">
+		<value>IO operation will not work. Most likely the file will become too long or the handle was not opened to support synchronous IO operations.</value>
+	</data>
+	<data name="IO_PathNotFound_NoPathName" xml:space="preserve">
+		<value>Could not find a part of the path.</value>
+	</data>
+	<data name="IO_PathNotFound_Path" xml:space="preserve">
+		<value>Could not find a part of the path '{0}'.</value>
+	</data>
+	<data name="IO_PathTooLong" xml:space="preserve">
+		<value>The specified file name or path is too long, or a component of the specified path is too long.</value>
+	</data>
+	<data name="IO_SeekAppendOverwrite" xml:space="preserve">
+		<value>Unable seek backward to overwrite data that previously existed in a file opened in Append mode.</value>
+	</data>
+	<data name="IO_SetLengthAppendTruncate" xml:space="preserve">
+		<value>Unable to truncate data that previously existed in a file opened in Append mode.</value>
+	</data>
+	<data name="IO_SharingViolation_File" xml:space="preserve">
+		<value>The process cannot access the file '{0}' because it is being used by another process.</value>
+	</data>
+	<data name="IO_SharingViolation_NoFileName" xml:space="preserve">
+		<value>The process cannot access the file because it is being used by another process.</value>
+	</data>
+	<data name="IO_SourceDestMustBeDifferent" xml:space="preserve">
+		<value>Source and destination path must be different.</value>
+	</data>
+	<data name="IO_SourceDestMustHaveSameRoot" xml:space="preserve">
+		<value>Source and destination path must have identical roots. Move will not work across volumes.</value>
+	</data>
+	<data name="IO_SyncOpOnUIThread" xml:space="preserve">
+		<value>Synchronous operations should not be performed on the UI thread.  Consider wrapping this method in Task.Run.</value>
+	</data>
+	<data name="IO_UnknownFileName" xml:space="preserve">
+		<value>[Unknown]</value>
+	</data>
+	<data name="IndexOutOfRange_IORaceCondition" xml:space="preserve">
+		<value>Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods. This also applies to classes like StreamWriter and StreamReader.</value>
+	</data>
+	<data name="NotSupported_UnreadableStream" xml:space="preserve">
+		<value>Stream does not support reading.</value>
+	</data>
+	<data name="NotSupported_UnseekableStream" xml:space="preserve">
+		<value>Stream does not support seeking.</value>
+	</data>
+	<data name="NotSupported_UnwritableStream" xml:space="preserve">
+		<value>Stream does not support writing.</value>
+	</data>
+	<data name="ObjectDisposed_FileClosed" xml:space="preserve">
+		<value>Cannot access a closed file.</value>
+	</data>
+	<data name="UnauthorizedAccess_IODenied_NoPathName" xml:space="preserve">
+		<value>Access to the path is denied.</value>
+	</data>
+	<data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
+		<value>Access to the path '{0}' is denied.</value>
+	</data>
+	<data name="ObjectDisposed_StreamClosed" xml:space="preserve">
+		<value>Cannot access a closed stream.</value>
+	</data>
+	<data name="PlatformNotSupported_FileEncryption" xml:space="preserve">
+		<value>File encryption is not supported on this platform.</value>
+	</data>
+	<data name="IO_PathTooLong_Path" xml:space="preserve">
+		<value>The path '{0}' is too long, or a component of the specified path is too long.</value>
+	</data>
+	<data name="Arg_BasePathNotFullyQualified" xml:space="preserve">
+		<value>Basepath argument is not fully qualified.</value>
+	</data>
+	<data name="Arg_PathEmpty" xml:space="preserve">
+		<value>The path is empty.</value>
+	</data>
+	<!-- System.IO.FileSystem.DriveInfo strings -->
+	<data name="Arg_MustBeNonEmptyDriveName" xml:space="preserve">
+		<value>Drive name must not be empty.</value>
+	</data>
+	<data name="Arg_InvalidDriveChars" xml:space="preserve">
+		<value>Illegal characters in drive name '{0}'.</value>
+	</data>
+	<data name="InvalidOperation_SetVolumeLabelFailed" xml:space="preserve">
+		<value>Volume labels can only be set for writable local volumes.</value>
+	</data>
+	<data name="IO_DriveNotFound" xml:space="preserve">
+		<value>Could not find the drive. The drive might not be ready or might not be mapped.</value>
+	</data>
+	<data name="IO_DriveNotFound_Drive" xml:space="preserve">
+		<value>Could not find the drive '{0}'. The drive might not be ready or might not be mapped.</value>
+	</data>
+	<!-- For Microsoft.IO.FileStream -->
+	<data name="IO_DiskFull_Path_AllocationSize" xml:space="preserve">
+		<value>Failed to create '{0}' with allocation size '{1}' because the disk was full.</value>
+	</data>
+	<data name="IO_FileTooLarge_Path_AllocationSize" xml:space="preserve">
+		<value>Failed to create '{0}' with allocation size '{1}' because the file was too large.</value>
+	</data>
+	<!-- For Microsoft.IO.MemoryStream -->
+	<data name="ArgumentOutOfRange_SmallCapacity" xml:space="preserve">
+		<value>capacity was less than the current size.</value>
+	</data>
+	<data name="NotSupported_MemStreamNotExpandable" xml:space="preserve">
+		<value>Memory stream is not expandable.</value>
+	</data>
+	<data name="ArgumentOutOfRange_StreamLength" xml:space="preserve">
+		<value>Stream length must be non-negative and less than 2^31 - 1 - origin.</value>
+	</data>
+	<data name="IO_SeekBeforeBegin" xml:space="preserve">
+		<value>An attempt was made to move the position before the beginning of the stream.</value>
+	</data>
+	<data name="IO_StreamTooLong" xml:space="preserve">
+		<value>Stream was too long.</value>
+	</data>
+	<data name="UnauthorizedAccess_MemStreamBuffer" xml:space="preserve">
+		<value>MemoryStream's internal buffer cannot be accessed.</value>
+	</data>
+	<!-- For Microsoft.IO.StreamReader -->
+	<data name="InvalidOperation_AsyncIOInProgress" xml:space="preserve">
+		<value>The stream is currently in use by a previous operation on the stream.</value>
+	</data>
+	<data name="ObjectDisposed_ReaderClosed" xml:space="preserve">
+		<value>Cannot read from a closed TextReader.</value>
+	</data>
+	<!-- Microsoft.Security.Cryptography namespace -->
+	<data name="Argument_InvalidValue" xml:space="preserve">
+		<value>Value was invalid.</value>
+	</data>
+	<data name="Argument_StreamNotReadable" xml:space="preserve">
+		<value>Stream was not readable.</value>
+	</data>
+	<data name="Argument_StreamNotWritable" xml:space="preserve">
+		<value>Stream was not writable.</value>
+	</data>
+	<data name="Cryptography_CryptoStream_FlushFinalBlockTwice" xml:space="preserve">
+		<value>FlushFinalBlock() method was called twice on a CryptoStream. It can only be called once.</value>
+	</data>
+	<data name="Arg_CryptographyException" xml:space="preserve">
+		<value>Error occurred during a cryptographic operation.</value>
+	</data>
+	<data name="Cryptography_InvalidBlockSize" xml:space="preserve">
+		<value>Specified block size is not valid for this algorithm.</value>
+	</data>
+	<data name="Cryptography_InvalidFeedbackSize" xml:space="preserve">
+		<value>Specified feedback size is not valid for this algorithm.</value>
+	</data>
+	<data name="Cryptography_InvalidIVSize" xml:space="preserve">
+		<value>Specified initialization vector (IV) does not match the block size for this algorithm.</value>
+	</data>
+	<data name="Cryptography_InvalidKeySize" xml:space="preserve">
+		<value>Specified key is not a valid size for this algorithm.</value>
+	</data>
+	<data name="Cryptography_InvalidCipherMode" xml:space="preserve">
+		<value>Specified cipher mode is not valid for this algorithm.</value>
+	</data>
+	<data name="Cryptography_InvalidPadding" xml:space="preserve">
+		<value>Padding is invalid and cannot be removed.</value>
+	</data>
+	<data name="Cryptography_InvalidPaddingMode" xml:space="preserve">
+		<value>Specified padding mode is not valid for this algorithm.</value>
+	</data>
+	<data name="Cryptography_MatchBlockSize" xml:space="preserve">
+		<value>The specified plaintext size is not valid for the padding and block size.</value>
+	</data>
+	<data name="InvalidOperation_UnsupportedBlockSize" xml:space="preserve">
+		<value>The algorithm's block size is not supported.</value>
+	</data>
+	<data name="Cryptography_PlaintextTooLarge" xml:space="preserve">
+		<value>The specified plaintext size is too large.</value>
+	</data>
+	<data name="Argument_BitsMustBeWholeBytes" xml:space="preserve">
+		<value>The value specified in bits must be a whole number of bytes.</value>
+	</data>
+	<data name="Cryptography_MatchFeedbackSize" xml:space="preserve">
+		<value>The specified plaintext size is not valid for the padding and feedback size.</value>
+	</data>
+	<data name="Argument_DestinationTooShort" xml:space="preserve">
+		<value>Destination is too short.</value>
+	</data>
+	<data name="Cryptography_EncryptedIncorrectLength" xml:space="preserve">
+		<value>{0} unexpectedly produced a ciphertext with the incorrect length.</value>
+	</data>
+	<data name="NotSupported_SubclassOverride" xml:space="preserve">
+		<value>Method not supported. Derived class must override.</value>
+	</data>
+	<data name="Cryptography_InvalidHashAlgorithmOid" xml:space="preserve">
+		<value>The specified OID ({0}) does not represent a known hash algorithm.</value>
+	</data>
+	<data name="Cryptography_HashNotYetFinalized" xml:space="preserve">
+		<value>Hash must be finalized before the hash value is retrieved.</value>
+	</data>
+	<data name="InvalidOperation_IncorrectImplementation" xml:space="preserve">
+		<value>The algorithm's implementation is incorrect.</value>
+	</data>
+	<data name="Cryptography_UnknownHashAlgorithm" xml:space="preserve">
+		<value>'{0}' is not a known hash algorithm.</value>
+	</data>
+	<data name="Cryptography_ExceedKdfExtractLimit" xml:space="preserve">
+		<value>The total number of bytes extracted cannot exceed UInt32.MaxValue * hash length.</value>
+	</data>
+	<data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
+		<value>The hash algorithm name cannot be null or empty.</value>
+	</data>
+	<data name="Arg_EmptySpan" xml:space="preserve">
+		<value>Span may not be empty.</value>
+	</data>
+	<data name="Argument_InvalidRandomRange" xml:space="preserve">
+		<value>Range of random number does not contain at least one possibility.</value>
+	</data>
+	<data name="Cryptography_UnexpectedTransformTruncation" xml:space="preserve">
+		<value>CNG provider unexpectedly terminated encryption or decryption prematurely.</value>
+	</data>
+	<data name="Cryptography_MissingIV" xml:space="preserve">
+		<value>The cipher mode specified requires that an initialization vector (IV) be used.</value>
+	</data>
+	<data name="Cryptography_PartialBlock" xml:space="preserve">
+		<value>The input data is not a complete block.</value>
+	</data>
+	<data name="Cryptography_UnknownPaddingMode" xml:space="preserve">
+		<value>Unknown padding mode used.</value>
+	</data>
+	<data name="Cryptography_MustTransformWholeBlock" xml:space="preserve">
+		<value>TransformBlock may only process bytes in block sized increments.</value>
+	</data>
+	<data name="Cryptography_CipherModeFeedbackNotSupported" xml:space="preserve">
+		<value>The specified feedback size '{0}' for CipherMode '{1}' is not supported.</value>
+	</data>
+</root>

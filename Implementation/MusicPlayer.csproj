@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<RootNamespace>MP</RootNamespace>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+		<EnableDefaultPageItems>False</EnableDefaultPageItems>
+		<UseWPF>true</UseWPF>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<UseWindowsForms>True</UseWindowsForms>
+		<StartupObject>MusicPlayer.Entry</StartupObject>
+		<MP_OutputResFilePath Condition="'$(IsFullMPReleaseBuild)' != 'true'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\Data\Resources.rsrc</MP_OutputResFilePath>
+		<ApplicationIcon>..\AppIcon.ico</ApplicationIcon>
+		<ApplicationManifest>App.manifest</ApplicationManifest>
+		<_BASEWPFGENDIR__II>$(MSBuildThisFileDirectory)\obj\WPF</_BASEWPFGENDIR__II>
+	</PropertyGroup>
+	
+	<ItemDefinitionGroup>
+	    <MP_XAMLPage>
+		  <Generator>MSBuild:Compile</Generator>
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</MP_XAMLPage>
+	</ItemDefinitionGroup>
+
+	<UsingTask AssemblyFile="$(MPBuildTasksAssemblyPath)" TaskName="MusicPlayer.BuildTasks.CopyFilesMatchingWin32Filter" />
+
+	<Import Project="Resources/ResourceBuilding.props" />
+	
+	<ItemGroup>
+		<FrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref.Windows" />
+		<None Include="*.xaml" />
+		<MP_XAMLPage Include="Main.xaml" />
+		<MP_XAMLPage Include="SingleFilePlayerWindow.xaml" />
+		<MP_XAMLPage Include="AppMainPlayerWindowDict.xaml" />
+		<MP_InputResourceFile Include="Resources\Resources.resxx" />
+		<!-- Add the generated bamls to the list of resources to be generated. -->
+		<MP_InputFileReference Include="Implementation/obj/WPF/AppMainPlayerWindowDict.baml">
+			<Name>MainWindowTemplateDictionary</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/obj/WPF/Main.baml">
+			<Name>MainWindowBAML</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/obj/WPF/SingleFilePlayerWindow.baml">
+			<Name>SFPWindowBAML</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="DotNetResourcesExtensions" Version="1.0.8" />
+	  <ProjectReference Include="..\Abstractions\MusicPlayer.Abstractions.csproj" />
+      <ProjectReference Include="..\Backend\MusicPlayer.Backend.csproj" />
+	</ItemGroup>
+	
+	<Target Name="MP_RunBeforeBuildData" DependsOnTargets="$(MarkupCompilePass1DependsOn)" BeforeTargets="CoreCompile">
+		<!--
+             When performing an intellisense compile, we don't want to abort the compile if
+             MarkupCompilePass1 fails.  This would prevent the list of files from being handed
+             off to the compiler, thereby breaking all intellisense.  For intellisense compiles
+             we set ContinueOnError to true.  The property defined here is used as the value
+             for ContinueOnError on the MarkupCompilePass1 task.
+        -->
+		<PropertyGroup>
+			<_IntellisenseOnlyCompile>False</_IntellisenseOnlyCompile>
+			<_IntellisenseOnlyCompile Condition="'$(BuildingProject)' != 'true'">True</_IntellisenseOnlyCompile>
+			<_RequireMCPass2ForMainAssembly>False</_RequireMCPass2ForMainAssembly>
+		</PropertyGroup>
+		<Delete Files="$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\session" />
+		<!-- I must explicitly call these targets to generate all the baml for our windows -->
+		<MarkupCompilePass1 PageMarkup="@(MP_XAMLPage)" Language="$(Language)" UICulture="$(UICulture)" ApplicationMarkup="@(ApplicationDefinition)" SplashScreen="@(SplashScreen)" LanguageSourceExtension="$(DefaultLanguageSourceExtension)" ContentFiles="@(Content)" AssemblyName="$(AssemblyName)" OutputType="$(OutputType)" AssemblyVersion="$(AssemblyVersion)" AssemblyPublicKeyToken="$(AssemblyPublicKeyToken)" References="@(ReferencePath)" RootNamespace="$(RootNamespace)" KnownReferencePaths="$(MSBuildBinPath);$(TargetFrameworkDirectory);@(_TargetFrameworkSDKDirectoryItem);@(KnownReferencePaths)" AssembliesGeneratedDuringBuild="@(AssembliesGeneratedDuringBuild)" AlwaysCompileMarkupFilesInSeparateDomain="$(AlwaysCompileMarkupFilesInSeparateDomain)" HostInBrowser="$(HostInBrowser)" LocalizationDirectivesToLocFile="$(LocalizationDirectivesToLocFile)" ContinueOnError="$(_IntellisenseOnlyCompile)" SourceCodeFiles="@(Compile)" DefineConstants="$(DefineConstants)" ExtraBuildControlFiles="@(ExtraBuildControlFiles)" XamlDebuggingInformation="$(XamlDebuggingInformation)" ChecksumAlgorithm="$(ChecksumAlgorithm)" IsRunningInVisualStudio="$(BuildingInsideVisualStudio)" OutputPath="$(_BASEWPFGENDIR__II)" SupportCustomOutputPaths="$(IncludePackageReferencesDuringMarkupCompilation)">
+							<!-- Condition="'$(MP_OnlyDryRestoreRun)' != 'true'" -->
+			<Output ItemName="GeneratedBaml" TaskParameter="GeneratedBamlFiles" />
+			<Output ItemName="Compile" TaskParameter="GeneratedCodeFiles" />
+			<Output PropertyName="_RequireMCPass2ForMainAssembly" TaskParameter="RequirePass2ForMainAssembly" />
+		</MarkupCompilePass1>
+		<MarkupCompilePass2 AssemblyName="$(AssemblyName)" OutputType="$(OutputType)" Language="$(Language)" LocalizationDirectivesToLocFile="$(LocalizationDirectivesToLocFile)" RootNamespace="$(RootNamespace)" References="@(ReferencePath);@(AssemblyForLocalTypeReference)" KnownReferencePaths="$(MSBuildBinPath);$(TargetFrameworkDirectory);@(_TargetFrameworkSDKDirectoryItem);@(KnownReferencePaths)" AssembliesGeneratedDuringBuild="@(AssembliesGeneratedDuringBuild)" AlwaysCompileMarkupFilesInSeparateDomain="$(AlwaysCompileMarkupFilesInSeparateDomain)" XamlDebuggingInformation="$(XamlDebuggingInformation)" GeneratedBaml="" OutputPath="$(_BASEWPFGENDIR__II)" ContinueOnError="false" Condition="'$(_RequireMCPass2ForMainAssembly)' == 'true' AND Exists('$(_BASEWPFGENDIR__II)\$(AssemblyName)_MarkupCompile.lref')" SupportCustomOutputPaths="$(IncludePackageReferencesDuringMarkupCompilation)">
+		</MarkupCompilePass2>
+		<MakeDir Directories="$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\Data" Condition="'$(IsFullMPReleaseBuild)' != 'true'" />
+		<CopyFilesMatchingWin32Filter InputDirectory="$(MSBuildThisFileDirectory)Resources\" TargetDirectory="$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\Data" Filter="*.json" Condition="'$(IsFullMPReleaseBuild)' != 'true'" />
+		<CallTarget Targets="MP_ResourceGeneration" Condition="'$(MP_OnlyDryRestoreRun)' != 'true'" />
+	</Target>
+
+	<Target Name="DSF" BeforeTargets="Run">
+		<Delete Files="$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\session" />
+	</Target>
+
+</Project>

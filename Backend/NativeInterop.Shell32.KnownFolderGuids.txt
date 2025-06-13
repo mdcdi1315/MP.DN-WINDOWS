@@ -1,0 +1,340 @@
+﻿
+// Purpose of this text file is to contain all the possible Shell known folders currently defined.
+// Because each GUID allocates 16 bytes , all of the GUID's will exist here but only the most important
+// will make it to the final assembly.
+
+public static class KnownFolderGuids
+        {
+
+            /* TODO: Port all these known folders to C#.
+// {56784854-C6CB-462b-8169-88E350ACB882}
+DEFINE_KNOWN_FOLDER(FOLDERID_Contacts,            0x56784854, 0xc6cb, 0x462b, 0x81, 0x69, 0x88, 0xe3, 0x50, 0xac, 0xb8, 0x82);
+
+// {A75D362E-50FC-4fb7-AC2C-A8BEAA314493}
+DEFINE_KNOWN_FOLDER(FOLDERID_SidebarParts,        0xa75d362e, 0x50fc, 0x4fb7, 0xac, 0x2c, 0xa8, 0xbe, 0xaa, 0x31, 0x44, 0x93);
+
+// {7B396E54-9EC5-4300-BE0A-2482EBAE1A26}
+DEFINE_KNOWN_FOLDER(FOLDERID_SidebarDefaultParts, 0x7b396e54, 0x9ec5, 0x4300, 0xbe, 0xa, 0x24, 0x82, 0xeb, 0xae, 0x1a, 0x26);
+
+// {DEBF2536-E1A8-4c59-B6A2-414586476AEA}
+DEFINE_KNOWN_FOLDER(FOLDERID_PublicGameTasks,     0xdebf2536, 0xe1a8, 0x4c59, 0xb6, 0xa2, 0x41, 0x45, 0x86, 0x47, 0x6a, 0xea);
+
+// {054FAE61-4DD8-4787-80B6-090220C4B700}
+DEFINE_KNOWN_FOLDER(FOLDERID_GameTasks,           0x54fae61, 0x4dd8, 0x4787, 0x80, 0xb6, 0x9, 0x2, 0x20, 0xc4, 0xb7, 0x0);
+
+// {4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}
+DEFINE_KNOWN_FOLDER(FOLDERID_SavedGames,          0x4c5c32ff, 0xbb9d, 0x43b0, 0xb5, 0xb4, 0x2d, 0x72, 0xe5, 0x4e, 0xaa, 0xa4);
+
+// {CAC52C1A-B53D-4edc-92D7-6B2E8AC19434} - deprecated
+DEFINE_KNOWN_FOLDER(FOLDERID_Games,               0xcac52c1a, 0xb53d, 0x4edc, 0x92, 0xd7, 0x6b, 0x2e, 0x8a, 0xc1, 0x94, 0x34);
+
+// {98ec0e18-2098-4d44-8644-66979315a281}
+DEFINE_KNOWN_FOLDER(FOLDERID_SEARCH_MAPI,         0x98ec0e18, 0x2098, 0x4d44, 0x86, 0x44, 0x66, 0x97, 0x93, 0x15, 0xa2, 0x81);
+
+// {ee32e446-31ca-4aba-814f-a5ebd2fd6d5e}
+DEFINE_KNOWN_FOLDER(FOLDERID_SEARCH_CSC,          0xee32e446, 0x31ca, 0x4aba, 0x81, 0x4f, 0xa5, 0xeb, 0xd2, 0xfd, 0x6d, 0x5e);
+
+// {bfb9d5e0-c6a9-404c-b2b2-ae6db6af4968}
+DEFINE_KNOWN_FOLDER(FOLDERID_Links,               0xbfb9d5e0, 0xc6a9, 0x404c, 0xb2, 0xb2, 0xae, 0x6d, 0xb6, 0xaf, 0x49, 0x68);
+
+// {f3ce0f7c-4901-4acc-8648-d5d44b04ef8f}
+DEFINE_KNOWN_FOLDER(FOLDERID_UsersFiles,          0xf3ce0f7c, 0x4901, 0x4acc, 0x86, 0x48, 0xd5, 0xd4, 0x4b, 0x04, 0xef, 0x8f);
+
+// {A302545D-DEFF-464b-ABE8-61C8648D939B}
+DEFINE_KNOWN_FOLDER(FOLDERID_UsersLibraries,      0xa302545d, 0xdeff, 0x464b, 0xab, 0xe8, 0x61, 0xc8, 0x64, 0x8d, 0x93, 0x9b);
+
+// {190337d1-b8ca-4121-a639-6d472d16972a}
+DEFINE_KNOWN_FOLDER(FOLDERID_SearchHome,          0x190337d1, 0xb8ca, 0x4121, 0xa6, 0x39, 0x6d, 0x47, 0x2d, 0x16, 0x97, 0x2a);
+
+// {2C36C0AA-5812-4b87-BFD0-4CD0DFB19B39}
+DEFINE_KNOWN_FOLDER(FOLDERID_OriginalImages,      0x2C36C0AA, 0x5812, 0x4b87, 0xbf, 0xd0, 0x4c, 0xd0, 0xdf, 0xb1, 0x9b, 0x39);
+
+// {7b0db17d-9cd2-4a93-9733-46cc89022e7c}
+DEFINE_KNOWN_FOLDER(FOLDERID_DocumentsLibrary,    0x7b0db17d, 0x9cd2, 0x4a93, 0x97, 0x33, 0x46, 0xcc, 0x89, 0x02, 0x2e, 0x7c);
+
+// {2112AB0A-C86A-4ffe-A368-0DE96E47012E}
+DEFINE_KNOWN_FOLDER(FOLDERID_MusicLibrary,        0x2112ab0a, 0xc86a, 0x4ffe, 0xa3, 0x68, 0xd, 0xe9, 0x6e, 0x47, 0x1, 0x2e);
+
+// {A990AE9F-A03B-4e80-94BC-9912D7504104}
+DEFINE_KNOWN_FOLDER(FOLDERID_PicturesLibrary,     0xa990ae9f, 0xa03b, 0x4e80, 0x94, 0xbc, 0x99, 0x12, 0xd7, 0x50, 0x41, 0x4);
+
+// {491E922F-5643-4af4-A7EB-4E7A138D8174}
+DEFINE_KNOWN_FOLDER(FOLDERID_VideosLibrary,       0x491e922f, 0x5643, 0x4af4, 0xa7, 0xeb, 0x4e, 0x7a, 0x13, 0x8d, 0x81, 0x74);
+
+// {1A6FDBA2-F42D-4358-A798-B74D745926C5}
+DEFINE_KNOWN_FOLDER(FOLDERID_RecordedTVLibrary,   0x1a6fdba2, 0xf42d, 0x4358, 0xa7, 0x98, 0xb7, 0x4d, 0x74, 0x59, 0x26, 0xc5);
+
+// {52528A6B-B9E3-4add-B60D-588C2DBA842D}
+DEFINE_KNOWN_FOLDER(FOLDERID_HomeGroup,           0x52528a6b, 0xb9e3, 0x4add, 0xb6, 0xd, 0x58, 0x8c, 0x2d, 0xba, 0x84, 0x2d);
+
+// {9B74B6A3-0DFD-4f11-9E78-5F7800F2E772}
+DEFINE_KNOWN_FOLDER(FOLDERID_HomeGroupCurrentUser, 0x9b74b6a3, 0xdfd, 0x4f11, 0x9e, 0x78, 0x5f, 0x78, 0x0, 0xf2, 0xe7, 0x72);
+
+// {5CE4A5E9-E4EB-479D-B89F-130C02886155}
+DEFINE_KNOWN_FOLDER(FOLDERID_DeviceMetadataStore, 0x5ce4a5e9, 0xe4eb, 0x479d, 0xb8, 0x9f, 0x13, 0x0c, 0x02, 0x88, 0x61, 0x55);
+
+// {1B3EA5DC-B587-4786-B4EF-BD1DC332AEAE}
+DEFINE_KNOWN_FOLDER(FOLDERID_Libraries,           0x1b3ea5dc, 0xb587, 0x4786, 0xb4, 0xef, 0xbd, 0x1d, 0xc3, 0x32, 0xae, 0xae);
+
+// {48daf80b-e6cf-4f4e-b800-0e69d84ee384}
+DEFINE_KNOWN_FOLDER(FOLDERID_PublicLibraries,     0x48daf80b, 0xe6cf, 0x4f4e, 0xb8, 0x00, 0x0e, 0x69, 0xd8, 0x4e, 0xe3, 0x84);
+
+// {9e3995ab-1f9c-4f13-b827-48b24b6c7174}
+DEFINE_KNOWN_FOLDER(FOLDERID_UserPinned,          0x9e3995ab, 0x1f9c, 0x4f13, 0xb8, 0x27, 0x48, 0xb2, 0x4b, 0x6c, 0x71, 0x74);
+
+// {bcb5256f-79f6-4cee-b725-dc34e402fd46}
+DEFINE_KNOWN_FOLDER(FOLDERID_ImplicitAppShortcuts,0xbcb5256f, 0x79f6, 0x4cee, 0xb7, 0x25, 0xdc, 0x34, 0xe4, 0x2, 0xfd, 0x46);
+
+// {008ca0b1-55b4-4c56-b8a8-4de4b299d3be}
+DEFINE_KNOWN_FOLDER(FOLDERID_AccountPictures,     0x008ca0b1, 0x55b4, 0x4c56, 0xb8, 0xa8, 0x4d, 0xe4, 0xb2, 0x99, 0xd3, 0xbe);
+
+// {0482af6c-08f1-4c34-8c90-e17ec98b1e17}
+DEFINE_KNOWN_FOLDER(FOLDERID_PublicUserTiles,     0x0482af6c, 0x08f1, 0x4c34, 0x8c, 0x90, 0xe1, 0x7e, 0xc9, 0x8b, 0x1e, 0x17);
+
+// {1e87508d-89c2-42f0-8a7e-645a0f50ca58}
+DEFINE_KNOWN_FOLDER(FOLDERID_AppsFolder,          0x1e87508d, 0x89c2, 0x42f0, 0x8a, 0x7e, 0x64, 0x5a, 0x0f, 0x50, 0xca, 0x58);
+
+// {F26305EF-6948-40B9-B255-81453D09C785}
+DEFINE_KNOWN_FOLDER(FOLDERID_StartMenuAllPrograms, 0xf26305ef, 0x6948, 0x40b9, 0xb2, 0x55, 0x81, 0x45, 0x3d, 0x9, 0xc7, 0x85);
+
+// {A440879F-87A0-4F7D-B700-0207B966194A}
+DEFINE_KNOWN_FOLDER(FOLDERID_CommonStartMenuPlaces, 0xa440879f, 0x87a0, 0x4f7d, 0xb7, 0x0, 0x2, 0x7, 0xb9, 0x66, 0x19, 0x4a);
+
+// {A3918781-E5F2-4890-B3D9-A7E54332328C}
+DEFINE_KNOWN_FOLDER(FOLDERID_ApplicationShortcuts, 0xa3918781, 0xe5f2, 0x4890, 0xb3, 0xd9, 0xa7, 0xe5, 0x43, 0x32, 0x32, 0x8c);
+
+// {00BCFC5A-ED94-4e48-96A1-3F6217F21990}
+DEFINE_KNOWN_FOLDER(FOLDERID_RoamingTiles,        0xbcfc5a, 0xed94, 0x4e48, 0x96, 0xa1, 0x3f, 0x62, 0x17, 0xf2, 0x19, 0x90);
+
+// {AAA8D5A5-F1D6-4259-BAA8-78E7EF60835E}
+DEFINE_KNOWN_FOLDER(FOLDERID_RoamedTileImages,    0xaaa8d5a5, 0xf1d6, 0x4259, 0xba, 0xa8, 0x78, 0xe7, 0xef, 0x60, 0x83, 0x5e);
+
+// {b7bede81-df94-4682-a7d8-57a52620b86f}
+DEFINE_KNOWN_FOLDER(FOLDERID_Screenshots,         0xb7bede81, 0xdf94, 0x4682, 0xa7, 0xd8, 0x57, 0xa5, 0x26, 0x20, 0xb8, 0x6f);
+
+// {AB5FB87B-7CE2-4F83-915D-550846C9537B}
+DEFINE_KNOWN_FOLDER(FOLDERID_CameraRoll,          0xab5fb87b, 0x7ce2, 0x4f83, 0x91, 0x5d, 0x55, 0x8, 0x46, 0xc9, 0x53, 0x7b);
+
+// {A52BBA46-E9E1-435f-B3D9-28DAA648C0F6}
+DEFINE_KNOWN_FOLDER(FOLDERID_OneDrive,            0xa52bba46, 0xe9e1, 0x435f, 0xb3, 0xd9, 0x28, 0xda, 0xa6, 0x48, 0xc0, 0xf6);
+
+// {24D89E24-2F19-4534-9DDE-6A6671FBB8FE}
+DEFINE_KNOWN_FOLDER(FOLDERID_SkyDriveDocuments,   0x24d89e24, 0x2f19, 0x4534, 0x9d, 0xde, 0x6a, 0x66, 0x71, 0xfb, 0xb8, 0xfe);
+
+// {339719B5-8C47-4894-94C2-D8F77ADD44A6}
+DEFINE_KNOWN_FOLDER(FOLDERID_SkyDrivePictures,    0x339719b5, 0x8c47, 0x4894, 0x94, 0xc2, 0xd8, 0xf7, 0x7a, 0xdd, 0x44, 0xa6);
+
+// {C3F2459E-80D6-45DC-BFEF-1F769F2BE730}
+DEFINE_KNOWN_FOLDER(FOLDERID_SkyDriveMusic,       0xc3f2459e, 0x80d6, 0x45dc, 0xbf, 0xef, 0x1f, 0x76, 0x9f, 0x2b, 0xe7, 0x30);
+
+// {767E6811-49CB-4273-87C2-20F355E1085B}
+DEFINE_KNOWN_FOLDER(FOLDERID_SkyDriveCameraRoll,  0x767e6811, 0x49cb, 0x4273, 0x87, 0xc2, 0x20, 0xf3, 0x55, 0xe1, 0x08, 0x5b);
+
+// {0D4C3DB6-03A3-462F-A0E6-08924C41B5D4}
+DEFINE_KNOWN_FOLDER(FOLDERID_SearchHistory,       0x0d4c3db6, 0x03a3, 0x462f, 0xa0, 0xe6, 0x08, 0x92, 0x4c, 0x41, 0xb5, 0xd4);
+
+// {7E636BFE-DFA9-4D5E-B456-D7B39851D8A9}
+DEFINE_KNOWN_FOLDER(FOLDERID_SearchTemplates,     0x7e636bfe, 0xdfa9, 0x4d5e, 0xb4, 0x56, 0xd7, 0xb3, 0x98, 0x51, 0xd8, 0xa9);
+
+// {2B20DF75-1EDA-4039-8097-38798227D5B7}
+DEFINE_KNOWN_FOLDER(FOLDERID_CameraRollLibrary,   0x2b20df75, 0x1eda, 0x4039, 0x80, 0x97, 0x38, 0x79, 0x82, 0x27, 0xd5, 0xb7);
+
+// {3B193882-D3AD-4eab-965A-69829D1FB59F}
+DEFINE_KNOWN_FOLDER(FOLDERID_SavedPictures,       0x3b193882, 0xd3ad, 0x4eab, 0x96, 0x5a, 0x69, 0x82, 0x9d, 0x1f, 0xb5, 0x9f);
+
+// {E25B5812-BE88-4bd9-94B0-29233477B6C3}
+DEFINE_KNOWN_FOLDER(FOLDERID_SavedPicturesLibrary, 0xe25b5812, 0xbe88, 0x4bd9, 0x94, 0xb0, 0x29, 0x23, 0x34, 0x77, 0xb6, 0xc3);
+
+// {12D4C69E-24AD-4923-BE19-31321C43A767}
+DEFINE_KNOWN_FOLDER(FOLDERID_RetailDemo,          0x12d4c69e, 0x24ad, 0x4923, 0xbe, 0x19, 0x31, 0x32, 0x1c, 0x43, 0xa7, 0x67);
+
+// {1C2AC1DC-4358-4B6C-9733-AF21156576F0}
+DEFINE_KNOWN_FOLDER(FOLDERID_Device,              0x1C2AC1DC, 0x4358, 0x4B6C, 0x97, 0x33, 0xAF, 0x21, 0x15, 0x65, 0x76, 0xF0);
+
+// The file system directory that contains development files that have been copied to this device by a development tool. A 
+// typical path is C:\Users\username\AppData\Local\DevelopmentFiles. This directory is used by development tools that need 
+// to copy files to a device. This may include copying application binaries for temporary registration and execution in order 
+// to allow a developer to test their application without having to go through the full app packaging process. It could also 
+// include development time only components such as a remote debugger. Recommended practice is to create sub-directories rather 
+// than copying files to the DevelopmentFiles directory. Development tools should be careful to use a naming convention that 
+// avoids conflicts. For example application binaries should be copied to a directory with a unique name such as the app package 
+// full name. This information is per user and will not roam.
+// {DBE8E08E-3053-4BBC-B183-2A7B2B191E59}
+DEFINE_KNOWN_FOLDER(FOLDERID_DevelopmentFiles, 0xdbe8e08e, 0x3053, 0x4bbc, 0xb1, 0x83, 0x2a, 0x7b, 0x2b, 0x19, 0x1e, 0x59);
+
+// {31C0DD25-9439-4F12-BF41-7FF4EDA38722}
+DEFINE_KNOWN_FOLDER(FOLDERID_Objects3D, 0x31c0dd25, 0x9439, 0x4f12, 0xbf, 0x41, 0x7f, 0xf4, 0xed, 0xa3, 0x87, 0x22);
+
+// {EDC0FE71-98D8-4F4A-B920-C8DC133CB165}
+DEFINE_KNOWN_FOLDER(FOLDERID_AppCaptures, 0xedc0fe71, 0x98d8, 0x4f4a, 0xb9, 0x20, 0xc8, 0xdc, 0x13, 0x3c, 0xb1, 0x65);
+
+// {f42ee2d3-909f-4907-8871-4c22fc0bf756}
+DEFINE_KNOWN_FOLDER(FOLDERID_LocalDocuments,      0xf42ee2d3, 0x909f, 0x4907, 0x88, 0x71, 0x4c, 0x22, 0xfc, 0x0b, 0xf7, 0x56);
+
+// {0ddd015d-b06c-45d5-8c4c-f59713854639 }
+DEFINE_KNOWN_FOLDER(FOLDERID_LocalPictures,       0x0ddd015d, 0xb06c, 0x45d5, 0x8c, 0x4c, 0xf5, 0x97, 0x13, 0x85, 0x46, 0x39);
+
+// {35286a68-3c57-41a1-bbb1-0eae73d76c95}
+DEFINE_KNOWN_FOLDER(FOLDERID_LocalVideos,         0x35286a68, 0x3c57, 0x41a1, 0xbb, 0xb1, 0x0e, 0xae, 0x73, 0xd7, 0x6c, 0x95);
+
+// {a0c69a99-21c8-4671-8703-7934162fcf1d}
+DEFINE_KNOWN_FOLDER(FOLDERID_LocalMusic,         0xa0c69a99,  0x21c8, 0x4671, 0x87, 0x03, 0x79, 0x34, 0x16, 0x2f, 0xcf, 0x1d);
+
+// {7d83ee9b-2244-4e70-b1f5-5393042af1e4}
+DEFINE_KNOWN_FOLDER(FOLDERID_LocalDownloads,     0x7d83ee9b,  0x2244, 0x4e70, 0xb1, 0xf5, 0x53, 0x93, 0x04, 0x2a, 0xf1, 0xe4);
+
+// {2f8b40c2-83ed-48ee-b383-a1f157ec6f9a}
+DEFINE_KNOWN_FOLDER(FOLDERID_RecordedCalls,       0x2f8b40c2, 0x83ed, 0x48ee, 0xb3, 0x83, 0xa1, 0xf1, 0x57, 0xec, 0x6f, 0x9a);
+
+// {7ad67899-66af-43ba-9156-6aad42e6c596}
+DEFINE_KNOWN_FOLDER(FOLDERID_AllAppMods,    0x7ad67899, 0x66af, 0x43ba, 0x91, 0x56, 0x6a, 0xad, 0x42, 0xe6, 0xc5, 0x96);
+
+// {3db40b20-2a30-4dbe-917e-771dd21dd099}
+DEFINE_KNOWN_FOLDER(FOLDERID_CurrentAppMods, 0x3db40b20, 0x2a30, 0x4dbe, 0x91, 0x7e, 0x77, 0x1d, 0xd2, 0x1d, 0xd0, 0x99);
+
+// {B2C5E279-7ADD-439F-B28C-C41FE1BBF672}
+DEFINE_KNOWN_FOLDER(FOLDERID_AppDataDesktop,   0xb2c5e279, 0x7add, 0x439f, 0xb2, 0x8c, 0xc4, 0x1f, 0xe1, 0xbb, 0xf6, 0x72);
+
+// {7BE16610-1F7F-44AC-BFF0-83E15F2FFCA1}
+DEFINE_KNOWN_FOLDER(FOLDERID_AppDataDocuments, 0x7be16610, 0x1f7f, 0x44ac, 0xbf, 0xf0, 0x83, 0xe1, 0x5f, 0x2f, 0xfc, 0xa1);
+
+// {7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}
+DEFINE_KNOWN_FOLDER(FOLDERID_AppDataFavorites, 0x7cfbefbc, 0xde1f, 0x45aa, 0xb8, 0x43, 0xa5, 0x42, 0xac, 0x53, 0x6c, 0xc9);
+
+// {559D40A3-A036-40FA-AF61-84CB430A4D34}
+DEFINE_KNOWN_FOLDER(FOLDERID_AppDataProgramData, 0x559d40a3, 0xa036, 0x40fa, 0xaf, 0x61, 0x84, 0xcb, 0x43, 0xa, 0x4d, 0x34);
+
+             */
+
+            // Aka {D20BEEC4-5CA8-4905-AE3B-BF251EA09B53}
+            public static GUID FOLDERID_NetworkFolder = new() { Data1 = 0xD20BEEC4, Data2 = 0x5CA8, Data3 = 0x4905, Data4_0 = 0xAE, Data4_1 = 0x3B, Data4_2 = 0xBF, Data4_3 = 0x25, Data4_4 = 0x1E, Data4_5 = 0xA0, Data4_6 = 0x9B, Data4_7 = 0x53 };
+
+            // Aka {0AC0837C-BBF8-452A-850D-79D08E667CA7}
+            public static GUID FOLDERID_ComputerFolder = new() { Data1 = 0x0AC0837C, Data2 = 0xBBF8, Data3 = 0x452A, Data4_0 = 0x85, Data4_1 = 0x0D, Data4_2 = 0x79, Data4_3 = 0xD0, Data4_4 = 0x8E, Data4_5 = 0x66, Data4_6 = 0x7C, Data4_7 = 0xA7 };
+
+            // Aka {4D9F7874-4E0C-4904-967B-40B0D20C3E4B}
+            public static GUID FOLDERID_InternetFolder = new() { Data1 = 0x4D9F7874, Data2 = 0x4E0C, Data3 = 0x4904, Data4_0 = 0x96, Data4_1 = 0x7B, Data4_2 = 0x40, Data4_3 = 0xB0, Data4_4 = 0xD2, Data4_5 = 0x0C, Data4_6 = 0x3E, Data4_7 = 0x4B };
+
+            // Aka {82A74AEB-AEB4-465C-A014-D097EE346D63}
+            public static GUID FOLDERID_ControlPanelFolder = new() { Data1 = 0x82A74AEB, Data2 = 0xAEB4, Data3 = 0x465C, Data4_0 = 0xA0, Data4_1 = 0x14, Data4_2 = 0xD0, Data4_3 = 0x97, Data4_4 = 0xEE, Data4_5 = 0x34, Data4_6 = 0x6D, Data4_7 = 0x63 };
+
+            // Aka {76FC4E2D-D6AD-4519-A663-37BD56068185}
+            public static GUID FOLDERID_PrintersFolder = new() { Data1 = 0x76FC4E2D, Data2 = 0xD6AD, Data3 = 0x4519, Data4_0 = 0xA6, Data4_1 = 0x63, Data4_2 = 0x37, Data4_3 = 0xBD, Data4_4 = 0x56, Data4_5 = 0x06, Data4_6 = 0x81, Data4_7 = 0x85 };
+
+            // Aka {43668BF8-C14E-49B2-97C9-747784D784B7}
+            public static GUID FOLDERID_SyncManagerFolder = new() { Data1 = 0x43668BF8, Data2 = 0xC14E, Data3 = 0x49B2, Data4_0 = 0x97, Data4_1 = 0xC9, Data4_2 = 0x74, Data4_3 = 0x77, Data4_4 = 0x84, Data4_5 = 0xD7, Data4_6 = 0x84, Data4_7 = 0xB7 };
+
+            // Aka {F214138-B1D3-4A90-BBA9-27CBC0C5389A}
+            public static GUID FOLDERID_SyncSetupFolder = new() { Data1 = 0xf214138, Data2 = 0xb1d3, Data3 = 0x4a90, Data4_0 = 0xbb, Data4_1 = 0xa9, Data4_2 = 0x27, Data4_3 = 0xcb, Data4_4 = 0xc0, Data4_5 = 0xc5, Data4_6 = 0x38, Data4_7 = 0x9a };
+
+            // Aka {4BFEFB45-347D-4006-A5BE-AC0CB0567192}
+            public static GUID FOLDERID_ConflictFolder = new() { Data1 = 0x4bfefb45, Data2 = 0x347d, Data3 = 0x4006, Data4_0 = 0xa5, Data4_1 = 0xbe, Data4_2 = 0xac, Data4_3 = 0x0c, Data4_4 = 0xb0, Data4_5 = 0x56, Data4_6 = 0x71, Data4_7 = 0x92 };
+
+            // Aka {289A9A43-BE44-4057-A41B-587A76D7E7F9}
+            public static GUID FOLDERID_SyncResultsFolder = new() { Data1 = 0x289a9a43, Data2 = 0xbe44, Data3 = 0x4057, Data4_0 = 0xa4, Data4_1 = 0x1b, Data4_2 = 0x58, Data4_3 = 0x7a, Data4_4 = 0x76, Data4_5 = 0xd7, Data4_6 = 0xe7, Data4_7 = 0xf9 };
+
+            // Aka {B7534046-3ECB-4C18-BE4E-64CD4CB7D6AC}
+            public static GUID FOLDERID_RecycleBinFolder = new() { Data1 = 0xB7534046, Data2 = 0x3ECB, Data3 = 0x4C18, Data4_0 = 0xBE, Data4_1 = 0x4E, Data4_2 = 0x64, Data4_3 = 0xCD, Data4_4 = 0x4C, Data4_5 = 0xB7, Data4_6 = 0xD6, Data4_7 = 0xAC };
+
+            // Aka {6F0CD92B-2E97-45D1-88FF-B0D186B8DEDD}
+            public static GUID FOLDERID_ConnectionsFolder = new() { Data1 = 0x6F0CD92B, Data2 = 0x2E97, Data3 = 0x45D1, Data4_0 = 0x88, Data4_1 = 0xFF, Data4_2 = 0xB0, Data4_3 = 0xD1, Data4_4 = 0x86, Data4_5 = 0xB8, Data4_6 = 0xDE, Data4_7 = 0xDD };
+
+            // Aka {FD228CB7-AE11-4AE3-864C-16F3910AB8FE}
+            public static GUID FOLDERID_Fonts = new() { Data1 = 0xFD228CB7, Data2 = 0xAE11, Data3 = 0x4AE3,  Data4_0 = 0x86, Data4_1 = 0x4C, Data4_2 = 0x16, Data4_3 = 0xF3, Data4_4 = 0x91, Data4_5 = 0x0A, Data4_6 = 0xB8, Data4_7 = 0xFE };
+
+            // display name:        "Desktop"
+            // default path:        "C:\Users\<UserName>\Desktop"
+            // legacy default path: "C:\Documents and Settings\<UserName>\Desktop"
+            // legacy CSIDL value:  CSIDL_DESKTOP
+            // Aka {B4BFCC3A-DB2C-424C-B029-7FE99A87C641}
+            public static GUID FOLDERID_Desktop = new() { Data1 = 0xB4BFCC3A, Data2 = 0xDB2C, Data3 = 0x424C, Data4_0 = 0xB0, Data4_1 = 0x29, Data4_2 = 0x7F, Data4_3 = 0xE9, Data4_4 = 0x9A, Data4_5 = 0x87, Data4_6 = 0xC6, Data4_7 = 0x41 };
+
+            public static GUID FOLDERID_Startup = new() { Data1 = 0xB97D20BB, Data2 = 0xF46A, Data3 = 0x4C97, Data4_0 = 0xBA, Data4_1 = 0x10, Data4_2 = 0x5E, Data4_3 = 0x36, Data4_4 = 0x08, Data4_5 = 0x43, Data4_6 = 0x08, Data4_7 = 0x54 };
+
+            public static GUID FOLDERID_Programs = new() { Data1 = 0xA77F5D77, Data2 = 0x2E2B, Data3 = 0x44C3, Data4_0 = 0xA6, Data4_1 = 0xA2, Data4_2 = 0xAB, Data4_3 = 0xA6, Data4_4 = 0x01, Data4_5 = 0x05, Data4_6 = 0x4A, Data4_7 = 0x51 };
+
+            public static GUID FOLDERID_StartMenu = new() { Data1 = 0x625B53C3, Data2 = 0xAB48, Data3 = 0x4EC1, Data4_0 = 0xBA, Data4_1 = 0x1F, Data4_2 = 0xA1, Data4_3 = 0xEF, Data4_4 = 0x41, Data4_5 = 0x46, Data4_6 = 0xFC, Data4_7 = 0x19 };
+
+            public static GUID FOLDERID_Recent = new() { Data1 = 0xAE50C081, Data2 = 0xEBD2, Data3 = 0x438A, Data4_0 = 0x86, Data4_1 = 0x55, Data4_2 = 0x8A, Data4_3 = 0x09, Data4_4 = 0x2E, Data4_5 = 0x34, Data4_6 = 0x98, Data4_7 = 0x7A };
+
+            public static GUID FOLDERID_SendTo = new() { Data1 = 0x8983036C, Data2 = 0x27C0, Data3 = 0x404B, Data4_0 = 0x8F, Data4_1 = 0x08, Data4_2 = 0x10, Data4_3 = 0x2D, Data4_4 = 0x10, Data4_5 = 0xDC, Data4_6 = 0xFD, Data4_7 = 0x74 };
+
+            public static GUID FOLDERID_Documents = new() { Data1 = 0xFDD39AD0, Data2 = 0x238F, Data3 = 0x46AF, Data4_0 = 0xAD, Data4_1 = 0xB4, Data4_2 = 0x6C, Data4_3 = 0x85, Data4_4 = 0x48, Data4_5 = 0x03, Data4_6 = 0x69, Data4_7 = 0xC7 };
+
+            public static GUID FOLDERID_Favorites = new() { Data1 = 0x1777F761, Data2 = 0x68AD, Data3 = 0x4D8A, Data4_0 = 0x87, Data4_1 = 0xBD, Data4_2 = 0x30, Data4_3 = 0xB7, Data4_4 = 0x59, Data4_5 = 0xFA, Data4_6 = 0x33, Data4_7 = 0xDD };
+
+            public static GUID FOLDERID_NetHood = new() { Data1 = 0xC5ABBF53, Data2 = 0xE17F, Data3 = 0x4121, Data4_0 = 0x89, Data4_1 = 0x00, Data4_2 = 0x86, Data4_3 = 0x62, Data4_4 = 0x6F, Data4_5 = 0xC2, Data4_6 = 0xC9, Data4_7 = 0x73 };
+
+            public static GUID FOLDERID_PrintHood = new() { Data1 = 0x9274BD8D, Data2 = 0xCFD1, Data3 = 0x41C3, Data4_0 = 0xB3, Data4_1 = 0x5E, Data4_2 = 0xB1, Data4_3 = 0x3F, Data4_4 = 0x55, Data4_5 = 0xA7, Data4_6 = 0x58, Data4_7 = 0xF4 };
+
+            public static GUID FOLDERID_Templates = new() { Data1 = 0xA63293E8, Data2 = 0x664E, Data3 = 0x48DB, Data4_0 = 0xA0, Data4_1 = 0x79, Data4_2 = 0xDF, Data4_3 = 0x75, Data4_4 = 0x9E, Data4_5 = 0x05, Data4_6 = 0x09, Data4_7 = 0xF7 };
+
+            public static GUID FOLDERID_CommonStartup = new() { Data1 = 0x82A5EA35, Data2 = 0xD9CD, Data3 = 0x47C5, Data4_0 = 0x96, Data4_1 = 0x29, Data4_2 = 0xE1, Data4_3 = 0x5D, Data4_4 = 0x2F, Data4_5 = 0x71, Data4_6 = 0x4E, Data4_7 = 0x6E };
+
+            public static GUID FOLDERID_CommonPrograms = new() { Data1 = 0x0139D44E, Data2 = 0x6AFE, Data3 = 0x49F2, Data4_0 = 0x86, Data4_1 = 0x90, Data4_2 = 0x3D, Data4_3 = 0xAF, Data4_4 = 0xCA, Data4_5 = 0xE6, Data4_6 = 0xFF, Data4_7 = 0xB8 };
+
+            public static GUID FOLDERID_CommonStartMenu = new() { Data1 = 0xA4115719, Data2 = 0xD62E, Data3 = 0x491D, Data4_0 = 0xAA, Data4_1 = 0x7C, Data4_2 = 0xE7, Data4_3 = 0x4B, Data4_4 = 0x8B, Data4_5 = 0xE3, Data4_6 = 0xB0, Data4_7 = 0x67 };
+
+            public static GUID FOLDERID_PublicDesktop = new() { Data1 = 0xC4AA340D, Data2 = 0xF20F, Data3 = 0x4863, Data4_0 = 0xAF, Data4_1 = 0xEF, Data4_2 = 0xF8, Data4_3 = 0x7E, Data4_4 = 0xF2, Data4_5 = 0xE6, Data4_6 = 0xBA, Data4_7 = 0x25 };
+
+            public static GUID FOLDERID_ProgramData = new() { Data1 = 0x62AB5D82, Data2 = 0xFDC1, Data3 = 0x4DC3, Data4_0 = 0xA9, Data4_1 = 0xDD, Data4_2 = 0x07, Data4_3 = 0x0D, Data4_4 = 0x1D, Data4_5 = 0x49, Data4_6 = 0x5D, Data4_7 = 0x97 };
+
+            public static GUID FOLDERID_CommonTemplates = new() { Data1 = 0xB94237E7, Data2 = 0x57AC, Data3 = 0x4347, Data4_0 = 0x91, Data4_1 = 0x51, Data4_2 = 0xB0, Data4_3 = 0x8C, Data4_4 = 0x6C, Data4_5 = 0x32, Data4_6 = 0xD1, Data4_7 = 0xF7 };
+
+            public static GUID FOLDERID_PublicDocuments = new() { Data1 = 0xED4824AF,Data2 = 0xDCE4,Data3 = 0x45A8,Data4_0 = 0x81, Data4_1 = 0xE2, Data4_2 = 0xFC, Data4_3 = 0x79, Data4_4 = 0x65, Data4_5 = 0x08, Data4_6 = 0x36, Data4_7 = 0x34 };
+
+            public static GUID FOLDERID_RoamingAppData = new() { Data1 = 0x3EB685DB, Data2 = 0x65F9, Data3 = 0x4CF6, Data4_0 = 0xA0, Data4_1 = 0x3A, Data4_2 = 0xE3, Data4_3 = 0xEF, Data4_4 = 0x65, Data4_5 = 0x72, Data4_6 = 0x9F, Data4_7 = 0x3D };
+
+            public static GUID FOLDERID_LocalAppData = new() { Data1 = 0xF1B32785, Data2 = 0x6FBA, Data3 = 0x4FCF, Data4_0 = 0x9D, Data4_1 = 0x55, Data4_2 = 0x7B, Data4_3 = 0x8E, Data4_4 = 0x7F, Data4_5 = 0x15, Data4_6 = 0x70,  Data4_7 = 0x91 };
+
+            public static GUID FOLDERID_LocalAppDataLow = new() { Data1 = 0xA520A1A4, Data2 = 0x1780, Data3 = 0x4FF6, Data4_0 = 0xBD, Data4_1 = 0x18, Data4_2 = 0x16, Data4_3 = 0x73, Data4_4 = 0x43, Data4_5 = 0xC5, Data4_6 = 0xAF, Data4_7 = 0x16 };
+
+            public static GUID FOLDERID_InternetCache = new() { Data1 = 0x352481E8, Data2 = 0x33BE, Data3 = 0x4251, Data4_0 = 0xBA, Data4_1 = 0x85, Data4_2 = 0x60, Data4_3 = 0x07, Data4_4 = 0xCA, Data4_5 = 0xED, Data4_6 = 0xCF, Data4_7 = 0x9D };
+
+            public static GUID FOLDERID_Cookies = new() { Data1 = 0x2B0F765D, Data2 = 0xC0E9, Data3 = 0x4171, Data4_0 = 0x90, Data4_1 = 0x8E, Data4_2 = 0x08, Data4_3 = 0xA6,  Data4_4 = 0x11, Data4_5 = 0xB8, Data4_6 = 0x4F, Data4_7 = 0xF6 };
+
+            public static GUID FOLDERID_History = new() { Data1 = 0xD9DC8A3B, Data2 = 0xB784, Data3 = 0x432E, Data4_0 = 0xA7, Data4_1 = 0x81, Data4_2 = 0x5A, Data4_3 = 0x11, Data4_4 = 0x30, Data4_5 = 0xA7, Data4_6 = 0x59, Data4_7 = 0x63 };
+
+            public static GUID FOLDERID_System = new() { Data1 = 0x1AC14E77, Data2 = 0x02E7, Data3 = 0x4E5D, Data4_0 = 0xB7, Data4_1 = 0x44, Data4_2 = 0x2E, Data4_3 = 0xB1, Data4_4 = 0xAE, Data4_5 = 0x51, Data4_6 = 0x98, Data4_7 = 0xB7 };
+
+            public static GUID FOLDERID_SystemX86 = new() { Data1 = 0xD65231B0, Data2 = 0xB2F1, Data3 = 0x4857, Data4_0 = 0xA4, Data4_1 = 0xCE, Data4_2 = 0xA8, Data4_3 = 0xE7, Data4_4 =0xC6, Data4_5 = 0xEA, Data4_6 = 0x7D, Data4_7 = 0x27 };
+
+            public static GUID FOLDERID_Windows = new() { Data1 = 0xF38BF404, Data2 = 0x1D43, Data3 = 0x42F2, Data4_0 = 0x93, Data4_1 = 0x05, Data4_2 = 0x67, Data4_3 = 0xDE, Data4_4 = 0x0B, Data4_5 = 0x28, Data4_6 = 0xFC, Data4_7 = 0x23 };
+
+            public static GUID FOLDERID_Profile = new() { Data1 = 0x5E6C858F, Data2 = 0x0E22, Data3 = 0x4760, Data4_0 = 0x9A, Data4_1 = 0xFE, Data4_2 = 0xEA, Data4_3 = 0x33, Data4_4 = 0x17, Data4_5 = 0xB6, Data4_6 = 0x71, Data4_7 = 0x73 };
+
+            public static GUID FOLDERID_Pictures = new() { Data1 = 0x33E28130, Data2 = 0x4E1E, Data3 = 0x4676, Data4_0 = 0x83, Data4_1 = 0x5A, Data4_2 = 0x98, Data4_3 = 0x39, Data4_4 = 0x5C, Data4_5 = 0x3B, Data4_6 = 0xC3, Data4_7 = 0xBB };
+
+            public static GUID FOLDERID_ProgramFilesX86 = new() { Data1 = 0x7C5A40EF, Data2 = 0xA0FB, Data3 = 0x4BFC, Data4_0 = 0x87, Data4_1 = 0x4A, Data4_2 = 0xC0, Data4_3 = 0xF2, Data4_4 = 0xE0, Data4_5 = 0xB9, Data4_6 = 0xFA, Data4_7 = 0x8E };
+
+            public static GUID FOLDERID_ProgramFilesCommonX86 = new() { Data1 = 0xDE974D24, Data2 = 0xD9C6, Data3 = 0x4D3E, Data4_0 = 0xBF, Data4_1 = 0x91, Data4_2 = 0xF4, Data4_3 = 0x45, Data4_4 = 0x51, Data4_5 = 0x20, Data4_6 = 0xB9, Data4_7 = 0x17 };
+
+            public static GUID FOLDERID_ProgramFilesX64 = new() { Data1 = 0x6d809377, Data2 = 0x6af0, Data3 = 0x444b, Data4_0 = 0x89, Data4_1 = 0x57, Data4_2 = 0xa3, Data4_3 = 0x77, Data4_4 = 0x3f, Data4_5 = 0x02, Data4_6 = 0x20, Data4_7 = 0x0e };
+
+            public static GUID FOLDERID_ProgramFilesCommonX64 = new() { Data1 = 0x6365d5a7, Data2 = 0xf0d, Data3 = 0x45e5, Data4_0 = 0x87, Data4_1 = 0xf6, Data4_2 = 0xd, Data4_3 = 0xa5, Data4_4 = 0x6b, Data4_5 = 0x6a, Data4_6 = 0x4f, Data4_7 = 0x7d };
+
+            public static GUID FOLDERID_ProgramFiles = new() { Data1 = 0x905e63b6, Data2 = 0xc1bf, Data3 = 0x494e, Data4_0 = 0xb2, Data4_1 = 0x9c, Data4_2 = 0x65, Data4_3 = 0xb7, Data4_4 = 0x32, Data4_5 = 0xd3, Data4_6 = 0xd2, Data4_7 = 0x1a };
+
+            public static GUID FOLDERID_ProgramFilesCommon = new() { Data1 = 0xF7F1ED05, Data2 = 0x9F6D, Data3 = 0x47A2, Data4_0 = 0xAA, Data4_1 = 0xAE, Data4_2 = 0x29, Data4_3 = 0xD3, Data4_4 = 0x17, Data4_5 = 0xC6, Data4_6 = 0xF0, Data4_7 = 0x66 };
+
+            public static GUID FOLDERID_UserProgramFiles = new() { Data1 = 0x5cd7aee2, Data2 = 0x2219, Data3 = 0x4a67, Data4_0 = 0xb8, Data4_1 = 0x5d, Data4_2 = 0x6c, Data4_3 = 0x9c, Data4_4 = 0xe1, Data4_5 = 0x56, Data4_6 = 0x60, Data4_7 = 0xcb };
+
+            public static GUID FOLDERID_UserProgramFilesCommon = new() { Data1 = 0xbcbd3057, Data2 = 0xca5c, Data3 = 0x4622, Data4_0 = 0xb4, Data4_1 = 0x2d, Data4_2 = 0xbc, Data4_3 = 0x56, Data4_4 = 0xdb, Data4_5 =0x0a, Data4_6 = 0xe5, Data4_7 = 0x16 };
+
+            public static GUID FOLDERID_AdminTools = new() { Data1 = 0x724EF170,  Data2 = 0xA42D, Data3 = 0x4FEF, Data4_0 = 0x9F, Data4_1 = 0x26, Data4_2 = 0xB6, Data4_3 = 0x0E, Data4_4 = 0x84, Data4_5 = 0x6F, Data4_6 = 0xBA, Data4_7 = 0x4F };
+
+            public static GUID FOLDERID_CommonAdminTools = new() { Data1 = 0xD0384E7D, Data2 = 0xBAC3, Data3 = 0x4797, Data4_0 = 0x8F, Data4_1 = 0x14, Data4_2 = 0xCB, Data4_3 = 0xA2, Data4_4 = 0x29, Data4_5 = 0xB3, Data4_6 = 0x92, Data4_7 = 0xB5 };
+
+            public static GUID FOLDERID_Music = new() { Data1 = 0x4BD8D571, Data2 = 0x6D19, Data3 = 0x48D3, Data4_0 = 0xBE, Data4_1 = 0x97, Data4_2 = 0x42, Data4_3 = 0x22, Data4_4 = 0x20, Data4_5 = 0x08, Data4_6 = 0x0E, Data4_7 = 0x43 };
+
+            public static GUID FOLDERID_Videos = new() { Data1 = 0x18989B1D, Data2 = 0x99B5, Data3 = 0x455B, Data4_0 = 0x84, Data4_1 = 0x1C, Data4_2 = 0xAB, Data4_3 = 0x7C, Data4_4 = 0x74, Data4_5 = 0xE4, Data4_6 = 0xDD, Data4_7 = 0xFC };
+
+            public static GUID FOLDERID_Ringtones = new() { Data1 = 0xC870044B, Data2 = 0xF49E, Data3 = 0x4126, Data4_0 = 0xA9, Data4_1 = 0xC3, Data4_2 = 0xB5, Data4_3 = 0x2A, Data4_4 = 0x1F, Data4_5 = 0xF4, Data4_6 = 0x11, Data4_7 = 0xE8 };
+
+            public static GUID FOLDERID_CDBurning = new() { Data1 = 0x9E52AB10, Data2 = 0xF80D, Data3 = 0x49DF, Data4_0 = 0xAC, Data4_1 = 0xB8, Data4_2 = 0x43, Data4_3 = 0x30, Data4_4 = 0xF5, Data4_5 = 0x68, Data4_6 = 0x78, Data4_7 = 0x55 };
+
+            public static GUID FOLDERID_Downloads = new() { Data1 = 0x374de290, Data2 = 0x123f, Data3 = 0x4565, Data4_0 = 0x91, Data4_1 = 0x64, Data4_2 = 0x39, Data4_3 = 0xc4, Data4_4 = 0x92, Data4_5 = 0x5e, Data4_6 = 0x46, Data4_7 = 0x7b };
+
+            public static GUID FOLDERID_Screenshots = new() { Data1 = 0xb7bede81,  Data2 = 0xdf94, Data3 = 0x4682, Data4_0 = 0xa7, Data4_1 = 0xd8, Data4_2 = 0x57, Data4_3 = 0xa5, Data4_4 = 0x26, Data4_5 = 0x20, Data4_6 = 0xb8, Data4_7 = 0x6f };
+
+        }

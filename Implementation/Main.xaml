@@ -1,0 +1,58 @@
+﻿<Window x:Class="MP.PlayerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MP" Closing="Window_Closing"
+        mc:Ignorable="d" Loaded="Window_Loaded"
+        Title="Music Player" Height="482" MaxHeight="482" MinHeight="482" MinWidth="1075" Width="1075" MaxWidth="1075" Background="Black" Foreground="White">
+    <DockPanel>
+        <Canvas DockPanel.Dock="Bottom" Height="116">
+            <Label Name="TimeElapsed" Foreground="White" Content="00:00:00.00" HorizontalAlignment="Left" Canvas.Top="5" VerticalAlignment="Center" Canvas.Left="4" />
+            <ProgressBar x:Name="TimeBar" BorderThickness="0.4" Height="21" Background="Black" Canvas.Left="79" Canvas.Top="7" Width="893" HorizontalAlignment="Left" VerticalAlignment="Center" Mouse.QueryCursor="TimeBar_QueryCursor" />
+            <Label Name="TimeRemaining" Foreground="White" Content="--:--:--.--" Canvas.Left="981" Canvas.Top="5" />
+            <Button x:Name="PlayButton" Canvas.Left="485.5" Canvas.Top="50.5" Height="46" Width="64" Background="Black" Click="PlayButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="PlayImage" />
+            </Button>
+            <Button x:Name="TenSecsBack" Width="30" Height="20" Click="TenSecsBack_Click" Background="Black" Canvas.Left="430" Canvas.Top="48" HorizontalAlignment="Center" VerticalAlignment="Top" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="TenSecsBackImage" Stretch="Fill" />
+            </Button>
+            <Button x:Name="PrevTrack" Width="30" Height="20" Click="PrevTrack_Click" Background="Black" Canvas.Left="430" Canvas.Top="80" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="PrevImage" Stretch="Fill" />
+            </Button>
+            <Button x:Name="TenSecsAhead" Width="30" Height="20" Click="TenSecsAhead_Click" Background="Black" Canvas.Left="574" Canvas.Top="48" HorizontalAlignment="Left" VerticalAlignment="Center" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="TenSecsAheadImage" Stretch="Fill" />
+            </Button>
+            <Button x:Name="NextTrack" Width="30" Height="20" Click="NextTrack_Click" Background="Black" Canvas.Left="574" Canvas.Top="80" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="NextImage" Stretch="Fill" />
+            </Button>
+            <Button x:Name="StopButton" Click="StopButton_Click" Width="34" Background="Black" Height="34" Canvas.Left="1003" Canvas.Top="68" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="StopImage" Stretch="Fill" />
+            </Button>
+            <Button x:Name="RepeatButton" Click="RepeatButton_Click" Width="34" Background="Black" Height="34" Canvas.Left="938" Canvas.Top="68" Template="{DynamicResource ResourceKey=PlayerButtonsTemplate}">
+                <Image x:Name="RepeatImage" Stretch="Fill" />
+            </Button>
+            <DockPanel x:Name="TrackInfoPanel" Width="410" Height="70" Canvas.Left="10" Canvas.Top="40" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Visible">
+                <Image x:Name="CoverImage" Stretch="Fill" Visibility="Visible" Width="104" Height="66" DockPanel.Dock="Left" />
+                <Label x:Name="TrackTitle" FontSize="13.7" Padding="1.1" DockPanel.Dock="Top" Height="26" Foreground="White" Visibility="Visible" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" TextOptions.TextHintingMode="Fixed" />
+                <Label x:Name="OtherData" FontSize="11" Padding="1" Foreground="White" />
+            </DockPanel>
+        </Canvas>
+        <StackPanel DockPanel.Dock="Left" Name="Controls" Width="250" HorizontalAlignment="Left">
+            <Label x:Name="RightVolumeLabel" Content="Right Speaker:" Foreground="White" />
+            <Slider x:Name="RightVolume" MouseEnter="RightVolume_MouseEnter" MouseLeave="RightVolume_MouseLeave" Maximum="100" Minimum="0" SmallChange="2" LargeChange="4" Height="20" Margin="0,5,0,0" />
+            <Label x:Name="LeftVolumeLabel" Content="Left Speaker:" Foreground="White" />
+            <Slider x:Name="LeftVolume" MouseEnter="LeftVolume_MouseEnter" MouseLeave="LeftVolume_MouseLeave" Maximum="100" Minimum="0" SmallChange="2" LargeChange="4" Height="20" Margin="0,5,0,0" />
+            <Button x:Name="GenericButton1" Width="200" Content="" Background="Black" Foreground="White" Margin="0,5,0,0" Click="GenericButton1_Click" Template="{DynamicResource GenericButtonTemplate}" />
+            <Button x:Name="GenericButton2" Width="200" Content="" Background="Black" Foreground="White" Margin="0,5,0,0" Click="GenericButton2_Click" Template="{DynamicResource GenericButtonTemplate}" />
+            <Button x:Name="GenericButton3" Width="200" Content="" Background="Black" Foreground="White" Margin="0,5,0,0" Click="GenericButton3_Click" Template="{DynamicResource GenericButtonTemplate}" />
+            <Button x:Name="GenericButton4" Width="200" Content="" Background="Black" Foreground="White" Margin="0,5,0,0" Click="GenericButton4_Click" Template="{DynamicResource GenericButtonTemplate}" />
+            <Button x:Name="GenericButton5" Width="200" Content="" Background="Black" Foreground="White" Margin="0,5,0,0" Click="GenericButton5_Click" Template="{DynamicResource GenericButtonTemplate}" />
+            <Button x:Name="GenericButton6" Width="200" Content="" Background="Black" Foreground="White" Margin="0,5,0,0" Click="GenericButton6_Click" Template="{DynamicResource GenericButtonTemplate}" />
+            <Button x:Name="SettingsButton" Width="200" Content="Settings..." Background="Black" Foreground="White" Margin="0,81,0,0" Click="SettingsButton_Click" Template="{DynamicResource GenericButtonTemplate}" />
+        </StackPanel>
+        <Grid DockPanel.Dock="Top">
+            <WindowsFormsHost Name="WFH_LISTVIEW_1" />
+        </Grid>
+    </DockPanel>
+</Window>

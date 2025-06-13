@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<!--
+		Basic structure for an input file reference:
+		
+		<MP_InputFileReference Include="Implementation/Resources/">
+			<Name></Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+	-->
+	
+	<ItemGroup>
+		<MP_InputFileReference Include="AppIcon.ico">
+			<Name>ApplicationIcon</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="ATTRIBUTION">
+			<Name>AttributionFile</Name>
+			<SaveType>String</SaveType>
+			<StringEncoding>UTF8</StringEncoding>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/audiofile.png">
+			<Name>Audiofile</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/osdrive.png">
+			<Name>OSDrive</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/PauseImg.png">
+			<Name>PauseImg</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/Repeat-enabled.png">
+			<Name>RepeatEnabled</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/Repeat.png">
+			<Name>Repeat</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/CovrImgNotFound.png">
+			<Name>CoverImageNotFound</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/PlayImg.png">
+			<Name>PlayImg</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/drive.png">
+			<Name>Drive</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/NextTrack.png">
+			<Name>NextTrack</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/Next10Secs.png">
+			<Name>Next10Secs</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/PrevTrack.png">
+			<Name>PrevTrack</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/Repeat-all.png">
+			<Name>RepeatAll</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/Prev10Secs.png">
+			<Name>Prev10Secs</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/StopImg.png">
+			<Name>StopImg</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/folder.png">
+			<Name>Folder</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/musicplayerfull.ico">
+			<Name>MusicPlayerIconFull</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/playlistdefaulticon.png">
+			<Name>PlaylistIconDefault</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/downloadsspecialplaylist.png">
+			<Name>SpecialDownloadsPlaylistIcon</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/settingssuggestionshowcase.png">
+			<Name>SettingsEditorNew_SuggestionShowCaseImage</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+		<MP_InputFileReference Include="Implementation/Resources/m3ufile.png">
+			<Name>M3UFile</Name>
+			<SaveType>ByteArray</SaveType>
+		</MP_InputFileReference>
+	</ItemGroup>
+	
+</Project>

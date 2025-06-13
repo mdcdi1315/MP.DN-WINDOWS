@@ -1,0 +1,30 @@
+{
+	"id": "mp-default-package",
+	"version": "1.0.0.0",
+	"description": "Provides the default native DLL's required for some Music Player features.",
+	"managedassets": null,
+	"resources": [
+		{
+			"name": "README.txt",
+			"hash": "41515f3afd5076cdda33d7632c9dfef6b5ed3e0643654c4b19a55a2ff3532436",
+			"hashtype": "SHA256"
+		}
+	],
+	"nativeassets": [
+		{
+			"name": "discord_game_sdk.dll",
+			"hash": "2ddfd7c9c0eec12bb2f6796572e270ab7cdb0b966b9b5195dc4c95e3201b0045",
+			"hashtype": "SHA256"
+		},
+		{
+			"name": "vorbis.dll",
+			"hash": "d498312c18c6fd972f1670b8fdc7af92619b76e52b362c744a2636a2094bf2eb",
+			"hashtype": "SHA256"
+		},
+		{
+			"name": "vorbisfile.dll",
+			"hash": "c0919e033f34e479d2ccb4836e9f4116737b8e65fb7866a65626b1c3aee66a11",
+			"hashtype": "SHA256"
+		}
+	]
+}

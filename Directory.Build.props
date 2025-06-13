@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Imports in and defines the first project file that is run on MSBuild. -->
+<Project InitialTargets="PrepareMPBuild">
+
+	<!-- 
+		Strong Name Key settings. 
+		The strong name key is not exposed to the public repo; 
+		instead, it is built internally with the key and the signed result is that which it is released.
+	-->
+	<PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.vcxproj' AND '$([System.IO.File]::Exists(`$(MSBuildThisFileDirectory)ProjectKey.snk`))' == 'true'">
+		<AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">$(MSBuildThisFileDirectory)ProjectKey.snk</AssemblyOriginatorKeyFile>
+		<SignAssembly Condition="'$(SignAssembly)' == ''">true</SignAssembly>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<MP_BaseFileReferenceLoadingPath>$(MSBuildThisFileDirectory)</MP_BaseFileReferenceLoadingPath>
+		<MPBuildTasksProjBasePath>$(MSBuildThisFileDirectory)BuildTasks</MPBuildTasksProjBasePath>
+		<MPBuildTasksBasePath>$(MPBuildTasksProjBasePath)/MP_BUILDTASKS</MPBuildTasksBasePath>
+	</PropertyGroup>
+	
+	<Import Project="$(MPBuildTasksProjBasePath)/MP.BuildTasks.targets" />
+
+	<!-- Builds the BuildTasks assembly before being referenced by any project. -->
+	<!-- Even the ReleaseBuilds file delegates to this. -->
+	<Target Name="PrepareMPBuild" 
+	Condition="'$(DesignTimeBuild)' != 'true' AND '$(MSBuildProjectName)' != 'MusicPlayer.BuildTasks' AND '$([System.IO.File]::Exists(`$(MPBuildTasksBasePath)/MP.BuildTasks.dll`))' == 'false'">
+		<MSBuild Projects="$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj" 
+				 Targets="Restore" 
+				 Properties="Configuration=Release;OutputPath=$(MPBuildTasksBasePath);DebugSymbols=false" 
+				 />
+		<Exec Command="dotnet msbuild &quot;$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj&quot; -t:Build -p:&quot;OutputPath=$(MPBuildTasksBasePath)&quot; -p:Configuration=Release -p:DebugSymbols=false" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
+		<Exec Command="&quot;$(MSBuildBinPath)/msbuild.exe&quot; &quot;$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj&quot; -t:Build -p:&quot;OutputPath=$(MPBuildTasksBasePath)&quot; -p:Configuration=Release -p:DebugSymbols=false" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
+	</Target>
+	
+</Project>

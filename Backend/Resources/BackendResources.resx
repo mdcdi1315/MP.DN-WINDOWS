@@ -1,0 +1,332 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InternetShortcutTemplate" xml:space="preserve">
+    <value>[{{000214A0-0000-0000-C000-000000000046}}]
+Prop3=19,11
+[InternetShortcut]
+IDList=
+URL={0}
+IconIndex={1}
+HotKey=0
+IconFile={2}</value>
+    <comment>Proper file code that can open an Internet Shortcut: Now it has the ability to change it's current icon to a custom one.</comment>
+  </data>
+  <data name="Shell32_KF_CDBurning" xml:space="preserve">
+    <value>9e52ab10-f80d-49df-acb8-4330f5687855</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_CommonOEMLinks" xml:space="preserve">
+    <value>C1BAE2D0-10DF-4334-BEDD-7AA20B227A9D</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Desktop" xml:space="preserve">
+    <value>b4bfcc3a-db2c-424c-b029-7fe99a87c641</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Documents" xml:space="preserve">
+    <value>fdd39ad0-238f-46af-adb4-6c85480369c7</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Downloads" xml:space="preserve">
+    <value>374de290-123f-4565-9164-39c4925e467b</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_LocalizedResourcesDir" xml:space="preserve">
+    <value>2A00375E-224C-49DE-B8D1-440DF7EF3DDC</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Music" xml:space="preserve">
+    <value>4bd8d571-6d19-48d3-be97-422220080e43</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_PhotoAlbums" xml:space="preserve">
+    <value>69D2CF90-FC33-4FB7-9A0C-EBB0F0FCB43C</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Pictures" xml:space="preserve">
+    <value>33e28130-4e1e-4676-835a-98395c3bc3bb</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Playlists" xml:space="preserve">
+    <value>DE92C1C7-837F-4F69-A3BB-86E631204A23</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Profile" xml:space="preserve">
+    <value>5e6c858f-0e22-4760-9afe-ea3317b67173</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Public" xml:space="preserve">
+    <value>DFDF76A2-C82A-4D63-906A-5644AC457385</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_PublicMusic" xml:space="preserve">
+    <value>3214FAB5-9757-4298-BB61-92A9DEAA44FF</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_PublicPictures" xml:space="preserve">
+    <value>B6EBFB86-6907-413C-9AF7-4FC2ABF07CC5</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_PublicRingtones" xml:space="preserve">
+    <value>E555AB60-153B-4D17-9F04-A5FE99FC15EC</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_PublicVideos" xml:space="preserve">
+    <value>2400183A-6185-49FB-A2D8-4A392A602BA3</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_ChangeRemovePrograms" xml:space="preserve">
+    <value>df7266ac-9274-4867-8d55-3bd661de872d</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_ResourceDir" xml:space="preserve">
+    <value>8AD10C31-2ADB-4296-A8F7-E4701232C972</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Ringtones" xml:space="preserve">
+    <value>c870044b-f49e-4126-a9c3-b52a1ff411e8</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SampleMusic" xml:space="preserve">
+    <value>B250C668-F57D-4EE1-A63C-290EE7D1AA1F</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SamplePictures" xml:space="preserve">
+    <value>C4900540-2379-4C75-844B-64E6FAF8716B</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SamplePlaylists" xml:space="preserve">
+    <value>15CA69B3-30EE-49C1-ACE1-6B5EC372AFB5</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SampleVideos" xml:space="preserve">
+    <value>859EAD94-2E85-48AD-A71A-0969CB56A6CD</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Screenshots" xml:space="preserve">
+    <value>b7bede81-df94-4682-a7d8-57a52620b86f</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SendTo" xml:space="preserve">
+    <value>8983036c-27c0-404b-8f08-102d10dcfd74</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_System" xml:space="preserve">
+    <value>1ac14e77-02e7-4e5d-b744-2eb1ae5198b7</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SystemX86" xml:space="preserve">
+    <value>d65231b0-b2f1-4857-a4ce-a8e7c6ea7d27</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_UserProfiles" xml:space="preserve">
+    <value>0762D272-C50A-4BB0-A382-697DCD729B80</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Videos" xml:space="preserve">
+    <value>18989b1d-99b5-455b-841c-ab7c74e4ddfc</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_Windows" xml:space="preserve">
+    <value>f38bf404-1d43-42f2-9305-67de0b28fc23</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_AppUpdates" xml:space="preserve">
+    <value>a305ce99-f527-492b-8b1a-7e76fa98d6e4</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_AddNewPrograms" xml:space="preserve">
+    <value>de61d971-5ebc-4f02-a3a9-6c82895e5c04</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_PublicDownloads" xml:space="preserve">
+    <value>3D644C9B-1FB8-4f30-9B45-F670235F79C0</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_SavedSearches" xml:space="preserve">
+    <value>7d1d3a04-debb-4115-95cf-2f29da2920da</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="Shell32_KF_QuickLaunch" xml:space="preserve">
+    <value>52a4f021-7b75-48a9-9f6b-4b87a210bc8f</value>
+    <comment>Shell32 Common Known Folder GUID</comment>
+  </data>
+  <data name="MP_DIALOGS_FOPFORMNAME" xml:space="preserve">
+    <value>FileOperationDialog</value>
+  </data>
+  <data name="MP_DIALOGS_FOPFORMTITLE" xml:space="preserve">
+    <value>File Operation in progress...</value>
+  </data>
+  <data name="MP_DIALOGS_FOPFORMTHREADWORKERNAME" xml:space="preserve">
+    <value>[MP] File Operation Dialog Worker</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_OPERATIONDETAILSLABEL_NAME" xml:space="preserve">
+    <value>OperationDetailsLabel</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_GENERICOPERATIONLABEL_NAME" xml:space="preserve">
+    <value>GenericOperationLabel</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_CURRENTFILEPROGRESSBAR_NAME" xml:space="preserve">
+    <value>CurrentFileProgressBar</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_OPERATIONGENERALBAR_NAME" xml:space="preserve">
+    <value>OperationGeneralBar</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_CBUTTON_NAME" xml:space="preserve">
+    <value>CButton</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_CBUTTON_TEXT" xml:space="preserve">
+    <value>Cancel...</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_CANCEL_ACTION_TEXT" xml:space="preserve">
+    <value>Are you sure that you want to cancel this action?
+Use 'Yes' to cancel, or use 'No' to continue running the operation.</value>
+  </data>
+  <data name="MP_DIALOGS_FOP_CANCEL_ACTION_TITLE" xml:space="preserve">
+    <value>Are you sure that you want to cancel?</value>
+  </data>
+  <data name="MP_GAMEPAD_MANAGER_REQTHREADNAME" xml:space="preserve">
+    <value>[MP] Background controller check thread</value>
+  </data>
+  <data name="MP_NETWORKING_WININETSTREAM_OPNOTSUPP" xml:space="preserve">
+    <value>Not supported for network connections</value>
+  </data>
+  <data name="MP_NETWORKING_WININETSTREAM_LENNOTSUPP" xml:space="preserve">
+    <value>Not supported for this network connection</value>
+  </data>
+  <data name="MP_DIALOGS_FILEDIALOGABSTRACT_THREADNAME" xml:space="preserve">
+    <value>[MP] OS File dialogs COM hosting thread</value>
+  </data>
+  <data name="MP_COMINTEROP_NOTMARKEDWITHDEFAULTCOMOBJECTATTRIBUTE" xml:space="preserve">
+    <value>The interface must have been marked with the DefaultCOMInterfaceObjectGuidAttribute and must contain a valid COM coclass GUID.</value>
+  </data>
+  <data name="MP_COMINTEROP_NOTCOMIMPORTTYPE" xml:space="preserve">
+    <value>The current type does not represent a COM Import type.</value>
+  </data>
+  <data name="MP_COMINTEROP_NOTCOMINTERFACE" xml:space="preserve">
+    <value>The current type does not represent a COM interface.</value>
+  </data>
+  <data name="MP_DIALOGS_PDDIALOG_THREADNAME" xml:space="preserve">
+    <value>[MP] Operation Dialog Worker Thread</value>
+  </data>
+  <data name="MP_DIALOGS_PDDIALOG_INVALID_HANDLE" xml:space="preserve">
+    <value>The window parameter must contain a valid window handle.</value>
+  </data>
+</root>

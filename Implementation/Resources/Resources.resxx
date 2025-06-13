@@ -1,0 +1,910 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<MDCDI1315-RES>
+	<xsd:schema id="MDCDI1315-RES" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="MDCDI1315-RES">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="MDCDI1315-XML-RESOURCE-TABLE" maxOccurs="1" minOccurs="1">
+						<xsd:complexType>
+							<xsd:annotation>
+								<xsd:documentation>Indicates the header of mdcdi1315' Custom XML Resource Format.</xsd:documentation>
+							</xsd:annotation>
+							<xsd:sequence>
+								<xsd:element name="Version" type="xsd:int" minOccurs="1" maxOccurs="1" />
+								<xsd:element name="Magic" type="xsd:string" minOccurs="1" maxOccurs="1" />
+								<xsd:element name="SupportedFormatsMask" type="xsd:int" minOccurs="1" maxOccurs="1" />
+								<xsd:element name="CurrentHeaderVersion" type="xsd:int" minOccurs="1" maxOccurs="1" />
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="ResData">
+						<xsd:annotation>
+							<xsd:documentation>Defines the root element that contains all the resources that are represented by this file.</xsd:documentation>
+						</xsd:annotation>
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="Data" maxOccurs="unbounded">
+									<xsd:annotation>
+										<xsd:documentation>The Data element provides a single resource definition. Each definition is then written to the target resource file.</xsd:documentation>
+									</xsd:annotation>
+									<xsd:complexType>
+										<xsd:sequence>
+											<xsd:element name="Value" type="xsd:string" minOccurs="1" maxOccurs="1">
+												<xsd:annotation>
+													<xsd:documentation>Provides the resource value of the current resource element.</xsd:documentation>
+												</xsd:annotation>
+											</xsd:element>
+											<xsd:element name="Comment" type="xsd:string" minOccurs="0">
+												<xsd:annotation>
+													<xsd:documentation>Provides an optional comment of the current resource.</xsd:documentation>
+												</xsd:annotation>
+											</xsd:element>
+										</xsd:sequence>
+										<xsd:attribute ref="xml:space" />
+										<xsd:attribute name="name" type="xsd:string" use="required">
+											<xsd:annotation>
+												<xsd:documentation>Defines the resource name of the current resource.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:attribute>
+										<xsd:attribute name="type" use="required">
+											<xsd:annotation>
+												<xsd:documentation>Defines the type under this resource will be saved in the target file.</xsd:documentation>
+											</xsd:annotation>
+											<xsd:simpleType>
+												<xsd:restriction base="xsd:token">
+													<xsd:enumeration value="String">
+														<xsd:annotation>
+															<xsd:documentation>Indicates that the data should be saved as a string inside the resource file.</xsd:documentation>
+														</xsd:annotation>
+													</xsd:enumeration>
+													<xsd:enumeration value="ByteArray">
+														<xsd:annotation>
+															<xsd:documentation>Indicates that the data should be saved in raw binary after decoded by base-64 inside the resource file.</xsd:documentation>
+														</xsd:annotation>
+													</xsd:enumeration>
+													<xsd:enumeration value="FileReference">
+														<xsd:annotation>
+															<xsd:documentation>Indicates that the data should be saved based on the contents to an external file. The Value element describes the location and the required settings to save it to the target resource file.</xsd:documentation>
+														</xsd:annotation>
+													</xsd:enumeration>
+													<xsd:enumeration value="Object">
+														<xsd:annotation>
+															<xsd:documentation>Indicates that the data are saved as a .NET object serialized with base-64 to the Value element.</xsd:documentation>
+														</xsd:annotation>
+													</xsd:enumeration>
+												</xsd:restriction>
+											</xsd:simpleType>
+										</xsd:attribute>
+										<xsd:attribute name="dotnettype" use="optional" type="xsd:string">
+											<xsd:annotation>
+												<xsd:documentation>Defines the .NET type to decode the base-64 binary serialized object as. Required when the type attribute is set to 'Object'.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:attribute>
+									</xsd:complexType>
+								</xsd:element>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<MDCDI1315-XML-RESOURCE-TABLE>
+		<Version>2</Version>
+		<Magic>mdcdi1315.XML.RESOURCE.NET</Magic>
+		<SupportedFormatsMask>3</SupportedFormatsMask>
+		<CurrentHeaderVersion>1</CurrentHeaderVersion>
+	</MDCDI1315-XML-RESOURCE-TABLE>
+	<ResData>
+		<Data name="DebugConsoleTitle" type="String">
+			<Value>Music Player On .NET 8 - Debug Console</Value>
+		</Data>
+		<Data name="SupportedExplorationViewFiles" type="String">
+			<Value>*.mp3;*.m4a;*.flac;*.wma;*.wav;*.aac;*.ogg;*.m3u;*.m3u8</Value>
+		</Data>
+		<Data name="PlaylistNotSavedErrorMsg" type="String">
+			<Value>Cannot save the playlist due to an error:
+{0}.
+The last save data will be preserved.</Value>
+		</Data>
+		<Data name="FileAddedToPlaylist" type="String">
+			<Value>The file {0} was successfully added to the playlist {1}. Please reload the playlist so that changes can be accepted.</Value>
+		</Data>
+		<Data name="CouldNotLoadTracks" type="String">
+			<Value>Could not load {0} tracks. 
+Please verify that their paths have not been changed.
+If the paths are correct then verify whether the drive
+that references them is up and running.</Value>
+		</Data>
+		<Data name="FileNotAddedToPlaylist" type="String">
+			<Value>The file {0} was not added to the playlist due to an internal error.</Value>
+		</Data>
+		<Data name="SelectDeviceWindow_SelectDevText" type="String">
+			<Value>The Music Player detected more than one audio devices and cannot
+determine which one to use. Select an audio device to use for playback.
+This can be changed at any time in the Settings window.</Value>
+		</Data>
+		<Data name="ResultingDatLengthCannotBeZero" type="String">
+			<Value>The resulting data length cannot be zero.</Value>
+		</Data>
+		<Data name="CannotLocatePlaylist" type="String">
+			<Value>Cannot locate the playlist {0}. The playlist will not be loaded.</Value>
+		</Data>
+		<Data name="SupportedFormats" type="String">
+			<Value>*.mp3;*.m4a;*.flac;*.wma;*.wav;*.aac;*.ogg</Value>
+		</Data>
+		<Data name="CouldNotLoadAnyTracks" type="String">
+			<Value>Could not load any tracks from this playlist. 
+Either the playlist is empty or all the tracks could not be loaded.
+If the paths to the files are correct then verify whether the drive
+that references them is up and running.</Value>
+		</Data>
+		<Data name="DeterminingAudioTags" type="String">
+			<Value>Determining audio tags , please wait...</Value>
+		</Data>
+		<Data name="ErrorMsg" type="String">
+			<Value>Error</Value>
+		</Data>
+		<Data name="AddFileWorkThreadName" type="String">
+			<Value>[MP] Add Audio file dialog working thread</Value>
+		</Data>
+		<Data name="AppTitle" type="String">
+			<Value>Music Player On .NET 8 - Version {0}</Value>
+		</Data>
+		<Data name="DirectoryShowcase" type="String">
+			<Value>Directory</Value>
+		</Data>
+		<Data name="CreatePA_Message1" type="String">
+			<Value>Create Playlist Archive dialog.
+You have been reached here after selecting the
+{0} playlist to be archived.
+Please select the saving path for this playlist so
+that the archiving operation can begin.</Value>
+		</Data>
+		<Data name="NoTitleExists_PlayerScreen" type="String">
+			<Value>(No Track Title exist)</Value>
+		</Data>
+		<Data name="RotatingTitleThread_Name" type="String">
+			<Value>[MP] Rotating title working thread</Value>
+		</Data>
+		<Data name="Question_DeletePlaylist" type="String">
+			<Value>Are you sure that you want to delete 
+the playlist with name {0}?
+Press 'Yes' to delete , or press 'No' to cancel.</Value>
+		</Data>
+		<Data name="Message_SaveArchivedPlaylistDialog_Title" type="String">
+			<Value>Select the archived playlist to load...</Value>
+		</Data>
+		<Data name="Message_AddAudioTrackDialog_Title" type="String">
+			<Value>Select an audio file to add...</Value>
+		</Data>
+		<Data name="Question_DeleteTrack" type="String">
+			<Value>Are you sure that you want to delete the track {0} ?
+This operation cannot be undone.
+To confirm the operation use 'Yes' , otherwise use 'No' to cancel.</Value>
+		</Data>
+		<Data name="Info_TrackDeleted" type="String">
+			<Value>Track '{0}' was successfully deleted.</Value>
+		</Data>
+		<Data name="Question_ConnectNewGamepad" type="String">
+			<Value>A new gamepad detected in the computer - do you want to use it to manage the Music Player?
+Press 'Yes' to use this controller to control Music Player , or use 'No' to cancel.</Value>
+		</Data>
+		<Data name="TrackCannotBeLoadedInMemory_ArchivedMode" type="String">
+			<Value>The track {0} 
+cannot be loaded in memory because it's size violates the Music Player loading limits.
+Tracks above 120 MB cannot be loaded in Archived mode for safety reasons.</Value>
+		</Data>
+		<Data name="UseConnectedHeadsetDevice" type="String">
+			<Value>A valid headset endpoint from the gamepad was detected with ID {0} and name {1}.
+Do you want to use as an output audio device?
+Use 'Yes' to confirm , or use 'No' to cancel.</Value>
+		</Data>
+		<Data name="FileExpView_AccessNotAllowed" type="String">
+			<Value>Access is denied for the folder {0}.
+Check that you have read permissions on the folder and retry.</Value>
+		</Data>
+		<Data name="FileExpView_DirectoryNotFound" type="String">
+			<Value>The directory with name {0} does not exist.</Value>
+		</Data>
+		<Data name="FileExpView_IOError" type="String">
+			<Value>An I/O Error occured while opening directory {0}.
+Details: {1}</Value>
+		</Data>
+		<Data name="PlaylistExtension" type="String">
+			<Value>.mpbpl</Value>
+		</Data>
+		<Data name="AllPlaylistExtensions" type="String">
+			<Value>.pljson;.mpbpl</Value>
+		</Data>
+		<Data name="ExportCoverImage_ImageFormats" type="String">
+			<Value>JPEG Format|*.jpg;*.jpeg
+PNG Format|*.png</Value>
+		</Data>
+		<Data name="ExportCoverImage_Title" type="String">
+			<Value>Export Cover Image to...</Value>
+		</Data>
+		<Data name="SupportedCoverImageFormats" type="String">
+			<Value>*.jpg;*.jpeg;*.bmp;*.png</Value>
+		</Data>
+		<Data name="CoverImageCouldNotBeSavedError" type="String">
+			<Value>Could not save the cover image to {0} due to an error: 
+{1}</Value>
+		</Data>
+		<Data name="ActThread_MainWindowThreadName" type="String">
+			<Value>[MP] Activation Management Thread</Value>
+		</Data>
+		<Data name="ArchCreator_MainWindowThreadName" type="String">
+			<Value>[MP] Archive Creation Host Thread</Value>
+		</Data>
+		<Data name="ArchOpener_FileFilter" type="String">
+			<Value>MusicPlayer archived playlists|*.aplaylist</Value>
+		</Data>
+		<Data name="WaitMsg_GatheringPlaylists" type="String">
+			<Value>Loading playlists...</Value>
+		</Data>
+		<Data name="WaitMsg_LoadingPlaylist" type="String">
+			<Value>Loading playlist {0}...</Value>
+		</Data>
+		<Data name="ArchivedPlaylist_PathSelectTitle" type="String">
+			<Value>Select save path for the archived playlist...</Value>
+		</Data>
+		<Data name="PlayerInstance_OptionalFeatureRequired" type="String">
+			<Value>The player requires an optional feature to be installed in order to work with this file. 
+Optional Feature Name: {0}</Value>
+		</Data>
+		<Data name="PlaylistPreferencesEditingWindow_Heading" type="String">
+			<Value>You are editing the preferences of {0} playlist.</Value>
+		</Data>
+		<Data name="ChangeTrackIndexDialog_Heading" type="String">
+			<Value>Change track {0} with: </Value>
+		</Data>
+		<Data name="ChangeTrackIndexDialog_NoItemSelected" type="String">
+			<Value>You must select a valid track to be changed with!</Value>
+		</Data>
+		<Data name="ChangeTrackIndexDialog_Confirmation" type="String">
+			<Value>Are you sure that you want to change the track {0} with {1}?
+Press 'Yes' to continue , or press 'No' to cancel.</Value>
+		</Data>
+		<Data name="SelectDeviceWindow_NoDevSelected" type="String">
+			<Value>You must select a device before exiting the dialog.</Value>
+		</Data>
+		<Data name="ErrCannotLoadTrack" type="String">
+			<Value>The track {0} could not be loaded.
+Please check that the track is a valid audio file ,
+and that the path is a valid path that does not
+fall through symbolic or hard links.</Value>
+		</Data>
+		<Data name="ErrPlaylistNotFound" type="String">
+			<Value>Cannot find the requested playlist.</Value>
+		</Data>
+		<Data name="ErrPlaylistNotLoaded" type="String">
+			<Value>A playlist has not been loaded yet.
+Please load a playlist from the saved playlists list.</Value>
+		</Data>
+		<Data name="ErrInvalidChangeModeToPlaylist" type="String">
+			<Value>Invalid attempt to change to a playlist when the mode has not been changed yet.</Value>
+		</Data>
+		<Data name="Error_ArchivedPlaylistCannotBeArchived" type="String">
+			<Value>An already archived playlist cannot be re-archived!
+Press 'OK' to return.</Value>
+		</Data>
+		<Data name="Error_AddingTracksInArchivedDisallowed" type="String">
+			<Value>You cannot add tracks in a archived playlist!
+Press 'OK' to return.</Value>
+		</Data>
+		<Data name="Error_DelPlaylist_NotSelected" type="String">
+			<Value>You must select a playlist so as to be deleted.
+Press 'OK' to return.</Value>
+		</Data>
+		<Data name="Error_ReadOnlyPlaylist" type="String">
+			<Value>This playlist is read-only and cannot be modified.</Value>
+		</Data>
+		<Data name="Error_PrefEditingOnlyOnPhysical" type="String">
+			<Value>Editing playlist preferences is only allowed on physical playlists.
+Press 'OK' to return.</Value>
+		</Data>
+		<Data name="Error_TrackNotDeleted" type="String">
+			<Value>Track '{0}' could not be deleted. Please try again later.</Value>
+		</Data>
+		<Data name="Error_OperationOnlyOnPhysicalPlaylists" type="String">
+			<Value>This operation is only allowed on physical playlists.</Value>
+		</Data>
+		<Data name="Error_TrackDoesNotContainTagInfo" type="String">
+			<Value>The track '{0}' does not have any tag information.</Value>
+		</Data>
+		<Data name="Error_NoAudioDeviceFound" type="String">
+			<Value>Cannot initialize the player because a valid output device was not found.
+Please re-open the app and select a suitable device.
+Press 'OK' to exit.</Value>
+		</Data>
+		<Data name="Error_NoValidAudioDeviceFound" type="String">
+			<Value>Error - A suitable output audio device has not been selected.
+A valid audio device is a device that can output audio and is active.
+Please re-open the app and select a suitable device.
+Press 'OK' to exit.</Value>
+		</Data>
+		<Data name="Error_InvalidThreadSelected" type="String">
+			<Value>INTERNAL ERROR - The initialization did not occur from the UI thread.
+This is a non-recoverable programming mistake. 
+Please fix in order to launch.
+Press 'OK' to exit.</Value>
+		</Data>
+		<Data name="Error_InvalidAudioFilesSelection" type="String">
+			<Value>Invalid selection. The selection must only contain true audio files.</Value>
+		</Data>
+		<Data name="Error_NoPlaylistProvided_PlayLastTrack" type="String">
+			<Value>You must provide a playlist so as to play the last track from it.</Value>
+		</Data>
+		<Data name="Error_NativePlayerException" type="String">
+			<Value>Exception occured on the native backend: 
+{0}</Value>
+		</Data>
+		<Data name="Error_IOException_Backend_ArchivedPlaylist" type="String">
+			<Value>The file {0} could not be loaded due to an I/O error:
+{1}</Value>
+		</Data>
+		<Data name="Error_AudioDevMustBeSelectedFromMainApp" type="String">
+			<Value>A device must be selected from the Music Player app by opening it normally. 
+Selecting an audio device is not supported in quick player instances.</Value>
+		</Data>
+		<Data name="Error_NoSuitableAudioDevFound" type="String">
+			<Value>Error - Could not find a suitable audio device to load.
+Connect one which will make it active.
+Press 'OK' to close.</Value>
+		</Data>
+		<Data name="Error_CurrentTrackNotLoaded_Null" type="String">
+			<Value>ERROR - Could not initialize the player because unexpectedly found that the current track is 'nothing'.</Value>
+		</Data>
+		<Data name="Error_AttributionStreamNotLoaded" type="String">
+			<Value>Cannot load the attrbution stream. 
+Please try again later.</Value>
+		</Data>
+		<Data name="Error_NoValidDeviceSelected_SettingsEd" type="String">
+			<Value>You must select a valid device in order to be changed!</Value>
+		</Data>
+		<Data name="Error_GatherPlaylists_IO" type="String">
+			<Value>Cannot gather playlists list because of an unexpected IO error.</Value>
+		</Data>
+		<Data name="Error_GenericException_Backend_ArchivedPlaylist" type="String">
+			<Value>An error has been occured. The archived playlist is possibly corrupted.
+Error Details: {0}</Value>
+		</Data>
+		<Data name="Error_DriveGather_AccessDenied" type="String">
+			<Value>Cannot gather drive list because of an access or authorization error. Please try again later.</Value>
+		</Data>
+		<Data name="Error_ExportedPlaylistDeletion_Failed_WithEx" type="String">
+			<Value>Cannot delete the remains of the exported playlist.
+Error details: {0}</Value>
+		</Data>
+		<Data name="Error_NoPLSelectedForLastTrack" type="String">
+			<Value>You must select a playlist so as to play it's last track!</Value>
+		</Data>
+		<Data name="Error_CannotLoadExtEngine" type="String">
+			<Value>The Extension Engine threw an exception and cannot be loaded.
+Please retry to open the app. If the error persists, raise an issue on GitHub.
+Error Details: {0}</Value>
+		</Data>
+		<Data name="Error_AnotherDownloadOnProgress" type="String">
+			<Value>Another track download is currently on progress. 
+Finish that download first, then submit a new one.</Value>
+		</Data>
+		<Data name="Error_CannotChangeAudioDevice" type="String">
+			<Value>Cannot find the audio device with ID {0}. The device might have been possibly disconnected.</Value>
+		</Data>
+		<Data name="Error_RCUEngineCannotStartHardError" type="String">
+			<Value>Fatal error occured. 
+The RCU Engine state became corrupted. 
+The engine cannot continue due to the following failure.
+Failure data: {0}</Value>
+		</Data>
+		<!-- Statistics Viewer resources -->
+		<Data name="Error_FieldDisallowedToBeCleared" type="String">
+			<Value>Cannot clear this field. Clearing the field named as {0} is disallowed.</Value>
+		</Data>
+		<!-- Discord Rich Presense string descriptions -->
+		<Data name="DRP_STATE_LISTENING" type="String">
+			<Value>Listening</Value>
+		</Data>
+		<Data name="DRP_STATE_PICKING_PLAYLIST" type="String">
+			<Value>Selecting Playlist</Value>
+		</Data>
+		<Data name="DRP_STATE_STOPPED" type="String">
+			<Value>Stopped</Value>
+		</Data>
+		<Data name="DRP_DETAILS_NOWPLAYING" type="String">
+			<Value>On Playlist {0} Track ordinal {1} is loaded.</Value>
+		</Data>
+		<Data name="DRP_DETAILS_ONPLAYLIST" type="String">
+			<Value>Opened Playlist {0}.</Value>
+		</Data>
+		<Data name="DRP_DETAILS_PLAYBACK_STOPPED" type="String">
+			<Value>On Playlist {0} Playback Stopped.</Value>
+		</Data>
+		<Data name="DRP_DETAILS_ON_PLAYLISTS_SELECTION" type="String">
+			<Value>On Playlist Selection Screen</Value>
+		</Data>
+		<!-- ListView ContextMenuStrip Button Text Definitions -->
+		<Data name="LVW_LOADEDPL_TSI_EDT_1" type="String">
+			<Value>Delete this track...</Value>
+		</Data>
+		<Data name="LVW_LOADEDPL_TSI_EDT_2" type="String">
+			<Value>Play this track...</Value>
+		</Data>
+		<Data name="LVW_LOADEDPL_TSI_EDT_3" type="String">
+			<Value>Show tag information...</Value>
+		</Data>
+		<Data name="LVW_LOADEDPL_TSI_EDT_4" type="String">
+			<Value>Change Track position...</Value>
+		</Data>
+		<Data name="LVWCMS_PLSELECT_PLS_1" type="String">
+			<Value>Delete this playlist...</Value>
+		</Data>
+		<Data name="LVWCMS_PLSELECT_PLS_2" type="String">
+			<Value>Play last track...</Value>
+		</Data>
+		<!-- Generic Button Text Definitions -->
+		<Data name="GButton1_LoadedPlaylist_String" type="String">
+			<Value>Playlist Preferences...</Value>
+		</Data>
+		<Data name="GButton2_LoadedPlaylist_String" type="String">
+			<Value>Reload...</Value>
+		</Data>
+		<Data name="GButton3_LoadedPlaylist_String" type="String">
+			<Value>Load other playlist...</Value>
+		</Data>
+		<Data name="GButton4_LoadedPlaylist_String" type="String">
+			<Value>Add track...</Value>
+		</Data>
+		<Data name="GButton5_LoadedPlaylist_String" type="String">
+			<Value>Archive this playlist...</Value>
+		</Data>
+		<Data name="GButton6_LoadedPlaylist_String" type="String">
+			<Value>Show statistics...</Value>
+		</Data>
+		<Data name="GButton1_LP_ShowArchivedPlaylistData_String" type="String">
+			<Value>Playlist Information...</Value>
+		</Data>
+		<Data name="GButton4_LP_ExportArchivedPlaylist_String" type="String">
+			<Value>Export to a physical one...</Value>
+		</Data>
+		<Data name="GButton1_Files_String" type="String">
+			<Value>Go to top directory...</Value>
+		</Data>
+		<Data name="GButton2_Files_String" type="String">
+			<Value>Load registered playlist...</Value>
+		</Data>
+		<Data name="GButton3_Files_String" type="String">
+			<Value>Reload...</Value>
+		</Data>
+		<Data name="GButton4_Files_String" type="String">
+			<Value>Go to Downloads Directory...</Value>
+		</Data>
+		<Data name="GButton1_PlaylistSelect_String" type="String">
+			<Value>Go back to file exploration view...</Value>
+		</Data>
+		<Data name="GButton2_PlaylistSelect_String" type="String">
+			<Value>Reload playlists...</Value>
+		</Data>
+		<Data name="GButton3_PlaylistSelect_String" type="String">
+			<Value>Load archived playlist...</Value>
+		</Data>
+		<Data name="GButton4_PlaylistSelect_String" type="String">
+			<Value>Download an audio file...</Value>
+		</Data>
+		<Data name="GButton5_PlaylistSelect_String" type="String">
+			<Value>Show statistics...</Value>
+		</Data>
+		<Data name="WaitMsg_DownloadPlaylistLoad" type="String">
+			<Value>Loading Downloads Playlist...</Value>
+		</Data>
+		<Data name="WaitMsg_SavingPlaylistWait" type="String">
+			<Value>Closing Playlist...</Value>
+		</Data>
+		<Data name="WaitMsg_LoadingArchedPlaylist" type="String">
+			<Value>Loading Archived Playlist: {0}</Value>
+		</Data>
+		<!-- CreatePlaylistDialog -->
+		<Data name="CreatePlaylistDialog_InvalidNameChars" type="String">
+			<Value>The playlist name cannot be empty.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_NameOccupied" type="String">
+			<Value>A playlist name does already exist under the name {0}. Please supply a different name.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_SavingPLText" type="String">
+			<Value>Saving playlist , please be patient...</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_PlaylistSaverThreadName" type="String">
+			<Value>[MP] Playlist Saver Thread</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_DirAccessError" type="String">
+			<Value>Cannot access the given directory.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_DirIOError" type="String">
+			<Value>An I/O Error occured while enumerating the requested directory.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_NoFilesFoundInDir" type="String">
+			<Value>No valid audio files were found in the selected directory.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_PlaylistSaveError" type="String">
+			<Value>Failed to save playlist due to an internal error...
+Use the 'OK' button to exit...</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_Status_LoadingM3U" type="String">
+			<Value>Reading M3U Playlist...</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_Status_LoadingM3UWithName" type="String">
+			<Value>Reading M3U Playlist: {0}</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_Error_NoFilesFound" type="String">
+			<Value>No usuable files were found.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_Error_M3UNoFilesFound_ThrownMessage" type="String">
+			<Value>No loadable audio files were found from the current playlist. The playlist is possibly invalid.</Value>
+		</Data>
+		<Data name="CreatePlaylistDialog_Status_ErrorFound" type="String">
+			<Value>Error occured.</Value>
+		</Data>
+		<!-- DownloadAFileForm -->
+		<Data name="DownloadAFileForm_ModePrompt" type="String">
+			<Value>Download an audio file from the Internet.
+The dialog will guide you to the proper steps to download one such.
+Select download mode from the below options:</Value>
+		</Data>
+		<Data name="DownloadAFileForm_UrlBoxPrompt" type="String">
+			<Value>URL of the file to download: (You may also use drag-n-drop to this window to apply the URL)</Value>
+		</Data>
+		<Data name="DownloadAFileForm_StatusText_DownloadNotStarted" type="String">
+			<Value>Downloading has not started yet.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_ModePrompt_O1" type="String">
+			<Value>Download from a URL...</Value>
+		</Data>
+		<Data name="DownloadAFileForm_ModePrompt_O2" type="String">
+			<Value>Download from a YouTube Video Code (requires yt-dlp)...</Value>
+		</Data>
+		<Data name="DownloadAFileForm_ModePrompt_O3" type="String">
+			<Value>Download from a YouTube-compliant link (requires yt-dlp)...</Value>
+		</Data>
+		<Data name="DownloadAFileForm_DownloadFailed_NotSupported" type="String">
+			<Value>The request failed with message: {0}</Value>
+		</Data>
+		<Data name="DownloadAFileForm_HTTPReqFailure" type="String">
+			<Value>HTTP request failed with code {0}: {1}</Value>
+		</Data>
+		<Data name="DownloadAFileForm_HTTPServerTimeoutFailure" type="String">
+			<Value>Cannot apply the request because the server was timed out.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_GenericError" type="String">
+			<Value>Error occured while downloading: 
+{0}</Value>
+		</Data>
+		<Data name="DownloadAFileForm_SuccessfullDownloadText" type="String">
+			<Value>Successfull download! Use 'Exit...' button to terminate the request and return back.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_InitConnFailed" type="String">
+			<Value>Cannot connect to the Internet - an error occured:
+Code: {0}
+Details: {1}</Value>
+		</Data>
+		<Data name="DownloadAFileForm_CancelActionQuestion" type="String">
+			<Value>Are you sure that you want to cancel this action?
+Use 'Yes' to cancel , or use 'No' to return back.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_URLInvalid_0" type="String">
+			<Value>The given URL was invalid.\nURL: {0}</Value>
+		</Data>
+		<Data name="DownloadAFileForm_URLInvalid_1" type="String">
+			<Value>The download URL must not be empty.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_ModeNotSelected" type="String">
+			<Value>A download mode has not been selected yet! Select a mode and retry.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_ThreadWorkerName" type="String">
+			<Value>[MP] Downloader Working Thread</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Status_StartingText" type="String">
+			<Value>Initiating request...</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Status_DownloadingText" type="String">
+			<Value>Downloading into: {0} ...</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Status_FailedText" type="String">
+			<Value>Download failed.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_UserAgentString" type="String">
+			<Value>Mp-DotNet8-sg-downloader</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Status_YtDlpInvokedText" type="String">
+			<Value>Invoking Yt-Dlp. For progress , see the opened console.</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Error_YtDlpExitCodeInvalid" type="String">
+			<Value>Returned exit code does not indicate success: {0}</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Status_FinalizingYtDlpState" type="String">
+			<Value>Finalizing...</Value>
+		</Data>
+		<Data name="DownloadAFileForm_Error_YtDlpInitFailed" type="String">
+			<Value>Could not create the environment for executing the YtDlp command. Fatal error occured.
+Error: {0}</Value>
+		</Data>
+		<!-- DependenciesDownloadForm -->
+		<Data name="DependenciesDownloadForm_UnderlyingErrorText" type="String">
+			<Value>Cannot show the dependencies window due to an error:
+{0}</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_AbortQuestionText" type="String">
+			<Value>Are you sure that you want to abort?
+Use 'Yes' to abort , or use 'No' to return back.</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_StatusFinishedText" type="String">
+			<Value>Download finished!
+Use the 'Exit' button to exit.</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_UserAgentString" type="String">
+			<Value>Mp-DotNet8-DownloadDeps</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_WritingVerDataText" type="String">
+			<Value>Writing installation verification data. This might take some time.</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_WritingVerDataFailedText" type="String">
+			<Value>Verification file data were failed to be written.
+Exception: {0}</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_WritingVerDataFailedText_st" type="String">
+			<Value>Writing the verification file failed!</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_ItemDownloadFailed" type="String">
+			<Value>Download failed for the current Dependency. 
+Error data: {0}</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_ItemDownloadSucceeded" type="String">
+			<Value>Download succeeded for Dependency {0}</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_DownloadingDepsText" type="String">
+			<Value>Downloading dependencies. This might take some time.</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_RequestSubmittedText" type="String">
+			<Value>Request for Dependency {0} is submitted...</Value>
+		</Data>
+		<Data name="DependenciesDownloadForm_DownloadInfoJsonNotFoundText" type="String">
+			<Value>Error - the file {0} does not exist. Data could not be retrieved.</Value>
+		</Data>
+		<!-- SettingsEditorNew -->
+		<Data name="SettingsEditorNew_FileDirOperationFailed" type="String">
+			<Value>The operation failed. This might be caused from the fact that the path string can be invalid.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_PathCannotBeEmpty" type="String">
+			<Value>A file or directory path cannot be empty.</Value>
+		</Data>
+		<Data name="SettingTree_DownloadedPLTracksDirSelection_Desc" type="String">
+			<Value>Defines the directory under all the downloaded tracks are saved to.
+You can change this directory to your own liking.
+Note that if you change the directory, all the currently 
+downloaded tracks will be moved there.</Value>
+		</Data>
+		<Data name="SettingTree_ExportedPLTracksDirSelection_Desc" type="String">
+			<Value>Defines the directory under all the playlist
+tracks are exported to.
+This is used so that the exported physical 
+playlists can find the exported tracks.</Value>
+		</Data>
+		<Data name="SettingTree_ExpBackColorSelection_Desc" type="String">
+			<Value>Exploration Panel background color.
+Modifies the background color of the exploration view to any color 
+of your choice.
+By default it is set to the system's black color (or any closest to it).
+NOTE: The color except from the exploration panel is also used 
+in a couple other places. 
+See the full documentation for more information.
+To modify the color , click on the box inside the border.</Value>
+		</Data>
+		<Data name="SettingTree_ExpForeColorSelection_Desc" type="String">
+			<Value>Exploration Panel foreground color.
+Modifies the foreground color of the exploration view to any color 
+of your choice.
+By default it is set to the system's white color (or any closest to it).
+NOTE: The color except from the exploration panel is also used 
+in a couple other places. 
+See the full documentation for more information.
+To modify the color , click on the box inside the border.</Value>
+		</Data>
+		<Data name="SettingTree_ControllerTrigPrecision_Desc" type="String">
+			<Value>Controller trigger accuracy.
+With this setting, you can properly modify the 
+triggers responsiveness behavior.
+This allows you to fine-tune the currently attached controller to have the best
+responsiveness but also not fire too early when you use them.
+Note that the Music Player does not currently define a mapping for these
+(are detached at app code level), but if such scenario happens, this is here.
+The value set is a ignore range that ignores all 
+trigger events below the defined level.</Value>
+		</Data>
+		<Data name="SettingTree_ControllerThumbPrecision_Desc" type="String">
+			<Value>Controller thumbstick accuracy.
+With this setting, you can properly modify the thumbstick 
+responsiveness behavior.
+This allows you to fine-tune the currently attached controller to have the best
+responsiveness but also not fire too early when you use them.
+The value set is a ignore range that ignores all 
+thumbstick events below the defined level.</Value>
+		</Data>
+		<Data name="SettingTree_ControllerTimeoutDelay_Desc" type="String">
+			<Value>Controller Thread Timeout Delay.
+This value should only be modified on advanced scenarios, 
+because this modifies when the controller thread will capture a new 
+controller state snapshot. Move it to larger values in case of driver
+discrepancies and/or increased input responsiveness latency.</Value>
+		</Data>
+		<Data name="SettingTree_AudioDeviceLatency_Desc" type="String">
+			<Value>Audio device buffering latency.
+Modifies the time between two new I/O requests while doing playback.
+Lower values achieve better precision on the reported time,
+while larger ones allow less I/O requests to be performed.
+However, when you find yourself in a case where the track
+'skips' samples (parts) of it, you should increase this value.
+This is especially true for slow computers and/or drives.</Value>
+		</Data>
+		<Data name="SettingTree_AudioDeviceSelection_Desc" type="String">
+			<Value>Audio device selection.
+Have you changed your mind on which audio device all the
+tracks are playing? You can change the playback target 
+from this box here.
+After pressing the 'Confirm...' button the settings editor will
+close in order to modify the setting, because it must
+directly modify a critical state inside the Music Player.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_TitleText" type="String">
+			<Value>Music Player Settings - Version {0}</Value>
+		</Data>
+		<Data name="SettingsEditorNew_RootText" type="String">
+			<Value>Settings Root Object</Value>
+		</Data>
+		<Data name="SettingsEditorNew_BrokenDescTextWarn" type="String">
+			<Value>Cannot load a description string.
+You should add a description string 
+for the item {0}</Value>
+		</Data>
+		<Data name="SettingsEditorNew_BrokenDescTextWarn_ResNotFound" type="String">
+			<Value>The resource loader cannot find the resource 
+named as {0}.
+The resource will not be loaded.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_CannotLoadSettingsObject" type="String">
+			<Value>Cannot apply the settings object due to an underlying exception:
+{0}</Value>
+		</Data>
+		<Data name="SettingsEditorNew_WelcomeAndUsageMessage" type="String">
+			<Value>Welcome to the new and revamped Music Player Settings!
+From the tree in the left , you can open it's nodes to find the currently 
+defined settings that are defined for the app.
+Then, you modify the setting as you expect.
+Note that you must apply the new setting value
+by pressing the 'Confirm...' button. If you do not do that,
+the setting will keep it's last value, whatever that was.
+See the below image to take an idea of how it looks like...</Value>
+		</Data>
+		<Data name="SettingsEditorNew_SettingNotSelected" type="String">
+			<Value>A setting has not been selected! Select a setting now.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_ValidValueFromValuesNotSelected" type="String">
+			<Value>An item was not selected yet! Select an item first.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_ApplyNewDeviceNow" type="String">
+			<Value>Apply the new device to the Music Player now?
+Press 'Yes' to confirm, or use 'No' to skip doing this.
+Note that the settings editor will close if you confirm this action.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_CannotFindYtDlpInstallationFile" type="String">
+			<Value>The app cannot find the YtDlp installation verification data.
+The installation is potentially broken.</Value>
+		</Data>
+		<Data name="SettingsEditorNew_VerifyYtDlpInstallationDataQuestion" type="String">
+			<Value>Are you sure that you want to verify the YtDlp installation?
+Use 'Yes' to proceed , or use 'No' to cancel.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_TrackName_Desc" type="String">
+			<Value>Modifies the Track Name column width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_TrackCreationTime_Desc" type="String">
+			<Value>Modifies the Track Creation Time column
+width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_TrackSize_Desc" type="String">
+			<Value>Modifies the Track Size column width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_TrackContribArtists_Desc" type="String">
+			<Value>Modifies the Track Contributing 
+Artists column width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_TrackNumber_Desc" type="String">
+			<Value>Modifies the Track Number column width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_EncodedBy_Desc" type="String">
+			<Value>Modifies the Encoded By column width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_Album_Desc" type="String">
+			<Value>Modifies the Album column width when in Playlist mode.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_PlaylistName_Desc" type="String">
+			<Value>Modifies the Playlist Name column width 
+when selecting/picking a playlist.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_CreationTime_Desc" type="String">
+			<Value>Modifies the File Creation Time 
+column width when selecting/picking a playlist.
+			</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_LastPlaylistTrack_Desc" type="String">
+			<Value>Modifies the Last Playlist Track 
+column width when selecting/picking a playlist.</Value>
+		</Data>
+		<Data name="SettingTree_ColWidth_FileName_Desc" type="String">
+			<Value>Modifies the File Name column width when 
+searching for files to add to a new playlist.</Value>
+		</Data>
+		<!-- CreditsPane -->
+		<Data name="CreditsPane_HeaderText" type="String">
+			<Value>The Music Player On .NET 8 is an application that requires support libraries in order to work.
+This window lists those external libraries and it's respective authors.
+Along with these, there is also here my license for my own code.</Value>
+		</Data>
+		<!-- PlaylistArchiveOptionsForm -->
+		<Data name="PlaylistArchiveOptionsForm_UsageDesc" type="String">
+			<Value>Playlist Archive Options. Through this dialog you can define more archived playlist
+attributes to be saved so as to present these to the consumers of this playlist.
+You can use one of the default attributes that are defined , or you may also define your own ones.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_IsCustomAttrDesc" type="String">
+			<Value>This attribute is a custom one and does not have a description.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_ProvideAttributeNameText" type="String">
+			<Value>Provide the name of the custom attribute on the below text box.
+Confirm the new attribute name by pressing the 'Add...' button below.
+If you want to cancel the operation, delete the text and press the 'Add...' button.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_DefinedAsReadOnlyAttribute" type="String">
+			<Value>The attribute attempted to be added is existing and is readonly.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_AttributeNotSelected" type="String">
+			<Value>An attribute was not selected so as to update it's value.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_SpecifyReadOnlyAttrText" type="String">
+			<Value>Register this attribute as an readonly-attribute...</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_ATTR_Creator" type="String">
+			<Value>Defines the creator of this playlist.
+By default it is set to the name of the current Windows User.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_ATTR_CreationTime" type="String">
+			<Value>Specifies a timestamp of the creation date and time of this archived playlist.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_ATTR_Comment" type="String">
+			<Value>Specifies an optional comment for the playlist.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_ATTR_Name" type="String">
+			<Value>Specifies a custom internal name for the playlist.</Value>
+		</Data>
+		<Data name="PlaylistArchiveOptionsForm_ATTR_CompressionMethod" type="String">
+			<Value>Specifies the compression method to use for the new archive. It's current values are:
+-> Store, which does just plainly store the playlist files,
+-> GZip, stores the files using the GZip algorithm,
+-> BZip2, stores the files using the BZip2 algorithm.</Value>
+		</Data>
+		<!-- ArchivedPlaylistInformationForm -->
+		<Data name="ArchivedPlaylistInformationForm_NoAttributesFound" type="String">
+			<Value>This playlist was written with an older version of the Music Player
+that does not support custom attributes and information.
+Press 'OK' to return back.</Value>
+		</Data>
+		<Data name="ArchivedPlaylistInformationForm_PrimaryData" type="String">
+			<Value>Playlist Name: {0}
+Playlist Creator: {1}
+Playlist Creation Date: {2}</Value>
+		</Data>
+		<Data name="ArchivedPlaylistInformationForm_AdditionalInfoLabelText" type="String">
+			<Value>Additional discovered attributes &amp;&amp; preferences:</Value>
+		</Data>
+	</ResData>
+</MDCDI1315-RES>

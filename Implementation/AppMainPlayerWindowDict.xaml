@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    This was used to be in Window.Resources , but prefer to load this dictionary dynamically    
+-->
+    
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ControlTemplate x:Key="PlayerButtonsTemplate" TargetType="Button">
+        <Grid>
+            <!-- Change stroke thickness from 0 to one to see and edit the controls. -->
+            <Rectangle x:Name="backgroundElement" Fill="{TemplateBinding Background}" StrokeThickness="0" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}" Stroke="AliceBlue" />
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Fill" TargetName="backgroundElement" Value="LimeGreen"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <ControlTemplate x:Key="GenericButtonTemplate" TargetType="Button">
+        <Grid>
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup Name="CommonStates">
+                    <VisualState Name="Normal">
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="backgroundElement" 
+                            Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" 
+                            To="{TemplateBinding Background}" 
+                            Duration="0:0:0.3"/>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState Name="MouseOver">
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="backgroundElement" 
+                            Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" 
+                            To="DarkCyan" 
+                            RepeatBehavior="300"
+                            Duration="0:0:1.55" />
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Rectangle x:Name="backgroundElement" Fill="{TemplateBinding Background}" StrokeThickness="0.60" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}" Stroke="AliceBlue" />
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+    </ControlTemplate>
+</ResourceDictionary>

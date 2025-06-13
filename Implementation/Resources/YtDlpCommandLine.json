@@ -1,0 +1,28 @@
+﻿{
+  "version": 1,
+  "schema": "MDCDI1315.MP.CMDLINE",
+  "CommandLine": {
+    "ExecutablePath": "$PYTHONEXECDIR\\python.exe",
+    "Arguments": [
+      "\"$BASEDIR\\yt-dlp\"",
+      "-f m4a/bestaudio/best",
+      "--embed-thumbnail",
+      "--embed-metadata",
+      "--ffmpeg-location \"$FFMPEGDIR\"",
+      "-o \"$BASEDIR\\$OUTFILENAME.%(ext)s\"",
+      "--",
+      "\"$URL\""
+    ]
+  },
+  "RequiresVariables": [
+    "URL",
+    "BASEDIR",
+    "OUTFILENAME"
+  ],
+  "SetVariables": {
+    "PYTHONEXECDIR": "$BASEDIR\\python",
+    "FFMPEGDIR": "$BASEDIR\\ffmpeg",
+    "PARSLEYDIR": "$BASEDIR\\atomicparsley",
+    "PATH": "$PATH;$PARSLEYDIR"
+  }
+}

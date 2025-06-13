@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="CreateRelease" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<!-- Directory.Build.props is not imported because this is not in a sub-dir of the project , so explicitly import it instead. -->
+	<Import Project="Directory.Build.props"/>
+	
+	<UsingTask AssemblyFile="$(MPBuildTasksAssemblyPath)" TaskName="MusicPlayer.BuildTasks.CopyFilesMatchingWin32Filter" />
+	<UsingTask AssemblyFile="$(MPBuildTasksAssemblyPath)" TaskName="MusicPlayer.BuildTasks.DeleteFilesMatchingWin32Filter" />
+
+	<PropertyGroup>
+		<_MPProjectDir>$(MSBuildThisFileDirectory)</_MPProjectDir>
+		<MPReleaseBuildOutputPath Condition="'$(MPReleaseBuildOutputPath)' == ''">$(_MPProjectDir)MP_DOTNET_RELEASE</MPReleaseBuildOutputPath>
+		<MPReleasePrefferedArchitecture Condition="'$(MPReleasePrefferedArchitecture)' == ''">x64</MPReleasePrefferedArchitecture>
+		<MPNativeHostExecutableName>MP</MPNativeHostExecutableName>
+		<MPOutputResourcesFile>$(MPReleaseBuildOutputPath)\Data\Resources.rsrc</MPOutputResourcesFile>
+		<MPBuildSetting_CreateFrameworkDependentInstallation
+			Condition="'$(MPBuildSetting_CreateFrameworkDependentInstallation)' == ''">No</MPBuildSetting_CreateFrameworkDependentInstallation>
+	</PropertyGroup>
+	
+	<Target Name="CreateRelease">
+		<Error Condition="'$(MSBuildRuntimeType)' == 'Core' AND '$(MPBuildSetting_CreateFrameworkDependentInstallation)' == 'No'" Code="BuildMP0000" Text="Cannot build the project by using a .NET Core version of the MSBuild." />
+		<Message Importance="high" Text="Preparing Release Build for Music Player On .NET 8..." />
+		<Delete Files="$(MPReleaseBuildOutputPath)\.completed" Condition="'$([System.IO.File]::Exists(`$(MPReleaseBuildOutputPath)\.completed`))' != 'true'" />
+		<Message Importance="high" Text="Creating Release Build for Music Player On .NET 8..." />
+		<MakeDir Directories="$(MPReleaseBuildOutputPath);$(MPReleaseBuildOutputPath)\Data" />
+		<MSBuild Projects="$(_MPProjectDir)\Implementation\MusicPlayer.csproj" 
+				 Targets="Restore" 
+				 UnloadProjectsOnCompletion="true" 
+				 RunEachTargetSeparately="true"
+				 Properties="Configuration=Release;OutputPath=$(MPReleaseBuildOutputPath);IsFullMPReleaseBuild=true;MP_OutputResFilePath=$(MPOutputResourcesFile);DebugSymbols=false;MP_OnlyDryRestoreRun=true" 
+				 />
+		<MSBuild Projects="$(_MPProjectDir)\Implementation\MusicPlayer.csproj" 
+				 Targets="Build"
+				 UnloadProjectsOnCompletion="true" 
+				 RunEachTargetSeparately="true"
+				 Properties="Configuration=Release;OutputPath=$(MPReleaseBuildOutputPath);IsFullMPReleaseBuild=true;MP_OutputResFilePath=$(MPOutputResourcesFile);DebugSymbols=false" 
+				 />
+		<MSBuild Projects="$(_MPProjectDir)\Loader\MusicPlayer.Loader.vcxproj"
+				 Targets="Build"
+				 UnloadProjectsOnCompletion="true"
+				 Properties="Configuration=InternalReleaseDraft;OutDir=$(MPReleaseBuildOutputPath)\;Platform=$(MPReleasePrefferedArchitecture);TargetName=$(MPNativeHostExecutableName);ShortProjectName=MPL_RB"
+				 Condition="'$(MPBuildSetting_CreateFrameworkDependentInstallation)' == 'No'"
+				 />
+		<MSBuild Projects="$(_MPProjectDir)\NativeAssets\PackageBuilderProj.proj"
+				 Targets="Build"
+				 UnloadProjectsOnCompletion="true"
+				 />
+		<Message Importance="high" Text="Initializing Release Build..." />
+		<Copy SourceFiles="$(_MPProjectDir)/NativeAssets/bin/MP.NativeAssets.pkgrsrc"
+			  DestinationFolder="$(MPReleaseBuildOutputPath)/Data/Plugins"
+			  />
+		<CopyFilesMatchingWin32Filter 
+			InputDirectory="$(_MPProjectDir)Implementation/Resources"
+			Filter="*.json"
+			TargetDirectory="$(MPReleaseBuildOutputPath)/Data"
+			/>
+		<Delete Files="$(MPReleaseBuildOutputPath)\MusicPlayer.exe"
+				Condition="'$(MPBuildSetting_CreateFrameworkDependentInstallation)' == 'No'"
+				ContinueOnError="true" />
+		<DeleteFilesMatchingWin32Filter InputDirectory="$(MPReleaseBuildOutputPath)"
+				Filter="*.xml" />
+		<DeleteFilesMatchingWin32Filter InputDirectory="$(MPReleaseBuildOutputPath)"
+				Filter="*.deps.json"
+				Condition="'$(MPBuildSetting_CreateFrameworkDependentInstallation)' == 'No'" />
+		<Move SourceFiles="$(MPReleaseBuildOutputPath)\MusicPlayer.dll;$(MPReleaseBuildOutputPath)\MusicPlayer.runtimeconfig.json"
+			  DestinationFiles="$(MPReleaseBuildOutputPath)\MusicPlayer-impl.dll;$(MPReleaseBuildOutputPath)\MusicPlayer-impl.runtimeconfig.json"
+			  Condition="'$(MPBuildSetting_CreateFrameworkDependentInstallation)' == 'No'"
+			  />
+		<Touch Files="$(MPReleaseBuildOutputPath)\.completed" ContinueOnError="true" AlwaysCreate="true" />
+		<Message Importance="high" Text="Cleaning environment..." />
+		<CallTarget Targets="CleanGeneratedData" />		
+		<Message Importance="high" Text="Release Build for Windows succeeded." />
+	</Target>
+
+	<Target Name="Clean">
+		<Message Importance="high" Text="Cleaning output directory. If you do not see any errors , the operation will have been succeeded." />
+		<Delete Files="$(MPReleaseBuildOutputPath)/session" />
+		<RemoveDir Directories="$(MPReleaseBuildOutputPath)" />
+	</Target>
+
+	<Target Name="PackageRelease">
+		<Error Condition="'$([System.IO.File]::Exists(`$(MPReleaseBuildOutputPath)\.completed`))' != 'true'" 
+			   Code="BuildMP0001" Text="The output directory has not been properly generated. Please generate the directory first by using the target CreateRelease." />
+		<Message Importance="high" Text="Generating packaged release..." />
+		<Delete Files="$(MPReleaseBuildOutputPath)\.completed" />
+		<ZipDirectory SourceDirectory="$(MPReleaseBuildOutputPath)" DestinationFile="$(MPReleaseBuildOutputPath)\..\PackagedRelease.zip" />
+		<Move SourceFiles="$(MPReleaseBuildOutputPath)\..\PackagedRelease.zip" DestinationFiles="$(MPReleaseBuildOutputPath)\PackagedRelease.zip" />
+		<Message Importance="high" Text="Packaged release was generated to '$(MPReleaseBuildOutputPath)\PackagedRelease.zip'. %0AOperation successfull." />
+	</Target>
+
+	<Target Name="RunReleaseWithDebugger">
+		<Exec Command="vsjitdebugger.exe $(MPReleaseBuildOutputPath)\MP.exe" IgnoreExitCode="true" />
+	</Target>
+
+	<Target Name="Run">
+		<Exec Command="$(MPReleaseBuildOutputPath)\MP.exe" IgnoreExitCode="true" />
+	</Target>
+	
+	<Target Name="CleanGeneratedData">
+		<RemoveDir Directories="$(_MPProjectDir)Implementation\bin;$(_MPProjectDir)Implementation\obj" />
+		<RemoveDir Directories="$(_MPProjectDir)Backend\bin;$(_MPProjectDir)Backend\obj" />
+		<RemoveDir Directories="$(_MPProjectDir)Abstractions\bin;$(_MPProjectDir)Abstractions\obj" />
+		<RemoveDir Directories="$(_MPProjectDir)BuildTasks\bin;$(_MPProjectDir)BuildTasks\obj" />
+		<RemoveDir Directories="$(_MPProjectDir)NativeAssets\bin" />
+		<DeleteFilesMatchingWin32Filter InputDirectory="$(_MPProjectDir)Backend/Resources" Filter="*.Gen.cs" />
+		<Delete Files="$(_MPProjectDir)Loader\MusicPlayer.Loader.aps" ContinueOnError="true" />
+		<RemoveDir Directories="$(_MPProjectDir)Loader\MPL_RB" />
+	</Target>
+	
+</Project>

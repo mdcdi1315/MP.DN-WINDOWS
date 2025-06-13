@@ -1,0 +1,447 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<Nullable>disable</Nullable>
+	<RootNamespace></RootNamespace>
+	<ImplicitUsings>disable</ImplicitUsings>
+	<UseWindowsForms>True</UseWindowsForms>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+	<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+	<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<FrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref.Windows" />
+	<!-- 
+		VS does not see these auto-gen files properly so explicitly forcing 
+		these to be used by the code analysis service, 
+		which in turn it will force-load the files into VS.
+		This is only for using inside VS , that's why the condition.
+	-->
+	<Compile Include="Resources/*.cs" Condition="'$(DesignTimeBuild)' == 'true'" />
+	<EmbeddedResource Update="Resources/SR.resx">
+		<StronglyTypedNamespace>System</StronglyTypedNamespace>
+		<StronglyTypedClassName>SR</StronglyTypedClassName>
+		<StronglyTypedFileName>Resources/SR.Gen.cs</StronglyTypedFileName>
+		<StronglyTypedLanguage>C#</StronglyTypedLanguage>
+		<LogicalName>System.SR.resources</LogicalName>
+		<GenerateResource>true</GenerateResource>
+		<Type>Resx</Type>
+	</EmbeddedResource>
+	<EmbeddedResource Update="Resources/BackendResources.resx">
+		<StronglyTypedNamespace>MP</StronglyTypedNamespace>
+		<StronglyTypedClassName>InternalResources</StronglyTypedClassName>
+		<StronglyTypedFileName>Resources/BackendResources.Gen.cs</StronglyTypedFileName>
+		<StronglyTypedLanguage>C#</StronglyTypedLanguage>
+		<LogicalName>MP.InternalResources.resources</LogicalName>
+		<GenerateResource>true</GenerateResource>
+		<Type>Resx</Type>
+	</EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Abstractions\MusicPlayer.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Compile Include="Microsoft\Diagnostics\Stopwatch.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundationMFTResampler.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundationReaderFromStream.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFActivateAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSampleExtensions.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSourceReaderExtensions.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFTransformAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFTransformExtensions.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFTransformPropertyKeys.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaEventType.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFActivate.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAttributesExtensions.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFByteStream.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFByteStreamAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFCollection.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFMediaBuffer.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFMediaEvent.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFMediaType.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFMediaTypeAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSample.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSourceReader.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSourceReaderAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFTransform.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationAttributeNotFoundException.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationErrorCodes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationException.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationIncorrectStartupVersionException.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationInterfaceIds.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationInterfacesFactory.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationMediaType.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationReader.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationTransform.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFBYTESTREAM_CAPABILITIES.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFBYTESTREAM_SEEK_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_DRAIN_TYPE.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_INPUT_DATA_BUFFER_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_INPUT_STATUS_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_INPUT_STREAM_INFO.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_INPUT_STREAM_INFO_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_MESSAGE_TYPE.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_OUTPUT_DATA_BUFFER.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_OUTPUT_DATA_BUFFER_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_OUTPUT_STATUS_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_OUTPUT_STREAM_INFO.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_OUTPUT_STREAM_INFO_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_PROCESS_OUTPUT_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_PROCESS_OUTPUT_STATUS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFT_SET_TYPE_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MF_ATTRIBUTES_MATCH_TYPE.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MF_ATTRIBUTE_TYPE.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MF_MEDIATYPE_EQUALITY_FLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MFBYTESTREAM_SEEK_ORIGIN.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MF_SOURCE_READER_CONTROL_FLAG.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MF_SOURCE_READER_FLAG.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MF_SOURCE_READER_STREAM_SELECTION.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\AbstractMMNotificationClient.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\DEVICE_STATE.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\EDataFlow.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\ENDPOINT_SYSFX.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\ERole.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\IMMDevice.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\IMMDeviceCollection.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\IMMDeviceEnumerator.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\IMMEndpoint.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\IMMNotificationClient.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\MMDevice.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\MMDeviceEnumerator.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\MMDeviceInterfaceIds.cs" />
+	  <Compile Include="MP\AudioLibrary\MMDevice\MMDevicePropertyKeys.cs" />
+	  <Compile Include="MP\AudioLibrary\SPEAKERASSIGNMENT.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPIMode.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPIRenderer.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AbstractAudioClient.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AUDCLNT_BUFFERFLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AUDCLNT_SHAREMODE.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AUDCLNT_STREAMFLAGS.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AUDCLNT_STREAMOPTIONS.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AudioClientProperties.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AudioClockClient.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AUDIOCLOCK_CHARACTERISTIC.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AudioRenderClient.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\AUDIO_STREAM_CATEGORY.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\ChannelAudioVolume.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\IAudioClient.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\IAudioClient2.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\IAudioClock.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\IAudioClock2.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\IAudioRenderClient.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\IChannelAudioVolume.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\REFERENCE_TIME.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\RenderingAudioClient.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\WASAPIErrorCodes.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\WASAPIExceptions.cs" />
+	  <Compile Include="MP\AudioLibrary\WASAPI\WASAPIInterfaceIds.cs" />
+	  <Compile Include="MP\AudioLibrary\WAVEFORMATEX.cs" />
+	  <Compile Include="MP\AudioLibrary\WAVEFORMATEXTENSIBLE.cs" />
+	  <Compile Include="MP\AudioLibrary\WAVEFORMATTAG.cs" />
+	  <Compile Include="MP\AudioLibrary\WindowsAudioLibrary.cs" />
+	  <Compile Include="MP\ComInterop\BLOB.cs" />
+	  <Compile Include="MP\ComInterop\BSTR.cs" />
+	  <Compile Include="MP\ComInterop\CURRENCY.cs" />
+	  <Compile Include="MP\ComInterop\GETPROPERTYSTOREFLAGS.cs" />
+	  <Compile Include="MP\ComInterop\HRESULT_SEVERITY.cs" />
+	  <Compile Include="MP\ComInterop\IEnumShellItems.cs" />
+	  <Compile Include="MP\ComInterop\INamedPropertyStore.cs" />
+	  <Compile Include="MP\ComInterop\IPersistSerializedPropStorage.cs" />
+	  <Compile Include="MP\ComInterop\IPersistSerializedPropStorage2.cs" />
+	  <Compile Include="MP\ComInterop\IProgressDialog.cs" />
+	  <Compile Include="MP\ComInterop\NamedPropertyStore.cs" />
+	  <Compile Include="MP\ComInterop\PERSIST_SPROPSTORE_FLAGS.cs" />
+	  <Compile Include="MP\ComInterop\ProgressDialogFlags.cs" />
+	  <Compile Include="MP\ComInterop\ProgressDialogTimerAction.cs" />
+	  <Compile Include="MP\ComInterop\PropertyStore.cs" />
+	  <Compile Include="MP\ComInterop\PROPVARIANTVALUE.cs" />
+	  <Compile Include="MP\ComInterop\SIATTRIBFLAGS.cs" />
+	  <Compile Include="MP\ComInterop\SICHINTF.cs" />
+	  <Compile Include="MP\ComInterop\STATFLAG.cs" />
+	  <Compile Include="MP\ComInterop\STGC.cs" />
+	  <Compile Include="MP\ComInterop\STORAGE_ACCESS_MODE.cs" />
+	  <Compile Include="MP\Dialogs\ProgressDialog.cs" />
+	  <Compile Include="MP\Dialogs\StartupLoadingDialogBase.cs" />
+	  <Compile Include="MP\ExceptionSystem\NativeWindowsCOMException.cs" />
+	  <Compile Include="MP\Imaging\BitFieldDecoder.cs" />
+	  <Compile Include="MP\Imaging\RawIconWriter.cs" />
+	  <Compile Include="MP\WindowsInterop\WindowsVersions.cs" />
+	  <Compile Include="NativeInterop.Gdi32.cs" />
+	  <Compile Include="NativeInterop.Kernel32.PerformanceCounting.cs" />
+	  <Compile Include="NativeInterop.OleAut32.cs" />
+	  <Compile Include="NativeInterop.PropSys.cs" />
+	  <Compile Include="AssemblyInfo.cs" />
+	  <Compile Include="Microsoft\IO\CommonFileSystemExtensions.cs" />
+	  <Compile Include="Microsoft\IO\ConsoleStream.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemEnumerator.Windows.cs" />
+	  <Compile Include="Microsoft\IO\FileAccess.cs" />
+	  <Compile Include="Microsoft\IO\FileMode.cs" />
+	  <Compile Include="Microsoft\IO\FileOperations.cs" />
+	  <Compile Include="Microsoft\IO\FileOptions.cs" />
+	  <Compile Include="Microsoft\IO\FileShare.cs" />
+	  <Compile Include="Microsoft\IO\FileStream.cs" />
+	  <Compile Include="Microsoft\IO\MemoryStream.cs" />
+	  <Compile Include="Microsoft\IO\StreamReader.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\Aes.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\AesImplementation.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\AesImplementation.Windows.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\BasicSymmetricCipher.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\BasicSymmetricCipherBCrypt.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\BasicSymmetricCipherLiteBCrypt.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\BCryptHashProvider.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\CipherMode.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\CryptographicException.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\CryptographicOperations.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\CryptographicUnexpectedOperationException.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\CryptoStream.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\CryptoStreamMode.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\DeriveBytes.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\HashAlgorithm.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\HashAlgorithmName.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\HashAlgorithmNames.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\HashProvider.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\Helpers.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\HMACCommon.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\ICryptoTransform.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\ILiteSymmetricCipher.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\IncrementalHash.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\KeySizeHelpers.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\KeySizes.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\MD5.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\Oids.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\PaddingMode.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\RandomNumberGenerator.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\RandomNumberGeneratorImplementation.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\RandomNumberGeneratorImplementation.Windows.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\Rfc2898DeriveBytes.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA1.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA256.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA384.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA3_256.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA3_384.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA3_512.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SHA512.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SymmetricAlgorithm.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\SymmetricPadding.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoDecryptor.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoEncryptor.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoOneShot.cs" />
+	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoTransform.cs" />
+	  <Compile Include="Microsoft\Win32\FileOpenDialog.cs" />
+	  <Compile Include="Microsoft\Win32\FileSaveDialog.cs" />
+	  <Compile Include="Microsoft\Win32\FolderOpenDialog.cs" />
+	  <Compile Include="Microsoft\Win32\MemoryHeapBlock.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeBCryptAlgorithmProviderHandle.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeBCryptHashHandle.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeBCryptKeyHandle.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeCoTaskMemoryHandle.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeLibcMemoryHandle.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeWindowsLibraryHandle.cs" />
+	  <Compile Include="Microsoft\Win32\ShellCommonFileDialog.cs" />
+	  <Compile Include="MP\Archiving\ArchiveEntryAttribute.cs" />
+	  <Compile Include="MP\Archiving\ArchiveByteOrder.cs" />
+	  <Compile Include="MP\Archiving\ArchiveEntry.cs" />
+	  <Compile Include="MP\Archiving\ArchiveEntryCompression.cs" />
+	  <Compile Include="MP\Archiving\ArchiveEntryReaders.cs" />
+	  <Compile Include="MP\Archiving\ArchiveEntryType.cs" />
+	  <Compile Include="MP\Archiving\ArchiveOffsetStream.cs" />
+	  <Compile Include="MP\Archiving\AttributeValueType.cs" />
+	  <Compile Include="MP\Archiving\IArchiveEntryReader.cs" />
+	  <Compile Include="MP\Archiving\MPARCHATTRIB.cs" />
+	  <Compile Include="MP\Archiving\MPARCHDATETIME.cs" />
+	  <Compile Include="MP\Archiving\MPARCHENTRY.cs" />
+	  <Compile Include="MP\Archiving\MPARCHHEADER.cs" />
+	  <Compile Include="MP\Archiving\MPARCHUINT.cs" />
+	  <Compile Include="MP\Archiving\MusicPlayerArchiveReader.cs" />
+	  <Compile Include="MP\Archiving\MusicPlayerArchiveWriter.cs" />
+	  <Compile Include="MP\WindowsInterop\BOOL.cs" />
+	  <Compile Include="MP\ComInterop\CLSCTX.cs" />
+	  <Compile Include="MP\ComInterop\COMDLG_FILTERSPEC.cs" />
+	  <Compile Include="MP\ComInterop\ComMarshalling.cs" />
+	  <Compile Include="MP\ComInterop\CommonHResults.cs" />
+	  <Compile Include="MP\ComInterop\CommonInteropClsIds.cs" />
+	  <Compile Include="MP\ComInterop\FILEOPENDIALOGOPTIONS.cs" />
+	  <Compile Include="MP\WindowsInterop\GUID.cs" />
+	  <Compile Include="MP\ComInterop\HRESULT.cs" />
+	  <Compile Include="MP\ComInterop\HRESULT_FACILITY.cs" />
+	  <Compile Include="MP\ComInterop\IAgileObject.cs" />
+	  <Compile Include="MP\ComInterop\IFileDialog.cs" />
+	  <Compile Include="MP\ComInterop\IFileOpenDialog.cs" />
+	  <Compile Include="MP\ComInterop\IFileSaveDialog.cs" />
+	  <Compile Include="MP\ComInterop\IPersist.cs" />
+	  <Compile Include="MP\ComInterop\IPersistStream.cs" />
+	  <Compile Include="MP\ComInterop\ISequentialStream.cs" />
+	  <Compile Include="MP\ComInterop\IShellItem.cs" />
+	  <Compile Include="MP\ComInterop\IShellItemArray.cs" />
+	  <Compile Include="MP\ComInterop\IStream.cs" />
+	  <Compile Include="MP\ComInterop\LOCKTYPE.cs" />
+	  <Compile Include="MP\ComInterop\PROPVARIANT.cs" />
+	  <Compile Include="MP\ComInterop\SFGAO.cs" />
+	  <Compile Include="MP\ComInterop\SIGDN.cs" />
+	  <Compile Include="MP\ComInterop\STATSTG.cs" />
+	  <Compile Include="MP\ComInterop\STGTY.cs" />
+	  <Compile Include="Microsoft\IO\DriveInfo.cs" />
+	  <Compile Include="Microsoft\IO\DriveInfo.Windows.cs" />
+	  <Compile Include="Microsoft\IO\DriveNotFoundException.cs" />
+	  <Compile Include="Microsoft\IO\DriveType.cs" />
+	  <Compile Include="MP\ColorBox.cs" />
+	  <Compile Include="MP\ComInterop\STREAM_SEEK.cs" />
+	  <Compile Include="MP\ComInterop\VARTYPE.cs" />
+	  <Compile Include="MP\ConsoleBackend.cs" />
+	  <Compile Include="MP\ConsoleColor.cs" />
+	  <Compile Include="MP\Dialogs\Enumerations.cs" />
+	  <Compile Include="MP\Dialogs\FileOperationDialog.cs" />
+	  <Compile Include="MP\Dialogs\NativeMessageBox.cs" />
+	  <Compile Include="MP\Dialogs\NewGenMessageBox.cs" />
+	  <Compile Include="MP\Dialogs\WaitDialog.cs" />
+	  <Compile Include="MP\DiscordRichPresenseContent.cs" />
+	  <Compile Include="MP\DiscordSdk\ActivityManager.cs" />
+	  <Compile Include="MP\DiscordSdk\Core.cs" />
+	  <Compile Include="MP\DiscordSdk\Exceptions.cs" />
+	  <Compile Include="MP\DiscordSdk\ImageManager.cs" />
+	  <Compile Include="MP\DiscordSdk\LobbyManager.cs" />
+	  <Compile Include="MP\DiscordSdk\StorageManager.cs" />
+	  <Compile Include="MP\DiscordSdk\StoreManager.cs" />
+	  <Compile Include="MP\ExceptionSystem\GamepadDisconnectedException.cs" />
+	  <Compile Include="MP\ExceptionSystem\HttpFailureException.cs" />
+	  <Compile Include="MP\ExceptionSystem\InvalidMPArchiveFormatException.cs" />
+	  <Compile Include="MP\ExceptionSystem\NativeWindowsException.cs" />
+	  <Compile Include="MP\ComInterop\IPropertyStore.cs" />
+	  <Compile Include="MP\ComInterop\PROPERTYKEY.cs" />
+	  <Compile Include="MP\ExceptionSystem\VariableNotFoundException.cs" />
+	  <Compile Include="MP\ExceptionSystem\VorbisWrapperException.cs" />
+	  <Compile Include="MP\Extensions.Strings.cs" />
+	  <Compile Include="MP\GamepadBackend\GamepadBatteryInfo.cs" />
+	  <Compile Include="MP\GamepadBackend\GamepadManager.cs" />
+	  <Compile Include="MP\GamepadBackend\GamepadReader.cs" />
+	  <Compile Include="MP\GamepadBackend\GamepadReaderSupport.cs" />
+	  <Compile Include="MP\GamepadBackend\GamepadFeatures.cs" />
+	  <Compile Include="MP\GenericInterop\CStringMarshaller.cs" />
+	  <Compile Include="MP\GenericInterop\NativeMemoryManager.cs" />
+	  <Compile Include="MP\GenericInterop\UnicodeStringMarshaller.cs" />
+	  <Compile Include="MP\Imaging\BitmapImageStructures.cs" />
+	  <Compile Include="MP\Imaging\IconPackageStructures.cs" />
+	  <Compile Include="MP\Imaging\RawBitmapReader.cs" />
+	  <Compile Include="MP\Imaging\RawBitmapWriter.cs" />
+	  <Compile Include="MP\Imaging\RawIconReader.cs" />
+	  <Compile Include="MP\NativeLibraryLoader.cs" />
+	  <Compile Include="MP\Networking\GenericNetworkConnection.cs" />
+	  <Compile Include="MP\Networking\GenericNetworkConnectionParameters.cs" />
+	  <Compile Include="MP\Networking\HttpNetworkConnection.cs" />
+	  <Compile Include="MP\Networking\HttpNetworkConnectionParameters.cs" />
+	  <Compile Include="MP\Networking\HttpVersion.cs" />
+	  <Compile Include="MP\Networking\INetworkConnection.cs" />
+	  <Compile Include="MP\Networking\NetworkConnection.cs" />
+	  <Compile Include="MP\Networking\NetworkConnectionParameters.cs" />
+	  <Compile Include="MP\Networking\NetworkPort.cs" />
+	  <Compile Include="MP\Networking\NetworkProvider.cs" />
+	  <Compile Include="MP\Networking\WinInetApplication.cs" />
+	  <Compile Include="MP\Networking\WinInetStream.cs" />
+	  <Compile Include="MP\ProcessLaunching\ProcessCreationFlags.cs" />
+	  <Compile Include="MP\ProcessLaunching\ProcessLauncher.cs" />
+	  <Compile Include="MP\ProcessLaunching\VariablesDictionary.cs" />
+	  <Compile Include="MP\SettingsTree\Attributes.cs" />
+	  <Compile Include="MP\SettingsTree\BuilderHelpers.cs" />
+	  <Compile Include="MP\SettingsTree\Exceptions.cs" />
+	  <Compile Include="MP\SettingsTree\SettingsTreeBuilder.cs" />
+	  <Compile Include="MP\SettingsTree\SettingsTreeNode.cs" />
+	  <Compile Include="MP\SettingsTree\SettingsTreeSetting.cs" />
+	  <Compile Include="MP\SysInfo.cs" />
+	  <Compile Include="NativeInterop.BCrypt.Cryptography.cs" />
+	  <Compile Include="NativeInterop.AdvApi32.SysInfo.cs" />
+	  <Compile Include="NativeInterop.DiscordSDK.cs" />
+	  <Compile Include="NativeInterop.ErrorsAndLibs.cs" />
+	  <Compile Include="NativeInterop.Kernel32.Console.cs" />
+	  <Compile Include="NativeInterop.Kernel32.Drive.cs" />
+	  <Compile Include="NativeInterop.Kernel32.Handles.cs" />
+	  <Compile Include="NativeInterop.Kernel32.LibraryLoader.cs" />
+	  <Compile Include="NativeInterop.Kernel32.Localization.cs" />
+	  <Compile Include="NativeInterop.Kernel32.Memory.cs" />
+	  <Compile Include="NativeInterop.Kernel32.NativeException.cs" />
+	  <Compile Include="NativeInterop.Kernel32.ProcessLaunching.cs" />
+	  <Compile Include="NativeInterop.Kernel32.SysInfo.cs" />
+	  <Compile Include="NativeInterop.Kernel32.Threading.cs" />
+	  <Compile Include="NativeInterop.MFPlat.cs" />
+	  <Compile Include="NativeInterop.MFReadWrite.cs" />
+	  <Compile Include="NativeInterop.NtDll.SysInfo.cs" />
+	  <Compile Include="NativeInterop.Ole32.cs" />
+	  <Compile Include="NativeInterop.Shell32.cs" />
+	  <Compile Include="NativeInterop.User32.cs" />
+	  <Compile Include="NativeInterop.Vorbis.cs" />
+	  <Compile Include="NativeInterop.WinInet.cs" />
+	  <Compile Include="NativeInterop.XInput.cs" />
+	  <Compile Include="System\Buffers\CryptoPool.cs" />
+	  <Compile Include="System\Buffers\NativeMemoryPool.cs" />
+	  <Compile Include="System\Drawing\CursorImage.cs" />
+	  <Compile Include="System\Drawing\DefaultImage.cs" />
+	  <Compile Include="System\Drawing\IImage.cs" />
+	  <Compile Include="System\Drawing\IImageExtensions.cs" />
+	  <Compile Include="System\Drawing\IImageFactory.cs" />
+	  <Compile Include="System\Drawing\ImagePixelFormat.cs" />
+	  <Compile Include="System\FixedBufferExtensions.cs" />
+	  <Compile Include="Microsoft\IO\Directory.cs" />
+	  <Compile Include="Microsoft\IO\DirectoryInfo.cs" />
+	  <Compile Include="Microsoft\IO\EnumerationOptions.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemEntry.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemEntry.Windows.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemEnumerable.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemEnumerableFactory.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemEnumerator.cs" />
+	  <Compile Include="Microsoft\IO\Enumeration\FileSystemName.cs" />
+	  <Compile Include="MP\MusicPlayerStream.cs" />
+	  <Compile Include="System\HexConverter.cs" />
+	  <Compile Include="System\IO\Error.cs" />
+	  <Compile Include="Microsoft\IO\File.cs" />
+	  <Compile Include="Microsoft\IO\FileInfo.cs" />
+	  <Compile Include="Microsoft\IO\FileSystem.Attributes.Windows.cs" />
+	  <Compile Include="Microsoft\IO\FileSystem.DirectoryCreation.Windows.cs" />
+	  <Compile Include="Microsoft\IO\FileSystem.Win32.cs" />
+	  <Compile Include="Microsoft\IO\FileSystem.Windows.cs" />
+	  <Compile Include="Microsoft\IO\FileSystemInfo.cs" />
+	  <Compile Include="Microsoft\IO\FileSystemInfo.Windows.cs" />
+	  <Compile Include="System\IO\Iterator.cs" />
+	  <Compile Include="Microsoft\IO\MatchCasing.cs" />
+	  <Compile Include="Microsoft\IO\MatchType.cs" />
+	  <Compile Include="System\IO\PathInternal.CaseSensitivity.cs" />
+	  <Compile Include="System\IO\ReadLinesIterator.cs" />
+	  <Compile Include="Microsoft\IO\SearchOption.cs" />
+	  <Compile Include="Microsoft\IO\SearchTarget.cs" />
+	  <Compile Include="Microsoft\IO\StringExtensions.cs" />
+	  <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
+	  <Compile Include="NativeInterop.AdvApi32.File.cs" />
+	  <Compile Include="NativeInterop.Base.cs" />
+	  <Compile Include="NativeInterop.BCrypt.RNG.cs" />
+	  <Compile Include="NativeInterop.Kernel32.File.cs" />
+	  <Compile Include="NativeInterop.NtDll.File.cs" />
+	  <Compile Include="Microsoft\IO\DisableMediaInsertionPrompt.cs" />
+	  <Compile Include="System\IO\DriveInfoInternal.Windows.cs" />
+	  <Compile Include="Microsoft\IO\Path.cs" />
+	  <Compile Include="Microsoft\IO\Path.Windows.cs" />
+	  <Compile Include="System\IO\ManagedZip\BZip2.cs" />
+	  <Compile Include="System\IO\ManagedZip\Checksums.cs" />
+	  <Compile Include="System\IO\ManagedZip\Core.cs" />
+	  <Compile Include="System\IO\ManagedZip\Encryption.cs" />
+	  <Compile Include="System\IO\ManagedZip\Exceptions.cs" />
+	  <Compile Include="System\IO\ManagedZip\GZip.cs" />
+	  <Compile Include="System\IO\ManagedZip\Zip.cs" />
+	  <Compile Include="System\IO\PathHelper.Windows.cs" />
+	  <Compile Include="System\IO\PathInternal.cs" />
+	  <Compile Include="System\IO\PathInternal.Windows.cs" />
+	  <Compile Include="System\IO\Win32Marshal.cs" />
+	  <Compile Include="System\Text\StringBuilderCache.cs" />
+	  <Compile Include="System\Text\ValueStringBuilder.cs" />
+	  <Compile Include="System\Windows\Forms\ControllerCompatibleForm.cs" />
+	  <Compile Include="System\Windows\Forms\IWin32WindowExtensions.cs" />
+	  <Compile Include="System\Windows\Forms\ReadOnlyWindowHandle.cs" />
+	  <Compile Include="System\Windows\Forms\ControllerEventArgs.cs" />
+	  <Compile Include="MP\VorbisWrapper\Vorbis.cs" />
+  </ItemGroup>
+
+</Project>

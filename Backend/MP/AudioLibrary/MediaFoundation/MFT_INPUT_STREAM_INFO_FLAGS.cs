@@ -1,0 +1,30 @@
+﻿
+
+
+using System;
+
+namespace MP.AudioLibrary.MediaFoundation
+{
+    /// <summary>
+    /// Flags returned by GetInputStreamInfo()
+    /// </summary>
+    [Flags]
+    public enum MFT_INPUT_STREAM_INFO_FLAGS
+    {
+        //
+        // Carried over from DMO (IMediaObject)
+        //
+        MFT_INPUT_STREAM_WHOLE_SAMPLES = 0x00000001,
+        MFT_INPUT_STREAM_SINGLE_SAMPLE_PER_BUFFER = 0x00000002,
+        MFT_INPUT_STREAM_FIXED_SAMPLE_SIZE = 0x00000004,
+        MFT_INPUT_STREAM_HOLDS_BUFFERS = 0x00000008,
+
+        //
+        // New for MFT
+        //
+        MFT_INPUT_STREAM_DOES_NOT_ADDREF = 0x00000100,
+        MFT_INPUT_STREAM_REMOVABLE = 0x00000200,
+        MFT_INPUT_STREAM_OPTIONAL = 0x00000400,
+        MFT_INPUT_STREAM_PROCESSES_IN_PLACE = 0x00000800
+    }
+}

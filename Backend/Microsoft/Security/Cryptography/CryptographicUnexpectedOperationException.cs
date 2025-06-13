@@ -1,0 +1,31 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Globalization;
+
+namespace Microsoft.Security.Cryptography
+{
+    public class CryptographicUnexpectedOperationException : CryptographicException
+    {
+        public CryptographicUnexpectedOperationException()
+            : base(SR.Arg_CryptographyException)
+        {
+        }
+
+        public CryptographicUnexpectedOperationException(string message)
+            : base(message)
+        {
+        }
+
+        public CryptographicUnexpectedOperationException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        public CryptographicUnexpectedOperationException(string format, string insert)
+            : base(string.Format(CultureInfo.CurrentCulture, format, insert))
+        {
+        }
+    }
+}

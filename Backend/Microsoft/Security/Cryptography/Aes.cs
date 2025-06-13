@@ -1,0 +1,27 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Runtime.Versioning;
+
+namespace Microsoft.Security.Cryptography
+{
+    public abstract class Aes : SymmetricAlgorithm
+    {
+        protected Aes()
+        {
+            LegalBlockSizesValue = s_legalBlockSizes.CloneKeySizesArray();
+            LegalKeySizesValue = s_legalKeySizes.CloneKeySizesArray();
+
+            BlockSizeValue = 128;
+            FeedbackSizeValue = 8;
+            KeySizeValue = 256;
+            ModeValue = CipherMode.CBC;
+        }
+
+        [UnsupportedOSPlatform("browser")]
+        public static Aes Create() => new AesImplementation();
+
+        private static readonly KeySizes[] s_legalBlockSizes = { new KeySizes(128, 128, 0) };
+        private static readonly KeySizes[] s_legalKeySizes = { new KeySizes(128, 256, 64) };
+    }
+}

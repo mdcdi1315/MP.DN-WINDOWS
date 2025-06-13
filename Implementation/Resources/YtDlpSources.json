@@ -1,0 +1,98 @@
+﻿{
+  "version": 1,
+  "schema": "MDCDI1315.MP.DDEPFMT",
+  "MainDependency": {
+    "Name": "Yt-Dlp",
+    "Description": "The YouTube Downloader Command-Line redistributable",
+    "URL": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp",
+    "ZipDownload": false,
+    "Rules": [],
+    "UseOnlyFiles": [],
+    "Results": {
+      "SavePath": "yt-dlp",
+      "IsDirectory": false
+    }
+  },
+  "SubDependencies": [
+    {
+      "Name": "python3",
+      "Description": "x64 Python v3.13.2 Interpreter",
+      "URL": "https://www.python.org/ftp/python/3.13.2/python-3.13.2-embed-amd64.zip",
+      "MD5Hash": "4c9d083e2d79c07e8d9e5e2d02127980",
+      "ZipDownload": true,
+      "Rules": [
+        "platform=x64"
+      ],
+      "UseOnlyFiles": [],
+      "Results": {
+        "SavePath": "python",
+        "IsDirectory": true
+      }
+    },
+    {
+      "Name": "python3",
+      "Description": "ARM64 Python v3.13.2 Interpreter",
+      "URL": "https://www.python.org/ftp/python/3.13.2/python-3.13.2-embed-arm64.zip",
+      "MD5Hash": "6814e678a029bb545e6fb2472ddc1153",
+      "ZipDownload": true,
+      "Rules": [
+        "platform=arm64"
+      ],
+      "UseOnlyFiles": [],
+      "Results": {
+        "SavePath": "python",
+        "IsDirectory": true
+      }
+    },
+    {
+      "Name": "ffmpeg",
+      "Description": "FFMPEG audio/video conversion binaries - ARM64",
+      "URL": "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-winarm64-gpl-shared.zip",
+      "ZipDownload": true,
+      "Rules": [
+        "platform=arm64"
+      ],
+      "UseOnlyFiles": [
+        "ffmpeg-master-latest-winarm64-gpl-shared/bin/*.dll",
+        "ffmpeg-master-latest-winarm64-gpl-shared/bin/ffmpeg.exe",
+        "ffmpeg-master-latest-winarm64-gpl-shared/bin/ffprobe.exe"
+      ],
+      "Results": {
+        "SavePath": "ffmpeg",
+        "IsDirectory": true
+      }
+    },
+    {
+      "Name": "ffmpeg",
+      "Description": "FFMPEG audio/video conversion binaries - x64",
+      "URL": "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip",
+      "ZipDownload": true,
+      "Rules": [
+        "platform=x64"
+      ],
+      "UseOnlyFiles": [
+        "ffmpeg-master-latest-win64-gpl-shared/bin/*.dll",
+        "ffmpeg-master-latest-win64-gpl-shared/bin/ffmpeg.exe",
+        "ffmpeg-master-latest-win64-gpl-shared/bin/ffprobe.exe"
+      ],
+      "Results": {
+        "SavePath": "ffmpeg",
+        "IsDirectory": true
+      }
+    },
+    {
+      "Name": "atomicparsley",
+      "Description": "AtomicParsley - M4A audio tag processor",
+      "URL": "https://github.com/wez/atomicparsley/releases/download/20240608.083822.1ed9031/AtomicParsleyWindows.zip",
+      "ZipDownload": true,
+      "Rules": [
+        "platform=x64"
+      ],
+      "UseOnlyFiles": [],
+      "Results": {
+        "SavePath": "atomicparsley",
+        "IsDirectory": true
+      }
+    }
+  ]
+}
