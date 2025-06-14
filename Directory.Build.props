@@ -2,11 +2,6 @@
 <!-- Imports in and defines the first project file that is run on MSBuild. -->
 <Project InitialTargets="PrepareMPBuild">
 
-	<!-- 
-		Strong Name Key settings. 
-		The strong name key is not exposed to the public repo; 
-		instead, it is built internally with the key and the signed result is that which it is released.
-	-->
 	<PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.vcxproj' AND '$([System.IO.File]::Exists(`$(MSBuildThisFileDirectory)ProjectKey.snk`))' == 'true'">
 		<AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">$(MSBuildThisFileDirectory)ProjectKey.snk</AssemblyOriginatorKeyFile>
 		<SignAssembly Condition="'$(SignAssembly)' == ''">true</SignAssembly>

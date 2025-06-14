@@ -1,7 +1,7 @@
-﻿using System.Reflection;
+﻿
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -14,8 +14,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("Release")]
 #endif
 [assembly: AssemblyCompany("© MDCDI1315 - 2025")]
-[assembly: AssemblyProduct("MP-DotNet8 - Backend Library")]
-[assembly: AssemblyCopyright("Copyright © mdcdi1315 2025")]
+[assembly: AssemblyProduct("MP-DotNet - Backend Library - .NET CORE RUNTIME 8")]
+[assembly: AssemblyCopyright("Copyright © mdcdi1315 (2024-2025). The project has been published under the MIT License.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

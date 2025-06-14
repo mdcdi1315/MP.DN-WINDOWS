@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 partial class Interop
 {
-    public static unsafe partial class Kernel32
+    unsafe partial class Kernel32
     {
         [DllImport(Libraries.Kernel32 , EntryPoint = "GetCurrentDirectoryW" , SetLastError = true)]
         private static extern System.UInt32 GetCurrentDirectory_Native(System.UInt32 bufferlength , System.Char* buffer);
@@ -276,9 +276,6 @@ partial class Interop
             return GCNT.ToInt32();
         }
 
-        [DllImport(Libraries.Kernel32 , EntryPoint = "GetModuleFileNameW" , SetLastError = true)]
-        private static extern System.UInt32 GetModuleFileName_Native(System.IntPtr hmod , System.Char* buffer , System.UInt32 bufsize);
-
         public static System.String GetProcessDirectory()
         {
             System.Char[] ret = new System.Char[32767];
@@ -306,12 +303,10 @@ partial class Interop
             input += "\0";
             System.String output = new('\0', 512);
             System.UInt32 fs;
-            fixed (System.Char* pout = output) 
+            fixed (System.Char* pout = output)
+            fixed (System.Char* pin = input)
             {
-                fixed (System.Char* pin = input)
-                {
-                     fs = ExpandEnvironmentStrings_Native(pin, pout, output.Length.ToUInt32());
-                }
+                fs = ExpandEnvironmentStrings_Native(pin, pout, output.Length.ToUInt32());
             }
             if (fs == 0) { throw new MP.ExceptionSystem.NativeWindowsException(); }
             return output.Remove((fs - 1).ToInt32());
@@ -322,15 +317,12 @@ partial class Interop
 
         public static System.String GetEnvironmentVariable(System.String name)
         {
-            name += "\0";
             System.String ret = new('\0', 32767);
             System.UInt32 fs;
             fixed (System.Char* pout = ret)
+            fixed (System.Char* pin = name)
             {
-                fixed (System.Char* pin = name)
-                {
-                    fs = GetEnvironmentVariable_Native(pin , pout , ret.Length.ToUInt32());
-                }
+                fs = GetEnvironmentVariable_Native(pin, pout, ret.Length.ToUInt32());
             }
             if (fs == 0) {
                 System.Int32 err = GetLastError();
@@ -348,16 +340,11 @@ partial class Interop
 
         public static void SetEnvironmentVariable(System.String name , System.String value)
         {
-            name += "\0";
-            value += "\0";
             BOOL ret;
             fixed (System.Char* pnam = name)
+            fixed (System.Char* pval = value)
             {
-                fixed (System.Char* pval = value)
-                {
-                    if (value == "\0") { ret = SetEnvironmentVariable_Native(pnam, null); }
-                    else { ret = SetEnvironmentVariable_Native(pnam, pval); }
-                }
+                ret = SetEnvironmentVariable_Native(pnam, pval);
             }
             if (ret == BOOL.FALSE) { throw new MP.ExceptionSystem.NativeWindowsException(); }
         }

@@ -37,8 +37,11 @@ partial class Interop
             SEM_NOOPENFILEERRORBOX = 0x8000
         }
 
-        [DllImport(Libraries.Kernel32, CallingConvention = CallingConvention.Winapi, EntryPoint = "GetLastError" , ExactSpelling = true)]
+        [DllImport(Libraries.Kernel32 , ExactSpelling = true)]
         public static extern System.Int32 GetLastError();
+
+        [DllImport(Libraries.Kernel32 , ExactSpelling = true)]
+        public static extern void SetLastError(System.Int32 code);
 
         [DllImport(Libraries.Kernel32, EntryPoint = "FormatMessageW", SetLastError = true , ExactSpelling = true)]
         private static extern System.Int32 FormatMessage(

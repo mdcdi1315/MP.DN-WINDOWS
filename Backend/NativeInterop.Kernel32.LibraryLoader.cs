@@ -1,5 +1,6 @@
 ﻿
 
+using MP;
 using System;
 using System.Runtime.InteropServices;
 
@@ -53,7 +54,6 @@ partial class Interop
 
         public static System.IntPtr LoadLibraryEx(System.String libraryname , LoadLibraryFlags flags) 
         {
-            libraryname += "\0";
             fixed (System.Char* plib = libraryname)
             {
                 return LoadLibraryEx_Native(plib, System.IntPtr.Zero , flags);
@@ -64,20 +64,22 @@ partial class Interop
         public static extern BOOL FreeLibrary(System.IntPtr library);
 
         [DllImport(Libraries.Kernel32 , ExactSpelling = true , SetLastError = true , EntryPoint = "GetProcAddress")]
-        private static extern System.IntPtr GetProcAddress_Native(System.IntPtr library, System.Char* pprocname);
+        private static extern void* GetProcAddress_Native(System.IntPtr library, System.Char* pprocname);
 
-        public static System.IntPtr GetProcAddress(System.IntPtr lib , System.String procName) 
+        [DllImport(Libraries.Kernel32, EntryPoint = "GetModuleFileNameW", SetLastError = true)]
+        private static extern System.UInt32 GetModuleFileName_Native(System.IntPtr hmod, System.Char* buffer, System.UInt32 bufsize);
+
+        [DllImport(Libraries.Kernel32, ExactSpelling = true, EntryPoint = "GetModuleHandleExW", SetLastError = true)]
+        private static extern BOOL GetModuleHandleEx_Native(GetModuleHandleFlags flags, System.Char* plibname, System.IntPtr* phandle);
+
+        public static void* GetProcAddress(System.IntPtr lib , System.String procName) 
         {
-            procName += "\0";
             fixed (System.Char* ppc = procName)
             {
                 return GetProcAddress_Native(lib , ppc);
             }
         }
-
-        [DllImport(Libraries.Kernel32 , ExactSpelling = true , EntryPoint = "GetModuleHandleExW", SetLastError = true)]
-        private static extern BOOL GetModuleHandleEx_Native(GetModuleHandleFlags flags , System.Char* plibname , System.IntPtr* phandle);
-
+        
         public static BOOL GetModuleHandleEx(GetModuleHandleFlags flags , System.String name , out System.IntPtr pmodule)
         {
             name += "\0";
@@ -88,6 +90,32 @@ partial class Interop
                 pmodule = hmod;
                 return ret;
             }
+        }
+
+        public static System.String GetModuleFileName(System.IntPtr hmod)
+        {
+            System.Int32 bufinsize;
+            System.String pfn = new('\0', bufinsize = 512);
+            System.UInt32 bufsize;
+        G_Retry:
+            fixed (System.Char* pfilename = pfn)
+            {
+                bufsize = GetModuleFileName_Native(hmod, pfilename, bufinsize.ToUInt32());
+            }
+            // GetModuleFileName will fail only if there is a fatal error.
+            // In insufficient buffer calls, the below handling is done.
+            if (bufsize == 0) { return null; }
+            System.Int32 err;
+            switch (err = GetLastError())
+            {
+                case Errors.ERROR_INSUFFICIENT_BUFFER:
+                    pfn = new('\0', bufinsize += 512);
+                    goto G_Retry;
+                default:
+                    SetLastError(err);
+                    break;
+            }
+            return pfn.Remove(bufsize.ToInt32());
         }
     }
 }

@@ -30,13 +30,13 @@ namespace MP.AudioLibrary.MMDevice
             ObjectDisposedException.ThrowIf(enumerator is null, this);
             void* tp;
             HRESULT hr = enumerator.EnumAudioEndpoints(dataflow, statemask, &tp);
-            if (hr.FAILED) { throw hr.MappingException; }
+            hr.ThrowOnFailure();
             IMMDeviceCollection collection = ComMarshalling.CreateInteropObject(tp) as IMMDeviceCollection;
             try
             {
                 System.UInt32 devices;
                 hr = collection.GetCount(&devices);
-                if (hr.FAILED) { throw hr.MappingException; }
+                hr.ThrowOnFailure();
                 tp = null;
                 List<MMDevice> devs = new(devices.ToInt32());
                 for (System.UInt32 I = 0; I < devices; I++)
@@ -63,7 +63,7 @@ namespace MP.AudioLibrary.MMDevice
                 hr = enumerator.GetDevice(pdev, &pdevobj);
             }
             if (hr.FAILED) { return false; }
-            device = new(ComMarshalling.CreateInteropObject(pdevobj) as IMMDevice);
+            device = new(ComMarshalling.CreateInteropObject(pdevobj , -1) as IMMDevice);
             return true;
         }
 
@@ -77,7 +77,7 @@ namespace MP.AudioLibrary.MMDevice
             {
                 hr = enumerator.GetDevice(pdev, &pdevobj);
             }
-            if (hr.FAILED) { throw hr.MappingException; }
+            hr.ThrowOnFailure();
             return new(ComMarshalling.CreateInteropObject(pdevobj) as IMMDevice);
         }
 
@@ -85,9 +85,8 @@ namespace MP.AudioLibrary.MMDevice
         {
             ObjectDisposedException.ThrowIf(enumerator is null, this);
             void* pendpoint;
-            HRESULT hr = enumerator.GetDefaultAudioEndpoint(desiredflow, desiredrole, &pendpoint);
-            if (hr.FAILED) { throw hr.MappingException; }
-            return new(ComMarshalling.CreateInteropObject(pendpoint) as IMMDevice);
+            enumerator.GetDefaultAudioEndpoint(desiredflow, desiredrole, &pendpoint).ThrowOnFailure();
+            return new(ComMarshalling.CreateInteropObject(pendpoint , -1) as IMMDevice);
         }
 
         public AbstractMMNotificationClient NotificationClient
@@ -99,17 +98,14 @@ namespace MP.AudioLibrary.MMDevice
             set {
                 ObjectDisposedException.ThrowIf(enumerator is null, this);
                 ArgumentNullException.ThrowIfNull(value);
-                HRESULT hr;
                 System.IntPtr ptr;
                 if (notifclient is not null) {
                     ptr = Marshal.GetIUnknownForObject(notifclient);
-                    hr = enumerator.UnregisterEndpointNotificationCallback(ptr.ToPointer());
-                    if (hr.FAILED) { throw hr.MappingException; }
+                    enumerator.UnregisterEndpointNotificationCallback(ptr.ToPointer()).ThrowOnFailure();
                     notifclient = null;
                 }
                 ptr = Marshal.GetIUnknownForObject(notifclient = value);
-                hr = enumerator.RegisterEndpointNotificationCallback(ptr.ToPointer());
-                if (hr.FAILED) { throw hr.MappingException; }
+                enumerator.RegisterEndpointNotificationCallback(ptr.ToPointer()).ThrowOnFailure();
             }
         }
 

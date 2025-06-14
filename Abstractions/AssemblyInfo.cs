@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 #endif
 [assembly: AssemblyCompany("© MDCDI1315 - 2025")]
 [assembly: AssemblyProduct("Abstractions Library Project")]
-[assembly: AssemblyCopyright("© MDCDI1315. Created at 2025.")]
+[assembly: AssemblyCopyright("Copyright © mdcdi1315 (2024-2025). The project has been published under the MIT License.")]
 [assembly: AssemblyTrademark("™The RCU Engine and the Music Player Binary Format are technologies created by mdcdi1315. Read the project's license in the repository for more information.")]
 [assembly: AssemblyCulture("")]
 

@@ -11,7 +11,6 @@
 	<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 	<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<!-- The abstractions library uses a different key than the rest of the project and this key is accessible by everyone who has a copy of the project. -->
 	<AssemblyOriginatorKeyFile>AbstractionsKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 

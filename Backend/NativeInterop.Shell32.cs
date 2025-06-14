@@ -146,8 +146,7 @@ partial class Interop
         [DllImport(Libraries.Shell32 , EntryPoint = "SHGetDriveMedia" , PreserveSig = true)]
         private static extern MP.ComInterop.HRESULT SHGetDriveMedia_Native(System.Char* driveptr , ARCONTENT* flags);
 
-        // Docs say that ptrfolderpath must be freed with Ole32.CoTaskMemFree
-        // once it is used. The native string will be copied to managed memory first then free the native string.
+        // Docs say that ptrfolderpath must be freed with Ole32.CoTaskMemFree.
         [DllImport(Libraries.Shell32 , EntryPoint = "SHGetKnownFolderPath" , PreserveSig = true)]
         private static extern MP.ComInterop.HRESULT SHGetKnownFolderPath_Native(
             GUID* knownfolder, KNOWN_FOLDER_FLAG flags , System.IntPtr htokennotused , 
@@ -157,12 +156,16 @@ partial class Interop
         private static extern MP.ComInterop.HRESULT SHCreateItemFromParsingName_Native(
             System.Char* path, void* unusedsettonull, GUID* refiid, void** outputinterface);
 
-        public static MP.ComInterop.HRESULT SHCreateItemFromParsingName(System.String path, GUID interfacerefid, void** outinterface)
+        public static MP.ComInterop.HRESULT SHCreateItemFromParsingName(System.String path, GUID interfacerefid, out void* outinterface)
         {
+            void* pt;
+            MP.ComInterop.HRESULT hr;
             fixed (System.Char* pptr = path)
             {
-                return SHCreateItemFromParsingName_Native(pptr , null , &interfacerefid , outinterface);
+                hr = SHCreateItemFromParsingName_Native(pptr , null , &interfacerefid , &pt);
             }
+            outinterface = pt;
+            return hr;
         }
 
         public static MP.ComInterop.HRESULT SHGetKnownFolderPath(GUID knownfolder , out System.String pathcopied)

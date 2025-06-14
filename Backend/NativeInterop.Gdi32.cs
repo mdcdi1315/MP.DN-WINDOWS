@@ -26,7 +26,7 @@ partial class Interop
         public static extern BOOL DeleteObject(/* HGDIOBJ */ System.IntPtr hObject);
 
         [DllImport(Libraries.Gdi32 , ExactSpelling = true , SetLastError = true)]
-        public static extern System.IntPtr CreateBitmap(
+        public static extern /* HBITMAP */ System.IntPtr CreateBitmap(
             System.Int32 width , 
             System.Int32 height , 
             System.UInt32 planes ,

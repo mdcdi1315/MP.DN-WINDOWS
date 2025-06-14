@@ -6,7 +6,7 @@ partial class Interop
     /// <summary>
     /// Defines BCrypt.dll native interopability methods.
     /// </summary>
-    static unsafe partial class BCrypt
+    unsafe partial class BCrypt
     {
         internal const int BCRYPT_USE_SYSTEM_PREFERRED_RNG = 0x00000002;
 
