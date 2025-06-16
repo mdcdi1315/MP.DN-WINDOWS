@@ -78,7 +78,7 @@ namespace MP.AudioLibrary.MMDevice
                 hr = enumerator.GetDevice(pdev, &pdevobj);
             }
             hr.ThrowOnFailure();
-            return new(ComMarshalling.CreateInteropObject(pdevobj) as IMMDevice);
+            return new(ComMarshalling.CreateInteropObject(pdevobj , -1) as IMMDevice);
         }
 
         public MMDevice GetDefaultEndpoint(EDataFlow desiredflow , ERole desiredrole)

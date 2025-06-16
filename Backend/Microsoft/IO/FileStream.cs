@@ -28,7 +28,9 @@ namespace Microsoft.IO
             if (existing.IsClosed) { throw new ArgumentException("The passed handle is closed." , nameof(existing)); }
             if (existing.IsAsync) { throw new ArgumentException("Asynchronous file handling is unsupported.", nameof(existing)); }
             sfh = existing;
-            poscurrent = sfh.Seek(0, System.IO.SeekOrigin.Current);
+            if (sfh.CanSeek) {
+                poscurrent = sfh.Seek(0, System.IO.SeekOrigin.Begin);
+            }
             threadaccess = new(1);
         }
 
@@ -118,7 +120,9 @@ namespace Microsoft.IO
                 throw new System.IO.FileNotFoundException("The system cannot find the file requested.", savepath);
             }
             sfh = RedistSafeFileHandle.Open(savepath, mode, access, share, FileOptions.None , 100);
-            poscurrent = sfh.GetFileLength();
+            if (sfh.CanSeek) {
+                poscurrent = sfh.Seek(0, System.IO.SeekOrigin.Begin);
+            }
             threadaccess = new(1);
         }
 
