@@ -614,10 +614,10 @@ namespace MP
 
         private void F_CHOOSEPATH(object sender, EventArgs e)
         {
-            Microsoft.Win32.MPFileDialog mpf;
+            Dialogs.FileDialog mpf;
             if (ChooseFileOrFolderButton.Text == "Choose File...")
             {
-                mpf = new Microsoft.Win32.MPOpenFileDialog();
+                mpf = new Dialogs.OpenFileDialog();
                 mpf.MultiSelect = false;
                 mpf.CheckFilePath = true;
                 mpf.CheckPath = true;
@@ -625,7 +625,7 @@ namespace MP
             }
             else if (ChooseFileOrFolderButton.Text == "Choose Folder...")
             {
-                mpf = new Microsoft.Win32.MPOpenFolderDialog();
+                mpf = new Dialogs.OpenFolderDialog();
                 mpf.MultiSelect = false;
             }
             else { return; }

@@ -127,6 +127,7 @@ namespace Microsoft.Win32.SafeHandles
                 AllocationSize = preallocationSize
             };
 
+            // There is not a corresponding FILE_ALLOCATION_INFO in driver mode, so use the Kernel32 API instead.
             if (Interop.Kernel32.SetFileInformationByHandle(fileHandle.handle , allocationInfo) == Interop.BOOL.FALSE)
             {
                 int errorCode = Interop.Kernel32.GetLastError();
@@ -148,6 +149,152 @@ namespace Microsoft.Win32.SafeHandles
             }
         }
 
+        private Interop.NtDll.FILE_ID_INFORMATION GetFileIdInformation()
+        {
+            EnsureValid();
+            Interop.NTSTATUS nts;
+            if ((nts = Interop.NtDll.NtQueryInformationFile(handle, out Interop.NtDll.FILE_ID_INFORMATION idi, out _)) != Interop.NTSTATUS.STATUS_SUCCESS)
+            {
+                // Get a Win32 error for the NTSTATUS , and return that as the exception
+                throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts, path);
+            }
+            return idi;
+        }
+
+        private System.Int32 GetFileType()
+        {
+            if (_fileType == -1)
+            {
+                EnsureValid();
+                var ft = Interop.Kernel32.GetFileType(handle);
+
+                System.Diagnostics.Debug.Assert(
+                      ft == Interop.Kernel32.FILE_TYPE.FILE_TYPE_DISK
+                    || ft == Interop.Kernel32.FILE_TYPE.FILE_TYPE_PIPE
+                    || ft == Interop.Kernel32.FILE_TYPE.FILE_TYPE_CHAR,
+                    $"Unknown file type: {ft}");
+
+                _fileType = (System.Int32)ft;
+            }
+
+            return _fileType;
+        }
+
+        private unsafe FileOptions GetFileOptions()
+        {
+            // Query the file options only once
+            // If have been queried before disposing , continue to return them.
+            FileOptions fileOptions = _fileOptions;
+            if (fileOptions != (FileOptions)(-1))
+            {
+                return fileOptions;
+            }
+
+            EnsureValid();
+
+            FileOptions result = FileOptions.None;
+
+            
+            Interop.NTSTATUS status = Interop.NtDll.NtQueryInformationFile(handle, out Interop.NtDll.FILE_MODE_INFORMATION o, out _);
+
+            if (status != Interop.NTSTATUS.STATUS_SUCCESS)
+            {
+                throw new MP.ExceptionSystem.NativeWindowsException(status);
+            }
+
+            if ((o.Mode & (Interop.NtDll.CreateOptions.FILE_SYNCHRONOUS_IO_ALERT | Interop.NtDll.CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT)) == 0)
+            {
+                result |= FileOptions.Asynchronous;
+            }
+            if ((o.Mode & Interop.NtDll.CreateOptions.FILE_WRITE_THROUGH) != 0)
+            {
+                result |= FileOptions.WriteThrough;
+            }
+            if ((o.Mode & Interop.NtDll.CreateOptions.FILE_RANDOM_ACCESS) != 0)
+            {
+                result |= FileOptions.RandomAccess;
+            }
+            if ((o.Mode & Interop.NtDll.CreateOptions.FILE_SEQUENTIAL_ONLY) != 0)
+            {
+                result |= FileOptions.SequentialScan;
+            }
+            if ((o.Mode & Interop.NtDll.CreateOptions.FILE_DELETE_ON_CLOSE) != 0)
+            {
+                result |= FileOptions.DeleteOnClose;
+            }
+            if ((o.Mode & Interop.NtDll.CreateOptions.FILE_NO_INTERMEDIATE_BUFFERING) != 0)
+            {
+                result |= NoBuffering;
+            }
+
+            return _fileOptions = result;
+        }
+
+        private unsafe System.Int64 GetFileLengthCore()
+        {
+            Interop.NtDll.FILE_STANDARD_INFORMATION stdi;
+            Interop.NTSTATUS nts;
+            if ((nts = Interop.NtDll.NtQueryInformationFile(handle, out stdi, out _)) == Interop.NTSTATUS.STATUS_SUCCESS)
+            {
+                return stdi.EndOfFile;
+            }
+
+            // In theory when NtQueryInformation fails, then
+            // a) IsDevice can modify last error (not true today, but can be in the future),
+            // b) DeviceIoControl can succeed (last error set to ERROR_SUCCESS) but return fewer bytes than requested.
+            // The error is stored and in such cases exception for the first failure is going to be thrown.
+
+            if (path is null || System.IO.PathInternal.IsDevice(path) == false)
+            {
+                throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts, path is null ? System.String.Empty : path);
+            }
+
+            Interop.Kernel32.STORAGE_READ_CAPACITY storageReadCapacity;
+            System.UInt32 bytesReturned;
+            Interop.BOOL success = Interop.Kernel32.DeviceIoControl(
+                handle,
+                Interop.IOCTL.IOCTL_STORAGE_READ_CAPACITY,
+                null,
+                0,
+                &storageReadCapacity,
+                sizeof(Interop.Kernel32.STORAGE_READ_CAPACITY).ToUInt32(),
+                &bytesReturned,
+                null);
+
+            if (success == Interop.BOOL.FALSE)
+            {
+                throw System.IO.Win32Marshal.GetExceptionForLastWin32Error(path);
+            }
+            else if (bytesReturned != sizeof(Interop.Kernel32.STORAGE_READ_CAPACITY))
+            {
+                throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts, path);
+            }
+
+            return storageReadCapacity.DiskLength;
+        }
+
+        /// <summary>
+        /// Gets the Volume ID where this file is located to. <br />
+        /// By using the <see cref="MP.UnsafeMethods.ToUInt32(long)"/> to this member 
+        /// you get the volume ID for the id returned by <see cref="DriveInfo.SoftwareSerialNumber"/>.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
+        public System.UInt64 FileVolumeID => GetFileIdInformation().VolumeID;
+
+        /// <summary>
+        /// Gets a 128-bit ID that uniquely identifies this file. <br />
+        /// Note that it might not exist for all cases. <br />
+        /// Returned as a Guid for flexibility.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
+        public unsafe Guid FileId
+        {
+            get {
+                var inf = GetFileIdInformation();
+                return Interop.GUID.From16BytePointer(inf.FileID).GetGuid();
+            }
+        }
+
         /// <summary>
         /// The opened file path.
         /// </summary>
@@ -158,18 +305,24 @@ namespace Microsoft.Win32.SafeHandles
         /// </summary>
         public System.String FileName
         {
-            get {
+            get
+            {
                 EnsureValid();
                 System.String fn;
                 // Verify that we can get the file name first.
-                Interop.Kernel32.GetFileInformationByHandle(handle , out fn);
-                // Then , try to enumerate the drives to find from which drive the file was opened from.
-                try {
-                    System.UInt32 volid = FileVolumeID.ToUInt32(); // The volume ID for a drive is this value but getting only it's UInt32 portion.
-                    if (volid == 0) {
+                var s = Interop.NtDll.NtQueryInformationFile(handle , out fn);
+                if (s != Interop.NTSTATUS.STATUS_SUCCESS) { return null; }
+                // The file name returned has the drive letter stripped out.
+                // So, we need to get the file's volume ID and use that to find out the drive from which the file was opened from.
+                // Now, try to enumerate the drives to find from which drive the file was opened from.
+                try
+                {
+                    var idi = GetFileIdInformation();
+                    System.UInt32 volid = idi.VolumeID.ToUInt32(); // The volume ID for a drive is this value but getting only it's UInt32 portion.
+                    if (volid == 0)
+                    {
                         // If this happens , then we have to abort.
-                        // In such case we can return the known name tho.
-                        return fn;
+                        return null;
                     }
                     // Now enumerate the drives and find the matching drive.
                     foreach (var drive in DriveInfo.GetDrives())
@@ -178,17 +331,22 @@ namespace Microsoft.Win32.SafeHandles
                         {
                             // Join the path and return the result.
                             System.String ret = drive.RootDirectory.FullName;
-                            if (fn.StartsWith('\\')) {
+                            if (fn.StartsWith('\\'))
+                            {
                                 ret += fn.Substring(1);
-                            } else {
+                            }
+                            else
+                            {
                                 ret += fn;
                             }
                             return ret;
                         }
                     }
-                    // If we failed to find the drive , again return the known name.
+                    // If we failed to find the drive, return the known name.
                     return fn;
-                } catch {
+                }
+                catch
+                {
                     // If we can't get the FILE_ID_INFORMATION for the file , we can just simply return the already known path
                     return fn;
                 }
@@ -201,77 +359,39 @@ namespace Microsoft.Win32.SafeHandles
         /// </summary>
         public System.String LogicalPath
         {
-            get {
-                if (handle == IntPtr.Zero) 
-                {
+            get
+            {
+                if (handle == IntPtr.Zero) {
                     return path;
                 }
-                try {
+                try
+                {
                     System.String fn = FileName;
-                    if (fn.Length > 2 && fn[1] != ':')
+                    if (fn is null || (fn.Length > 2 && fn[1] != ':'))
                     {
-                        // We do not have a full path variant so we must return the already known path
+                        // We do not have a full path variant or NTDLL call failed so we must return the already known path
                         return path;
                     }
                     return fn; // The full path has been determined , return this instead
-                } catch {
+                }
+                catch
+                {
                     // FileName can fail for a number of reasons , so return the already known path
                     return path;
                 }
             }
         }
 
-        /// <summary>
-        /// Gets the Volume ID where this file is located to. <br />
-        /// By using the <see cref="MP.UnsafeMethods.ToUInt32(long)"/> to this member 
-        /// you get the volume ID for the id returned by <see cref="DriveInfo.SoftwareSerialNumber"/>.
-        /// </summary>
-        public System.UInt64 FileVolumeID
-        {
-            get {
-                EnsureValid();
-                Interop.NTSTATUS nts;
-                if ((nts = Interop.NtDll.NtQueryInformationFile(handle , out Interop.NtDll.FILE_ID_INFORMATION idi , out _)) != Interop.NTSTATUS.STATUS_SUCCESS)
-                {
-                    // Get a Win32 error for the NTSTATUS , and return that as the exception
-                    throw System.IO.Win32Marshal.GetExceptionForWin32Error(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32(), path);
-                }
-                return idi.VolumeID;
-            }
-        }
-
-        /// <summary>
-        /// Gets a 128-bit ID that uniquely identifies this file. <br />
-        /// Note that it might not exist for all cases. <br />
-        /// Returned as a Guid for flexibility.
-        /// </summary>
-        public unsafe System.Guid FileId
-        {
-            get {
-                EnsureValid();
-                Interop.NTSTATUS nts;
-                if ((nts = Interop.NtDll.NtQueryInformationFile(handle, out Interop.NtDll.FILE_ID_INFORMATION idi, out _)) != Interop.NTSTATUS.STATUS_SUCCESS)
-                {
-                    // Get a Win32 error for the NTSTATUS , and return that as the exception
-                    throw System.IO.Win32Marshal.GetExceptionForWin32Error(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32(), path);
-                }
-                return Interop.GUID.From16BytePointer(idi.FileID).GetGuid();
-            }
-        }
-
-        /// <summary>
-        /// Gets a value whether the file was opened with native asyncronous semantics.
-        /// </summary>
+        /// <summary>Gets a value whether the file was opened with native asyncronous semantics.</summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> was disposed before the file options were retrieved.</exception>
         public System.Boolean IsAsync => (GetFileOptions() & FileOptions.Asynchronous) != 0;
 
-        /// <summary>
-        /// Gets a value whether the OS does not perform any buffering to the file.
-        /// </summary>
+        /// <summary>Gets a value whether the OS does not perform any buffering to the file.</summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> was disposed before the file options were retrieved.</exception>
         public System.Boolean IsNoBuffering => (GetFileOptions() & NoBuffering) != 0;
 
-        /// <summary>
-        /// Gets a value whether the handle can seek into the file.
-        /// </summary>
+        /// <summary>Gets a value whether the handle can seek into the file.</summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> was disposed before the file options were retrieved.</exception>
         public System.Boolean CanSeek => !IsClosed && GetFileType() == (System.Int32)Interop.Kernel32.FILE_TYPE.FILE_TYPE_DISK;
 
         /// <summary>
@@ -283,15 +403,17 @@ namespace Microsoft.Win32.SafeHandles
         /// Gets the underlying OS handle. Once disposed, this property will return an OS invalid handle.
         /// </summary>
         public System.IntPtr Handle => handle;
-        
+
         /// <summary>
         /// Gets the options used to create this handle.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> was disposed before the file options were retrieved.</exception>
         public FileOptions Options => GetFileOptions();
 
         /// <summary>
         /// Flushes all the data to the file that the connected handle represents.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
         public void FlushToDisk()
         {
             EnsureValid();
@@ -317,52 +439,87 @@ namespace Microsoft.Win32.SafeHandles
         /// <param name="origin">The seek origin to perform seeking.</param>
         /// <param name="closeInvalidHandle">If the command fails with invalid handle, it does then dispose the handle.</param>
         /// <returns>The seeked position inside the file.</returns>
-        public System.Int64 Seek(long offset, System.IO.SeekOrigin origin, bool closeInvalidHandle = false)
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
+        public System.Int64 Seek(System.Int64 offset, System.IO.SeekOrigin origin, System.Boolean closeInvalidHandle = false)
         {
             EnsureValid();
             System.Diagnostics.Debug.Assert(origin >= System.IO.SeekOrigin.Begin && origin <= System.IO.SeekOrigin.End, "origin >= SeekOrigin.Begin && origin <= SeekOrigin.End");
 
-            if (Interop.Kernel32.SetFilePointer(handle, offset, origin , out System.Int64 ret) == Interop.BOOL.FALSE)
+            Interop.NTSTATUS nts;
+            Interop.NtDll.FILE_POSITION_INFORMATION pinf = new();
+
+            switch (origin)
             {
-                System.Int32 error = Interop.Kernel32.GetLastError();
-                if (closeInvalidHandle && error == Interop.Errors.ERROR_INVALID_HANDLE) { Dispose(); }
-                throw System.IO.Win32Marshal.GetExceptionForWin32Error(error, path);
+                case System.IO.SeekOrigin.Begin:
+                    // When we specify at the beginning, we can just directly apply the new seeked value
+                    pinf.CurrentByteOffset = offset;
+                    break;
+                case System.IO.SeekOrigin.Current:
+                    // When we need offset relative to the current, we must call NtQueryInformationFile to retrieve current offset, and add to that the offset parameter
+                    nts = Interop.NtDll.NtQueryInformationFile(handle, out pinf, out _);
+                    if (nts != Interop.NTSTATUS.STATUS_SUCCESS) {
+                        throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts , path);
+                    }
+                    pinf.CurrentByteOffset += offset;
+                    break;
+                case System.IO.SeekOrigin.End:
+                    // When we need offset relative to the end, we must get the standard information structure.
+                    // However, here we will use GetFileLength to also cache the result if needed.
+                    if (TryGetCachedLength(out pinf.CurrentByteOffset) == false) {
+                        pinf.CurrentByteOffset = GetFileLength();
+                    }
+                    pinf.CurrentByteOffset += offset;
+                    break;
             }
 
-            return ret;
+            if ((nts = Interop.NtDll.NtSetInformationFile(handle, pinf, out _)) != Interop.NTSTATUS.STATUS_SUCCESS)
+            {
+                if (closeInvalidHandle && nts == Interop.NTSTATUS.STATUS_INVALID_HANDLE) { Dispose(); }
+                throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts, path);
+            }
+
+            return pinf.CurrentByteOffset;
         }
 
-        /// <summary>
-        /// Implements <see cref="System.IO.Stream.SetLength(long)"/> logic.
-        /// </summary>
+        /// <summary>Implements <see cref="System.IO.Stream.SetLength(long)"/> logic.</summary>
         /// <param name="length">The absolute length of the file.</param>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
         public unsafe void SetFileLength(long length)
         {
             EnsureValid();
-            var eofInfo = new Interop.Kernel32.FILE_END_OF_FILE_INFO() {
-                EndOfFile = length
-            };
 
-            if (Interop.Kernel32.SetFileInformationByHandle(handle , eofInfo) == Interop.BOOL.FALSE)
+            var eofi = new Interop.NtDll.FILE_END_OF_FILE_INFORMATION() { EndOfFile = length };
+
+            Interop.NTSTATUS nts;
+
+            if ((nts = Interop.NtDll.NtSetInformationFile(handle, eofi, out _)) != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                int errorCode = Interop.Kernel32.GetLastError();
-
-                throw errorCode == Interop.Errors.ERROR_INVALID_PARAMETER
-                    ? new ArgumentOutOfRangeException(nameof(length), SR.ArgumentOutOfRange_FileLengthTooBig)
-                    : System.IO.Win32Marshal.GetExceptionForWin32Error(errorCode, path);
+                throw nts == Interop.NTSTATUS.STATUS_INVALID_PARAMETER ?
+                    new ArgumentOutOfRangeException(nameof(length), SR.ArgumentOutOfRange_FileLengthTooBig) :
+                    System.IO.Win32Marshal.GetExceptionForNtStatus(nts, path);
             }
         }
 
-        public System.Boolean TryGetCachedLength(out long cachedLength)
-        {
-            cachedLength = _length;
-            return _lengthCanBeCached && cachedLength >= 0;
-        }
+        /// <summary>
+        /// Attempts to get the cached length value for this handle. <br />
+        /// If not supported, the caller must still use the <see cref="GetFileLength"/> method
+        /// to retrieve the file object length.
+        /// </summary>
+        /// <param name="cachedLength">The cached length value.</param>
+        /// <returns>A value whether the length is cached.</returns>
+        public System.Boolean TryGetCachedLength(out long cachedLength) => _lengthCanBeCached & (cachedLength = _length) > -1;
 
+        /// <summary>
+        /// Gets the total length of the current file, in bytes.
+        /// </summary>
+        /// <returns>The total length of the file object in bytes.</returns>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
         public System.Int64 GetFileLength()
         {
             if (!_lengthCanBeCached)
             {
+                // Check for handle validity only when we need to call GetFileLengthCore.
+                EnsureValid();
                 return GetFileLengthCore();
             }
 
@@ -370,6 +527,8 @@ namespace Microsoft.Win32.SafeHandles
             // in memory and avoid subsequent native calls which are expensive.
             if (_length < 0)
             {
+                // Check for handle validity only when we need to call GetFileLengthCore.
+                EnsureValid();
                 _length = GetFileLengthCore();
             }
 
@@ -379,6 +538,7 @@ namespace Microsoft.Win32.SafeHandles
         /// <summary>
         /// Gets the access that the handle has to the underlying file.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
         public FileAccess GetFileAccess()
         {
             EnsureValid();
@@ -405,136 +565,42 @@ namespace Microsoft.Win32.SafeHandles
                 return 0; 
             } else {
                 // Get a Win32 error for the NTSTATUS , and return that as the exception
-                throw System.IO.Win32Marshal.GetExceptionForWin32Error(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32() , path);
+                throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts , path);
             }
         }
 
+        /// <summary>
+        /// Gets the file's attributes.
+        /// </summary>
+        /// <returns>A combination of flags specifying the current file's attributes.</returns>
+        /// <exception cref="MP.ExceptionSystem.NativeWindowsException">A native unexpected exception occured.</exception>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
         public System.UInt32 GetAttributes()
         {
             EnsureValid();
-            Interop.Kernel32.FILE_BASIC_INFO basic;
-            if (Interop.Kernel32.GetFileInformationByHandle(handle, out basic) != Interop.BOOL.FALSE)
-            {
-                return basic.FileAttributes;
+            Interop.NtDll.FILE_BASIC_INFORMATION basic;
+            Interop.NTSTATUS nts = Interop.NtDll.NtQueryInformationFile(handle , out basic , out _);
+            if (nts != Interop.NTSTATUS.STATUS_SUCCESS) {
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
-            throw new MP.ExceptionSystem.NativeWindowsException();
+            return (System.UInt32)basic.FileAttributes;
         }
 
-        private unsafe FileOptions GetFileOptions()
-        {
-            // Query the file options only once
-            // If have been queried before disposing , continue to return them.
-            FileOptions fileOptions = _fileOptions;
-            if (fileOptions != (FileOptions)(-1))
-            {
-                return fileOptions;
-            }
-
-            EnsureValid();
-
-            FileOptions result = FileOptions.None;
-
-            Interop.NtDll.CreateOptions options;
-            Interop.NTSTATUS status = Interop.NtDll.NtQueryInformationFile(handle, out options, out _);
-
-            if (status != Interop.NTSTATUS.STATUS_SUCCESS)
-            {
-                System.UInt32 err = Interop.NtDll.RtlNtStatusToDosError(status);
-                throw new MP.ExceptionSystem.NativeWindowsException(err.ToInt32());
-            }
-
-            if ((options & (Interop.NtDll.CreateOptions.FILE_SYNCHRONOUS_IO_ALERT | Interop.NtDll.CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT)) == 0)
-            {
-                result |= FileOptions.Asynchronous;
-            }
-            if ((options & Interop.NtDll.CreateOptions.FILE_WRITE_THROUGH) != 0)
-            {
-                result |= FileOptions.WriteThrough;
-            }
-            if ((options & Interop.NtDll.CreateOptions.FILE_RANDOM_ACCESS) != 0)
-            {
-                result |= FileOptions.RandomAccess;
-            }
-            if ((options & Interop.NtDll.CreateOptions.FILE_SEQUENTIAL_ONLY) != 0)
-            {
-                result |= FileOptions.SequentialScan;
-            }
-            if ((options & Interop.NtDll.CreateOptions.FILE_DELETE_ON_CLOSE) != 0)
-            {
-                result |= FileOptions.DeleteOnClose;
-            }
-            if ((options & Interop.NtDll.CreateOptions.FILE_NO_INTERMEDIATE_BUFFERING) != 0)
-            {
-                result |= NoBuffering;
-            }
-
-            return _fileOptions = result;
-        }
-
-        internal System.Int32 GetFileType()
-        {
-            System.Int32 fileType = _fileType;
-            if (fileType == -1)
-            {
-                EnsureValid();
-                fileType = (System.Int32)Interop.Kernel32.GetFileType(handle);
-
-                System.Diagnostics.Debug.Assert(
-                      fileType == (System.Int32)Interop.Kernel32.FILE_TYPE.FILE_TYPE_DISK
-                    || fileType == (System.Int32)Interop.Kernel32.FILE_TYPE.FILE_TYPE_PIPE
-                    || fileType == (System.Int32)Interop.Kernel32.FILE_TYPE.FILE_TYPE_CHAR,
-                    $"Unknown file type: {fileType}");
-
-                _fileType = fileType;
-            }
-
-            return fileType;
-        }
-
-        private unsafe System.Int64 GetFileLengthCore()
+        /// <summary>
+        /// Gets the file's seek pointer position, in offset of bytes from the beginning of the file.
+        /// </summary>
+        /// <returns>The file object's seek pointer position.</returns>
+        /// <exception cref="ObjectDisposedException">The current <see cref="RedistSafeFileHandle"/> is disposed.</exception>
+        public System.Int64 GetFilePosition()
         {
             EnsureValid();
-            Interop.Kernel32.FILE_STANDARD_INFO info;
-
-            if (Interop.Kernel32.GetFileInformationByHandle(handle, out info) != Interop.BOOL.FALSE)
-            {
-                return info.EndOfFile;
+            Interop.NTSTATUS nts = Interop.NtDll.NtQueryInformationFile(handle, out Interop.NtDll.FILE_POSITION_INFORMATION p, out _);
+            if (nts != Interop.NTSTATUS.STATUS_SUCCESS) {
+                throw System.IO.Win32Marshal.GetExceptionForNtStatus(nts , path);
             }
-
-            // In theory when GetFileInformationByHandleEx fails, then
-            // a) IsDevice can modify last error (not true today, but can be in the future),
-            // b) DeviceIoControl can succeed (last error set to ERROR_SUCCESS) but return fewer bytes than requested.
-            // The error is stored and in such cases exception for the first failure is going to be thrown.
-            int lastError = Interop.Kernel32.GetLastError();
-
-            if (path is null || System.IO.PathInternal.IsDevice(path) == false)
-            {
-                throw System.IO.Win32Marshal.GetExceptionForWin32Error(lastError , path is null ? "" : path);
-            }
-
-            Interop.Kernel32.STORAGE_READ_CAPACITY storageReadCapacity;
-            System.UInt32 bytesReturned;
-            Interop.BOOL success = Interop.Kernel32.DeviceIoControl(
-                handle,
-                Interop.IOCTL.IOCTL_STORAGE_READ_CAPACITY,
-                null,
-                0,
-                &storageReadCapacity,
-                sizeof(Interop.Kernel32.STORAGE_READ_CAPACITY).ToUInt32(),
-                &bytesReturned,
-                null);
-
-            if (success == Interop.BOOL.FALSE)
-            {
-                throw System.IO.Win32Marshal.GetExceptionForLastWin32Error(path);
-            } else if (bytesReturned != sizeof(Interop.Kernel32.STORAGE_READ_CAPACITY))
-            {
-                throw System.IO.Win32Marshal.GetExceptionForWin32Error(lastError , path);
-            }
-
-            return storageReadCapacity.DiskLength;
+            return p.CurrentByteOffset;
         }
-    
+
         private void CommonDisposeCode()
         {
             path = null;

@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using MP;
 using System;
 using System.Buffers;
 using System.Diagnostics;
@@ -91,7 +90,7 @@ namespace Microsoft.Security.Cryptography
             }
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
             return wb;
         }

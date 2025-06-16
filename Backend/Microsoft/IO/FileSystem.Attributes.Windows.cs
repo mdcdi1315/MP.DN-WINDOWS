@@ -14,10 +14,7 @@ namespace Microsoft.IO
 {
     internal static partial class FileSystem
     {
-        public static bool DirectoryExists(string fullPath)
-        {
-            return DirectoryExists(fullPath, out int lastError);
-        }
+        public static bool DirectoryExists(string fullPath) => DirectoryExists(fullPath, out _);
 
         private static bool DirectoryExists(string path, out int lastError)
         {
@@ -26,8 +23,8 @@ namespace Microsoft.IO
 
             return
                 (lastError == 0) &&
-                (data.dwFileAttributes != -1) &&
-                ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
+                (data.dwFileAttributes != unchecked((Interop.FileAttributes)(-1))) &&
+                ((data.dwFileAttributes & Interop.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
         }
 
         public static bool FileExists(string fullPath)
@@ -37,8 +34,8 @@ namespace Microsoft.IO
 
             return
                 (errorCode == 0) &&
-                (data.dwFileAttributes != -1) &&
-                ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == 0);
+                (data.dwFileAttributes != unchecked((Interop.FileAttributes)(-1))) &&
+                ((data.dwFileAttributes & Interop.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == 0);
         }
 
         /// <summary>
@@ -59,7 +56,7 @@ namespace Microsoft.IO
             {
                 if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {
-                    errorCode = Marshal.GetLastWin32Error();
+                    errorCode = Interop.Kernel32.GetLastError();
 
                     if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND
                         && errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND
@@ -97,7 +94,7 @@ namespace Microsoft.IO
                         {
                             if (handle.IsInvalid)
                             {
-                                errorCode = Marshal.GetLastWin32Error();
+                                errorCode = Interop.Kernel32.GetLastError();
                             }
                             else
                             {
@@ -117,7 +114,7 @@ namespace Microsoft.IO
                     case Interop.Errors.ERROR_PATH_NOT_FOUND:
                     case Interop.Errors.ERROR_NOT_READY: // Removable media not ready
                         // Return default value for backward compatibility
-                        data.dwFileAttributes = -1;
+                        data.dwFileAttributes = unchecked((Interop.FileAttributes)(-1));
                         return Interop.Errors.ERROR_SUCCESS;
                 }
             }

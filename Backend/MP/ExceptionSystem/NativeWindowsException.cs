@@ -21,6 +21,12 @@
             message = Interop.Kernel32.GetMessage(errorcode);
         }
 
+        internal NativeWindowsException(Interop.NTSTATUS ntstatus) : base()
+        {
+            errorcode = Interop.NtDll.RtlNtStatusToDosError(ntstatus).ToInt32();
+            message = Interop.Kernel32.GetMessage(errorcode);
+        }
+
         public override string Message => $"Windows error 0x{errorcode:x6} occured. \nDetails: {message}";
 
         public System.String NativeMessage => message;

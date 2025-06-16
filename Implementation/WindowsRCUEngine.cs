@@ -1484,7 +1484,7 @@ namespace MP
                 MusicPlayerHelper.ShowErrorResourceMessage("Error_AddingTracksInArchivedDisallowed", gamepad);
                 return;
             }
-            Microsoft.Win32.MPOpenFileDialog OFD = new();
+            Dialogs.OpenFileDialog OFD = new();
             OFD.StartupFolder = basedir.FullName;
             OFD.DefaultFilterExtension = ".mp3";
             OFD.MultiSelect = false;

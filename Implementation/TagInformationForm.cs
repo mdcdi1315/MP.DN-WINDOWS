@@ -118,7 +118,7 @@ namespace MP
         {
             if (imgstream is null) { return; }
             System.Threading.Thread td = new(() => {
-                Microsoft.Win32.MPSaveFileDialog sfd = new();
+                Dialogs.SaveFileDialog sfd = new();
                 sfd.DefaultFilterExtension = ".jpeg";
                 sfd.AddMultipleFiltersFromString(Settings.Global.Resources.GetStringResource("ExportCoverImage_ImageFormats"));
                 sfd.CheckFilePath = true;
@@ -126,7 +126,7 @@ namespace MP
                 if (sfd.SpawnDialog(Handle))
                 {
                     FileStream fs = null;
-                    System.String extension = Microsoft.IO.Path.GetExtension(sfd.FilePaths[0]);
+                    System.String extension = Path.GetExtension(sfd.FilePaths[0]);
                     System.Drawing.Bitmap bm = null;
                     try {
                         fs = new(sfd.FilePaths[0], FileMode.Create);

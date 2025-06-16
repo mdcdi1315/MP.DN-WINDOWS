@@ -2,11 +2,11 @@
 using MP.ComInterop;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Win32
+namespace MP.Dialogs
 {
-    public unsafe sealed class MPOpenFileDialog : MPFileDialog
+    public unsafe sealed class OpenFolderDialog : FileDialog
     {
-        public MPOpenFileDialog() : base(CommonInteropClsIds.CLSID_FileOpenDialog) { }
+        public OpenFolderDialog() : base(CommonInteropClsIds.CLSID_FileOpenDialog , true) { }
 
         protected override bool SpawnDialogSpecificImplementation(IFileDialog dialog, nint parenthandle)
         {
@@ -44,7 +44,9 @@ namespace Microsoft.Win32
                     }
                     Marshal.ReleaseComObject(array);
                     return true;
-                } else {
+                }
+                else
+                {
                     System.IntPtr isli;
                     hr = dialog.GetResult(&isli);
                     if (hr.SUCCEEDED)
@@ -61,11 +63,15 @@ namespace Microsoft.Win32
                         Interop.Ole32.CoTaskMemFree(dpname);
                         Marshal.ReleaseComObject(item);
                         return true;
-                    } else {
+                    }
+                    else
+                    {
                         return false;
                     }
                 }
-            } else {
+            }
+            else
+            {
                 return false;
             }
         }

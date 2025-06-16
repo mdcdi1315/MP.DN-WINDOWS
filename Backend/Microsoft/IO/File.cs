@@ -71,38 +71,74 @@ namespace Microsoft.IO
             FileSystem.CopyFile(Path.GetFullPath(sourceFileName), Path.GetFullPath(destFileName), overwrite);
         }
 
-        // Creates a file in a particular path.  If the file exists, it is replaced.
-        // The file is opened with ReadWrite access and cannot be opened by another 
-        // application until it has been closed.  An IOException is thrown if the 
-        // directory specified doesn't exist.
+        /// <summary>
+        /// Creates a file in a particular path. If the file exists, it is replaced. <br />
+        /// The file is opened with ReadWrite access and cannot be opened by another application until it has been closed. <br />
+        /// An <see cref="System.IO.IOException"/> is thrown if the directory specified doesn't exist.
+        /// </summary>
+        /// <param name="path">The file path where the file is to be created.</param>
+        /// <returns>A <see cref="FileStream"/> object representing the opened file.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="path"/> was representing the empty string.</exception>
+        /// <exception cref="System.IO.IOException">An unexpected I/O exception was occured.</exception>
+        /// <exception cref="UnauthorizedAccessException">The application does not have access to the specific path.</exception>
         public static FileStream Create(string path) => Create(path, DefaultBufferSize);
 
-        // Creates a file in a particular path.  If the file exists, it is replaced.
-        // The file is opened with ReadWrite access and cannot be opened by another 
-        // application until it has been closed.  An IOException is thrown if the 
-        // directory specified doesn't exist.
+        /// <summary>
+        /// Creates a file in a particular path. If the file exists, it is replaced. <br />
+        /// The file is opened with ReadWrite access and cannot be opened by another application until it has been closed. <br />
+        /// An IOException is thrown if the directory specified doesn't exist.
+        /// </summary>
+        /// <param name="path">The file path where the file is to be created.</param>
+        /// <param name="bufferSize"></param>
+        /// <returns>A <see cref="FileStream"/> object representing the opened file.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="path"/> was representing the empty string.</exception>
+        /// <exception cref="System.IO.IOException">An unexpected I/O exception was occured.</exception>
+        /// <exception cref="UnauthorizedAccessException">The application does not have access to the specific path.</exception>
         public static FileStream Create(string path, int bufferSize) // bufferSize is currently not used.
             => new(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
- 
-        // Deletes a file. The file specified by the designated path is deleted.
-        // If the file does not exist, Delete succeeds without throwing
-        // an exception.
-        // 
-        // On Windows, Delete will fail for a file that is open for normal I/O
-        // or a file that is memory mapped.
+
+        /// <summary>
+        /// Deletes a file. The file specified by the designated path is deleted. <br />
+        /// If the file does not exist, Delete succeeds without throwing an exception. <br /> <br />
+        /// 
+        /// On Windows, Delete will fail for a file that is open for normal I/O or a file that is memory mapped.
+        /// </summary>
+        /// <param name="path">The path of the file that is to be deleted.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="path"/> was representing the empty string.</exception>
         public static void Delete(string path)
         {
-            if (path is null)
-                throw new ArgumentNullException(nameof(path));
-
+            ArgumentException.ThrowIfNullOrEmpty(path);
             FileSystem.DeleteFile(Path.GetFullPath(path));
         }
 
-        // Tests whether a file exists. The result is true if the file
-        // given by the specified path exists; otherwise, the result is
-        // false.  Note that if path describes a directory,
-        // Exists will return true.
-        public static bool Exists(string path)
+        /// <summary>
+        /// Renames a file. The file specified by the designated path is moved based on the path provided in <paramref name="newname"/> parameter. <br />
+        /// The file must exist so that this operation can succeed. <br />
+        /// </summary>
+        /// <param name="sourcepath"></param>
+        /// <param name="newname"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="sourcepath"/> and/or <paramref name="newname"/> were <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="sourcepath"/> and/or <paramref name="newname"/> were representing the empty string.</exception>
+        /// <exception cref="System.IO.FileNotFoundException">The source file does not exist.</exception>
+        /// <exception cref="UnauthorizedAccessException">The application does not have access to the specific path.</exception>
+        public static void Rename(System.String sourcepath , System.String newname)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(sourcepath);
+            ArgumentException.ThrowIfNullOrWhiteSpace(newname);
+            FileSystem.RenameFile(sourcepath, newname);
+        }
+
+        /// <summary>
+        /// Tests whether a file exists. <br />
+        /// The result is <see langword="true"/> if the file given by the specified path exists; otherwise, the result is <see langword="false"/>. <br />
+        /// Note that if <paramref name="path"/> describes a directory, Exists will return <see langword="true"/>.
+        /// </summary>
+        /// <param name="path">The path to be tested.</param>
+        /// <returns>A value whether the file specified in <paramref name="path"/> is present on the file system.</returns>
+        public static System.Boolean Exists(string path)
         {
             try
             {
@@ -113,10 +149,11 @@ namespace Microsoft.IO
 
                 path = Path.GetFullPath(path);
 
+                
+                // GetFullPath should never return null
+                Debug.Assert(path is not null, "File.Exists: GetFullPath returned null");
                 // After normalizing, check whether path ends in directory separator.
                 // Otherwise, FillAttributeInfo removes it and we may return a false positive.
-                // GetFullPath should never return null
-                Debug.Assert(path != null, "File.Exists: GetFullPath returned null");
                 if (path.Length > 0 && System.IO.PathInternal.IsDirectorySeparator(path[path.Length - 1]))
                 {
                     return false;
@@ -457,10 +494,7 @@ namespace Microsoft.IO
             return System.IO.ReadLinesIterator.CreateIterator(path, encoding);
         }
 
-        public static void WriteAllLines(string path, string[] contents)
-        {
-            WriteAllLines(path, (IEnumerable<string>)contents);
-        }
+        public static void WriteAllLines(string path, string[] contents) => WriteAllLines(path, (IEnumerable<string>)contents);
 
         public static void WriteAllLines(string path, IEnumerable<string> contents)
         {
@@ -474,10 +508,7 @@ namespace Microsoft.IO
             InternalWriteAllLines(new System.IO.StreamWriter(path), contents);
         }
 
-        public static void WriteAllLines(string path, string[] contents, Encoding encoding)
-        {
-            WriteAllLines(path, (IEnumerable<string>)contents, encoding);
-        }
+        public static void WriteAllLines(string path, string[] contents, Encoding encoding) => WriteAllLines(path, (IEnumerable<string>)contents, encoding);
 
         public static void WriteAllLines(string path, IEnumerable<string> contents, Encoding encoding)
         {
@@ -509,7 +540,7 @@ namespace Microsoft.IO
 
         public static void AppendAllText(string path, string contents)
         {
-            if (path == null)
+            if (path is null)
                 throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
@@ -522,7 +553,7 @@ namespace Microsoft.IO
 
         public static void AppendAllText(string path, string contents, Encoding encoding)
         {
-            if (path == null)
+            if (path is null)
                 throw new ArgumentNullException(nameof(path));
             if (encoding == null)
                 throw new ArgumentNullException(nameof(encoding));

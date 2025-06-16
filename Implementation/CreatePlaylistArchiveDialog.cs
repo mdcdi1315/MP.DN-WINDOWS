@@ -146,7 +146,7 @@ namespace MP
                 case "Browse...":
                     while (System.String.IsNullOrEmpty(resultfile))
                     {
-                        Microsoft.Win32.MPSaveFileDialog SFD = new();
+                        Dialogs.SaveFileDialog SFD = new();
                         SFD.DefaultFilterExtension = ".aplaylist";
                         SFD.CheckPath = true;
                         SFD.AddFilter(new("*.aplaylist", "Archived playlist files"));

@@ -518,8 +518,8 @@ namespace MP
                 return;
             } else if (backend.ListViewMode == ListViewMode.PlaylistSelect)
             {
-                Microsoft.Win32.MPOpenFileDialog OFD = new();
-                OFD.AddFilter(Microsoft.Win32.MPFileDialogFilter.GetFromWin32Filter(Global.Resources.GetStringResource("ArchOpener_FileFilter")));
+                Dialogs.OpenFolderDialog OFD = new();
+                OFD.AddFilter(Dialogs.FileDialogFilter.GetFromWin32Filter(Global.Resources.GetStringResource("ArchOpener_FileFilter")));
                 OFD.DefaultFilterExtension = ".aplaylist";
                 OFD.Title = Global.Resources.GetStringResource("Message_SaveArchivedPlaylistDialog_Title");
                 OFD.MultiSelect = false;

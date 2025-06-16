@@ -43,7 +43,7 @@ namespace Microsoft.IO
 
         internal unsafe void Init(Interop.NtDll.FILE_FULL_DIR_INFORMATION* info)
         {
-            _data.dwFileAttributes = (int)info->FileAttributes;
+            _data.dwFileAttributes = (Interop.FileAttributes)info->FileAttributes;
             _data.ftCreationTime = *((Interop.FILETIME*)&info->CreationTime);
             _data.ftLastAccessTime = *((Interop.FILETIME*)&info->LastAccessTime);
             _data.ftLastWriteTime = *((Interop.FILETIME*)&info->LastWriteTime);
@@ -79,7 +79,7 @@ namespace Microsoft.IO
                     // but Exists is supposed to return true or false.
                     return false;
                 }
-                return (_data.dwFileAttributes != -1) && ((this is DirectoryInfo) == ((_data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY));
+                return (_data.dwFileAttributes != unchecked((Interop.FileAttributes)(-1))) && ((this is DirectoryInfo) == ((_data.dwFileAttributes & Interop.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == Interop.FileAttributes.FILE_ATTRIBUTE_DIRECTORY));
             }
         }
 

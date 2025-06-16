@@ -1,5 +1,4 @@
 ﻿
-using MP;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,15 +16,32 @@ namespace Microsoft.IO
         private System.Int64 poscurrent;
         private SemaphoreSlim threadaccess;
 
+        /// <summary>
+        /// Creates a new <see cref="FileStream"/> class instance from a preexisting <see cref="RedistSafeFileHandle"/>.
+        /// </summary>
+        /// <param name="existing">The pre-existing <see cref="RedistSafeFileHandle"/> to use.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="existing"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="existing"/> was an asyncronous handle, or the passed handle was already closed.</exception>
         public FileStream(RedistSafeFileHandle existing)
         {
             if (existing is null) { throw new ArgumentNullException(nameof(existing)); }
+            if (existing.IsClosed) { throw new ArgumentException("The passed handle is closed." , nameof(existing)); }
             if (existing.IsAsync) { throw new ArgumentException("Asynchronous file handling is unsupported.", nameof(existing)); }
             sfh = existing;
             poscurrent = sfh.Seek(0, System.IO.SeekOrigin.Current);
             threadaccess = new(1);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="FileStream"/> class instance by specifying a file path, and with the specified file mode for this file to be opened.
+        /// </summary>
+        /// <param name="savepath">The path where the file is to be saved to, or read from.</param>
+        /// <param name="mode">The file mode to use to open this file.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="savepath"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="savepath"/> was represented the empty string.</exception>
+        /// <exception cref="System.IO.FileNotFoundException">Valid only when opening a file. The file does not exist.</exception>
+        /// <exception cref="System.IO.IOException">An unexpected I/O exception was occured.</exception>
+        /// <exception cref="UnauthorizedAccessException">The application does not have access to the specific path.</exception>
         public FileStream(System.String savepath, FileMode mode)
         {
             FileAccess fa = 0;
@@ -51,15 +67,37 @@ namespace Microsoft.IO
             SharedInitialize(savepath, mode, fa, FileShare.None);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="FileStream"/> class instance by specifying a file path, the file mode for this file to be opened,
+        /// and the desired data access to have on the file.
+        /// </summary>
+        /// <param name="savepath">The path where the file is to be saved to, or read from.</param>
+        /// <param name="mode">The file mode to use to open this file.</param>
+        /// <param name="access">The desired file access that the system and you will have access on the creating file object.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="savepath"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="savepath"/> was represented the empty string.</exception>
+        /// <exception cref="System.IO.FileNotFoundException">Valid only when opening a file. The file does not exist.</exception>
+        /// <exception cref="System.IO.IOException">An unexpected I/O exception was occured.</exception>
+        /// <exception cref="UnauthorizedAccessException">The application does not have access to the specific path.</exception>
         public FileStream(System.String savepath , FileMode mode , FileAccess access)
-        {
-            SharedInitialize(savepath, mode, access, FileShare.None);
-        }
+            => SharedInitialize(savepath, mode, access, FileShare.None);
 
+        /// <summary>
+        /// Creates a new <see cref="FileStream"/> class instance by specifying a file path, the file mode for this file to be opened,
+        /// the desired data access to have on the file, and with a value whether the file can be opened by other applications too, 
+        /// and how it should be opened by such applications.
+        /// </summary>
+        /// <param name="savepath">The path where the file is to be saved to, or read from.</param>
+        /// <param name="mode">The file mode to use to open this file.</param>
+        /// <param name="access">The desired file access that the system and you will have access on the creating file object.</param>
+        /// <param name="share">The desired file access that other applications can have on the file.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="savepath"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="savepath"/> was represented the empty string.</exception>
+        /// <exception cref="System.IO.FileNotFoundException">Valid only when opening a file. The file does not exist.</exception>
+        /// <exception cref="System.IO.IOException">An unexpected I/O exception was occured.</exception>
+        /// <exception cref="UnauthorizedAccessException">The application does not have access to the specific path.</exception>
         public FileStream(System.String savepath, FileMode mode, FileAccess access, FileShare share)
-        {
-            SharedInitialize(savepath, mode, access, share);
-        }
+            => SharedInitialize(savepath, mode, access, share);
 
         public static FileStream OpenAsRandomAccess(System.String savepath , FileMode fm , FileAccess fa , FileShare fse)
         {
@@ -74,13 +112,13 @@ namespace Microsoft.IO
         [System.Diagnostics.StackTraceHidden]
         private void SharedInitialize(System.String savepath, FileMode mode, FileAccess access , FileShare share)
         {
-            if (System.String.IsNullOrEmpty(savepath)) { throw new ArgumentNullException(nameof(savepath)); }
+            ArgumentException.ThrowIfNullOrEmpty(savepath);
             if (IsOpenMode(mode) && File.Exists(savepath) == false)
             {
                 throw new System.IO.FileNotFoundException("The system cannot find the file requested.", savepath);
             }
             sfh = RedistSafeFileHandle.Open(savepath, mode, access, share, FileOptions.None , 100);
-            poscurrent = sfh.Seek(0, System.IO.SeekOrigin.Current);
+            poscurrent = sfh.GetFileLength();
             threadaccess = new(1);
         }
 
@@ -97,8 +135,6 @@ namespace Microsoft.IO
         /// Gets the underlying native handle that does the heavy lifting of reading and writing to the underlying device.
         /// </summary>
         public RedistSafeFileHandle SafeFileHandle => sfh;
-
-        public override bool CanSeek => sfh.CanSeek; // This is just readonly so the caller can call it many consecutive times
 
         public override System.Int64 Seek(long offset, System.IO.SeekOrigin origin)
         {
@@ -152,6 +188,9 @@ namespace Microsoft.IO
                 return detaccess == FileAccess.ReadWrite;
             }
         }
+        
+        // This is just readonly so the caller can call it many consecutive times
+        public override bool CanSeek => sfh.CanSeek; 
 
         public override void Flush()
         {
@@ -304,22 +343,31 @@ namespace Microsoft.IO
 
         public override ValueTask DisposeAsync() => new(Task.Run(Dispose));
 
-        public override string ToString() => $"Microsoft.IO.FileStream {{ CanRead = {CanRead}, CanWrite = {CanWrite}, Position = {poscurrent}, Length = {Length}, Handle = {sfh.Handle} }}";
+        public override string ToString() => $"Microsoft.IO.FileStream {{ CanRead = {CanRead}, CanWrite = {CanWrite}, Position = {poscurrent}, Length = {Length}, Handle = {sfh?.Handle} }}";
 
         protected override void Dispose(bool disposing) 
         {
-            if (sfh is not null)
+            if (disposing)
             {
-                if (CanWrite) { sfh.FlushToDisk(); }
-                sfh.Dispose();
-                sfh = null;
-            }
-            if (threadaccess is not null)
-            {
-                // The thread that called Dispose must wait until all the semaphore operations have been finished.
-                while (threadaccess.CurrentCount == 0) { Thread.Sleep(10); }
-                threadaccess.Dispose();
-                threadaccess = null;
+                threadaccess?.Wait();
+                try {
+                    if (sfh is not null)
+                    {
+                        // May fail if the handle is invalid
+                        if (CanWrite) { sfh.FlushToDisk(); }
+                        sfh.Dispose();
+                        sfh = null;
+                    }
+                } catch { 
+                    
+                } finally {
+                    if (threadaccess is not null)
+                    {
+                        threadaccess.Release();
+                        threadaccess.Dispose();
+                        threadaccess = null;
+                    }
+                }
             }
         }
     }

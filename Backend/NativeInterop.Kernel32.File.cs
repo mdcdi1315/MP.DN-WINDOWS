@@ -200,9 +200,7 @@ unsafe partial class Interop
         public struct WIN32_FILE_ATTRIBUTE_DATA
         {
             [FieldOffset(0)]
-            private System.Byte pin;
-            [FieldOffset(0)]
-            public System.Int32 dwFileAttributes;
+            public FileAttributes dwFileAttributes;
             [FieldOffset(4)]
             public FILETIME ftCreationTime;
             [FieldOffset(12)]
@@ -216,19 +214,19 @@ unsafe partial class Interop
 
             public void PopulateFrom(ref WIN32_FIND_DATA findData)
             {
-                void* src = Unsafe.AsPointer(ref findData);
-                fixed (System.Byte* dst = &Unsafe.AsRef(in pin))
-                {
-                    Unsafe.CopyBlockUnaligned(dst, src , sizeof(WIN32_FILE_ATTRIBUTE_DATA).ToUInt32());
-                }
+                Unsafe.CopyBlockUnaligned(
+                    ref Unsafe.As<WIN32_FILE_ATTRIBUTE_DATA, System.Byte>(ref Unsafe.AsRef(in this)),
+                    ref Unsafe.As<WIN32_FIND_DATA, System.Byte>(ref findData), 
+                    sizeof(WIN32_FILE_ATTRIBUTE_DATA).ToUInt32()
+                );
             }
         }
 
-        [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode , Size = 592 , Pack = 4)]
+        [StructLayout(LayoutKind.Explicit,Pack = 4)]
         public unsafe struct WIN32_FIND_DATA
         {
             [FieldOffset(0)]
-            public System.UInt32 dwFileAttributes;
+            public FileAttributes dwFileAttributes;
             [FieldOffset(4)]
             public FILETIME ftCreationTime;
             [FieldOffset(12)]
@@ -244,47 +242,13 @@ unsafe partial class Interop
             [FieldOffset(40)]
             public System.UInt32 dwReserved1;
             [FieldOffset(44)]
-            private fixed char _cFileName[MAX_PATH];
-            [FieldOffset(MAX_PATH+44)]
-            private fixed char _cAlternateFileName[14];
+            private fixed System.Char _cFileName[MAX_PATH];
+            [FieldOffset((MAX_PATH * sizeof(System.Char))+44)]
+            private fixed System.Char _cAlternateFileName[14];
 
-            public readonly ReadOnlySpan<char> cFileName {
-                get { fixed (char* c = _cFileName) return new ReadOnlySpan<char>(c, MAX_PATH); }
+            public readonly ReadOnlySpan<System.Char> cFileName {
+                get { fixed (System.Char* c = _cFileName) return new ReadOnlySpan<char>(c, MAX_PATH); }
             }
-        }
-
-        [StructLayout(LayoutKind.Explicit, Size = 40, Pack = 8)]
-        public struct FILE_BASIC_INFO
-        {
-            [FieldOffset(0)]
-            public System.Int64 CreationTime;
-            [FieldOffset(8)]
-            public System.Int64 LastAccessTime;
-            [FieldOffset(16)]
-            public System.Int64 LastWriteTime;
-            [FieldOffset(24)]
-            public System.Int64 ChangeTime;
-            [FieldOffset(32)]
-            public System.UInt32 FileAttributes;
-        }
-
-        [StructLayout(LayoutKind.Explicit , Size = 24 , Pack = 8)]
-        public struct FILE_STANDARD_INFO
-        { 
-            [FieldOffset(0)]
-            public System.Int64 AllocationSize;
-
-            [FieldOffset(8)]
-            public System.Int64 EndOfFile;
-
-            [FieldOffset(16)]
-            public System.UInt32 NumberOfLinks;
-
-            [FieldOffset(20)]
-            public BOOLEAN DeletePending;
-
-            [FieldOffset(21)]
-            public BOOLEAN Directory;
         }
 
         [StructLayout(LayoutKind.Explicit , Size = 28 , Pack = 8)]
@@ -313,13 +277,6 @@ unsafe partial class Interop
             public System.Int64 AllocationSize;
         }
 
-        [StructLayout(LayoutKind.Explicit)]
-        public struct FILE_END_OF_FILE_INFO
-        {
-            [FieldOffset(0)]
-            public System.Int64 EndOfFile;
-        }
-
         public static class IOReparseOptions
         {
             public const System.UInt32 IO_REPARSE_TAG_FILE_PLACEHOLDER = 0x80000015;
@@ -329,6 +286,7 @@ unsafe partial class Interop
         public static class FileOperations
         {
             public const System.Int32 OPEN_EXISTING = 3;
+            public const System.Int32 DELETE = 0x00010000;
             public const System.Int32 COPY_FILE_FAIL_IF_EXISTS = 0x00000001;
 
             public const System.Int32 FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
@@ -342,14 +300,6 @@ unsafe partial class Interop
         {
             public const int GENERIC_READ = unchecked((int)0x80000000);
             public const int GENERIC_WRITE = 0x40000000;
-        }
-
-        public static class FileAttributes
-        {
-            public const int FILE_ATTRIBUTE_NORMAL = 0x00000080;
-            public const int FILE_ATTRIBUTE_READONLY = 0x00000001;
-            public const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
-            public const int FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
         }
 
         public static class SecurityOptions
@@ -380,16 +330,6 @@ unsafe partial class Interop
             {
                 return new(FindFirstFile_Native(pfn, FINDEX_INFO_LEVELS.FindExInfoBasic, pdt, FINDEX_SEARCH_OPS.FindExSearchNameMatch, IntPtr.Zero, 0));
             }
-        }
-
-        private static string GetAndTrimString(Span<char> buffer)
-        {
-            int length = buffer.Length;
-            while (length > 0 && buffer[length - 1] <= 32)
-            {
-                length--; // trim off spaces and non-printable ASCII chars at the end of the resource
-            }
-            return buffer.Slice(0, length).ToString();
         }
 
         /// <summary>
@@ -669,32 +609,6 @@ unsafe partial class Interop
         public static BOOL SetFileInformationByHandle(System.IntPtr file, FILE_ALLOCATION_INFO lpallocationinfo)
             => SetFileInformationByHandle_Native(file, FILE_INFO_BY_HANDLE_CLASS.FileAllocationInfo, &lpallocationinfo, sizeof(FILE_ALLOCATION_INFO).ToUInt32());
 
-        public static BOOL SetFileInformationByHandle(System.IntPtr file , FILE_BASIC_INFO lpbasicinfo)
-            => SetFileInformationByHandle_Native(file, FILE_INFO_BY_HANDLE_CLASS.FileBasicInfo, &lpbasicinfo, sizeof(FILE_BASIC_INFO).ToUInt32());
-
-        public static BOOL SetFileInformationByHandle(System.IntPtr file, FILE_END_OF_FILE_INFO lpendoffile)
-            => SetFileInformationByHandle_Native(file, FILE_INFO_BY_HANDLE_CLASS.FileEndOfFileInfo, &lpendoffile, sizeof(FILE_END_OF_FILE_INFO).ToUInt32());
-
-        // Default values indicate "no change".  Use defaults so that we don't force callsites to be aware of the default values
-        public static unsafe bool SetFileTime(
-            RedistSafeFileHandle hFile,
-            long creationTime = -1,
-            long lastAccessTime = -1,
-            long lastWriteTime = -1,
-            long changeTime = -1,
-            uint fileAttributes = 0)
-        {
-            FILE_BASIC_INFO basicInfo = new FILE_BASIC_INFO() {
-                CreationTime = creationTime,
-                LastAccessTime = lastAccessTime,
-                LastWriteTime = lastWriteTime,
-                ChangeTime = changeTime,
-                FileAttributes = fileAttributes
-            };
-
-            return SetFileInformationByHandle(hFile.Handle, basicInfo) != BOOL.FALSE;
-        }
-
         [DllImport(Libraries.Kernel32 , EntryPoint = "ReadFile" , ExactSpelling = true , SetLastError = true)]
         private static extern BOOL ReadFile_Native(System.IntPtr hfe, System.Byte* pbuf, System.UInt32 numbytestoread, System.UInt32* pnumbytesread, OVERLAPPED* poverlapped);
     
@@ -762,68 +676,6 @@ unsafe partial class Interop
             System.UInt32 OutBufferSize,
             System.UInt32* pbytesret,
             OVERLAPPED* poverlapped);
-
-        [DllImport(Libraries.Kernel32 , EntryPoint = "GetFileInformationByHandleEx" , SetLastError = true , ExactSpelling = true)]
-        private static extern BOOL GetFileInformationByHandle_Native(System.IntPtr hfe , FILE_INFO_BY_HANDLE_CLASS filecls , void* pfileinfo , System.UInt32 bufsize);
-
-        public static BOOL GetFileInformationByHandle(System.IntPtr file , out FILE_STANDARD_INFO standardinf)
-        {
-            FILE_STANDARD_INFO fstandard;
-            BOOL ret = GetFileInformationByHandle_Native(file, FILE_INFO_BY_HANDLE_CLASS.FileStandardInfo, &fstandard, sizeof(FILE_STANDARD_INFO).ToUInt32());
-            standardinf = fstandard;
-            return ret;
-        }
-
-        public static BOOL GetFileInformationByHandle(System.IntPtr file , out FILE_BASIC_INFO basicinf)
-        {
-            FILE_BASIC_INFO snative;
-            BOOL ret = GetFileInformationByHandle_Native(file, FILE_INFO_BY_HANDLE_CLASS.FileBasicInfo, &snative, sizeof(FILE_BASIC_INFO).ToUInt32());
-            basicinf = snative;
-            return ret;
-        }
-
-        public static BOOL GetFileInformationByHandle(System.IntPtr file , out System.String filename)
-        {
-            // For FILE_NAME_INFO we have to work with the following way:
-            // The FILE_NAME_INFO is the buffer that contains the name string.
-            // So we will create a byte array and will get the required information,
-            // emulating the structure.
-            System.Byte[] datatemp = new System.Byte[1004]; // The file name along it's buffer size.
-        g_retry:
-            (datatemp.Length - 4).GetBytes().Copy(0, datatemp, 0, sizeof(System.Int32).ToUInt32());
-            BOOL bret;
-            fixed (System.Byte* pdat = datatemp)
-            {
-                bret = GetFileInformationByHandle_Native(file, FILE_INFO_BY_HANDLE_CLASS.FileNameInfo, pdat, datatemp.Length.ToUInt32());
-                if (bret == BOOL.FALSE)
-                {
-                    System.Int32 erc = GetLastError();
-                    if (erc == Errors.ERROR_MORE_DATA) {
-                        datatemp = new System.Byte[datatemp.ToUInt32(0) + 4];
-                        goto g_retry;
-                    } else {
-                        throw new MP.ExceptionSystem.NativeWindowsException(erc);
-                    }
-                }
-            }
-            fixed (System.Byte* pdat = &datatemp[4])
-            {
-                // And return the file name by the length...
-                filename = new((System.Char*)pdat , 0 , (datatemp.ToUInt32(0) / sizeof(System.Char)).ToInt32());
-            }
-            return bret;
-        }
-
-        [DllImport(Libraries.Kernel32 , EntryPoint = "SetFilePointerEx" , SetLastError = true , ExactSpelling = true)]
-        private static extern BOOL SetFilePointer_Native(System.IntPtr hfe, System.Int64 disttomove, System.Int64* pdistmoved, SeekOrigin origin);
-
-        public static BOOL SetFilePointer(System.IntPtr hfe , System.Int64 offset , SeekOrigin origin , out System.Int64 movedat)
-        {
-            System.Int64 pmv;
-            BOOL ret = SetFilePointer_Native(hfe, offset, &pmv, origin);
-            movedat = pmv;
-            return ret;
-        }
 
         [DllImport(Libraries.Kernel32 , EntryPoint = "CancelIoEx" , SetLastError = true , ExactSpelling = true)]
         private static extern BOOL CancelIo_Native(System.IntPtr hfe, OVERLAPPED* poverlapped);

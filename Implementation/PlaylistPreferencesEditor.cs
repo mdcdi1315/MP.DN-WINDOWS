@@ -151,7 +151,7 @@ namespace MP
         private void BrowseFile_Click(object sender, EventArgs e)
         {
             System.Threading.Thread td = new(() => {
-                Microsoft.Win32.MPOpenFileDialog ofd = new();
+                Dialogs.OpenFileDialog ofd = new();
                 ofd.Title = $"Select value for option {playlist.Preferences[OptionBox.SelectedIndex - 1].Name} ...";
                 ofd.AddFilter(new("*.*", "All Files"));
                 ofd.MultiSelect = false;

@@ -1,5 +1,6 @@
 ﻿using MP;
 using System;
+using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
@@ -19,6 +20,7 @@ using System.Runtime.CompilerServices;
 // SIZE_T is a ULONG_PTR , which does mean that: The largest unsigned pointer size. In 64-bit this is effectively a System.UInt64.
 // QWORD corresponds to System.UInt64 (I have never found this in Win32 API but in IMFByteStream interface, thought to doc it tho)
 
+[MP.Annotations.NativeLayer]
 [System.Security.SuppressUnmanagedCodeSecurity] // Although that it has no effect in .NET 8 it might gain effect again in the future , so mark it.
 internal static partial class Interop
 {
@@ -52,17 +54,17 @@ internal static partial class Interop
         TRUE = 1,
     }
 
-    /// <summary>
-    /// Describes NT status codes.
-    /// </summary>
+    /// <summary>Describes NT status codes.</summary>
     public enum NTSTATUS : System.UInt32
     {
         STATUS_SUCCESS = 0x0,
         STATUS_NOT_FOUND = 0xC0000225,
         STATUS_INVALID_PARAMETER = 0xc000000d,
+        STATUS_INVALID_HANDLE = 0xC0000008,
         STATUS_NO_MEMORY = 0xc0000017,
         STATUS_AUTH_TAG_MISMATCH = 0xc000a002,
         STATUS_SOME_NOT_MAPPED = 0x00000107,
+        STATUS_BUFFER_OVERFLOW = 0x80000005,
         STATUS_NO_MORE_FILES = 0x80000006,
         STATUS_OBJECT_NAME_NOT_FOUND = 0xC0000034,
         STATUS_NONE_MAPPED = 0xC0000073,
@@ -129,23 +131,166 @@ internal static partial class Interop
         IOCTL_STORAGE_READ_CAPACITY = 2969920
     }
 
-    // https://msdn.microsoft.com/en-us/library/windows/desktop/aa380518.aspx
-    // https://msdn.microsoft.com/en-us/library/windows/hardware/ff564879.aspx
-    // For a very weird reason a same explicit layout makes NtCreateFile to fail on directories
-    [StructLayout(LayoutKind.Sequential)]
-    public struct UNICODE_STRING
+    /// <summary>Defines the Windows file attributes.</summary>
+    [Flags]
+    public enum FileAttributes : System.UInt32
     {
         /// <summary>
-        /// Length in bytes, not including the null terminator, if any.
+        /// A file that is read-only. 
+        /// Applications can read the file, but cannot write to it or delete it. 
+        /// This attribute is not honored on directories.
         /// </summary>
+        FILE_ATTRIBUTE_READONLY = 1,
+        /// <summary>
+        /// The file or directory is hidden. 
+        /// It is not included in an ordinary directory listing.
+        /// </summary>
+        FILE_ATTRIBUTE_HIDDEN = 2,
+        /// <summary>
+        /// A file or directory that the operating system uses a part of, or uses exclusively.
+        /// </summary>
+        FILE_ATTRIBUTE_SYSTEM = 4,
+        /// <summary>The handle that identifies a directory.</summary>
+        FILE_ATTRIBUTE_DIRECTORY = 16,
+        /// <summary>
+        /// A file or directory that is an archive file or directory. 
+        /// Applications typically use this attribute to mark files for backup or removal.
+        /// </summary>
+        FILE_ATTRIBUTE_ARCHIVE = 32,
+        /// <summary>
+        /// A file that does not have other attributes set. 
+        /// This attribute is valid only when used alone.
+        /// </summary>
+        FILE_ATTRIBUTE_NORMAL = 128,
+        /// <summary>
+        /// A file that is being used for temporary storage. 
+        /// File systems avoid writing data back to mass storage if sufficient cache memory is available, because typically, an application deletes a temporary file after the handle is closed. In that scenario, the system can entirely avoid writing the data. 
+        /// Otherwise, the data is written after the handle is closed.
+        /// </summary>
+        FILE_ATTRIBUTE_TEMPORARY = 256,
+        /// <summary>A file that is a sparse file.</summary>
+        FILE_ATTRIBUTE_SPARSE_FILE = 512,
+        /// <summary>
+        /// A file or directory that has an associated reparse point, or a file that is a symbolic link.
+        /// </summary>
+        FILE_ATTRIBUTE_REPARSE_POINT = 1024,
+        /// <summary>
+        /// A file or directory that is compressed. 
+        /// For a file, all of the data in the file is compressed. 
+        /// For a directory, compression is the default for newly created files and subdirectories.
+        /// </summary>
+        FILE_ATTRIBUTE_COMPRESSED = 2048,
+        /// <summary>
+        /// The data of a file is not available immediately. 
+        /// This attribute indicates that the file data is physically moved to offline storage. 
+        /// This attribute is used by Remote Storage, which is the hierarchical storage management software. 
+        /// Applications should not arbitrarily change this attribute.
+        /// </summary>
+        FILE_ATTRIBUTE_OFFLINE = 4096,
+        /// <summary>
+        /// The file or directory is not to be indexed by the content indexing service.
+        /// </summary>
+        FILE_ATTRIBUTE_NOT_CONTENT_INDEXED = 8192,
+        /// <summary>
+        /// A file or directory that is encrypted. 
+        /// For a file, all data streams in the file are encrypted.
+        /// For a directory, encryption is the default for newly created files and subdirectories.
+        /// </summary>
+        FILE_ATTRIBUTE_ENCRYPTED = 16384,
+        /// <summary>
+        /// The directory or user data stream is configured with integrity (only supported on ReFS volumes). 
+        /// It is not included in an ordinary directory listing. The integrity setting persists with the file if it's renamed.
+        /// If a file is copied the destination file will have integrity set if either the source file or destination directory have integrity set.
+        /// </summary>
+        [SupportedOSPlatform(MP.WindowsInterop.WindowsVersions.NTDDI_WIN8)]
+        FILE_ATTRIBUTE_INTEGRITY_STREAM = 32768,
+        /// <summary>This value is reserved for system use.</summary>
+        FILE_ATTRIBUTE_VIRTUAL = 65536,
+        /// <summary>
+        /// The user data stream not to be read by the background data integrity scanner (AKA scrubber).
+        /// When set on a directory it only provides inheritance. This flag is only supported on Storage Spaces and ReFS volumes. 
+        /// It is not included in an ordinary directory listing.
+        /// </summary>
+        [SupportedOSPlatform(MP.WindowsInterop.WindowsVersions.NTDDI_WIN8)]
+        FILE_ATTRIBUTE_NO_SCRUB_DATA = 131072,
+        /// <summary>
+        /// A file or directory with extended attributes. <br />
+        /// <strong>IMPORTANT</strong>: This constant is for internal use only.
+        /// </summary>
+        FILE_ATTRIBUTE_EA = 262144,
+        /// <summary>
+        /// This attribute only appears in directory enumeration classes (FILE_DIRECTORY_INFORMATION, FILE_BOTH_DIR_INFORMATION, etc.). 
+        /// When this attribute is set, it means that the file or directory has no physical representation on the local system; the item is virtual.
+        /// Opening the item will be more expensive than normal, e.g. it will cause at least some of it to be fetched from a remote store.
+        /// </summary>
+        FILE_ATTRIBUTE_RECALL_ON_OPEN = FILE_ATTRIBUTE_EA,
+        /// <summary>
+        /// This attribute indicates user intent that the file or directory should be kept fully present locally even when not being actively accessed. 
+        /// This attribute is for use with hierarchical storage management software.
+        /// </summary>
+        FILE_ATTRIBUTE_PINNED = 524288,
+        /// <summary>
+        /// This attribute indicates that the file or directory should not be kept fully present locally except when being actively accessed. 
+        /// This attribute is for use with hierarchical storage management software.
+        /// </summary>
+        FILE_ATTRIBUTE_UNPINNED = 1048576
+    }
+
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/aa380518.aspx
+    // https://msdn.microsoft.com/en-us/library/windows/hardware/ff564879.aspx
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct UNICODE_STRING
+    {
+        /// <summary>Length in bytes, not including the null terminator, if any.</summary>
         public System.UInt16 Length;
 
-        /// <summary>
-        /// Max size of the buffer in bytes
-        /// </summary>
+        /// <summary>Max size of the buffer in bytes</summary>
         public System.UInt16 MaximumLength;
 
-        public IntPtr Buffer;
+        /// <summary>The actual pointer to the string buffer</summary>
+        public System.Char* Buffer;
+
+        public unsafe void FreeCreatedString()
+        {
+            if (Buffer is null) { return; }
+            Ole32.CoTaskMemFree(Buffer);
+            Buffer = null;
+        }
+
+        public static UNICODE_STRING CreateFromString(System.String str)
+        {
+            if (str.Length > 32767) { throw new ArgumentOutOfRangeException(nameof(str), "The provided string is too large to fit into a UNICODE_STRING structure"); }
+            UNICODE_STRING strnew = new();
+            strnew.MaximumLength = strnew.Length = (str.Length * sizeof(System.Char)).ToUInt16();
+            System.Char* pbuf = (System.Char*)Ole32.CoTaskMemAlloc(strnew.Length);
+            if (pbuf is null) {
+                throw new OutOfMemoryException("Not enough memory to create the UNICODE_STRING instance!");
+            }
+            fixed (System.Char* ps = str)
+            {
+                Unsafe.CopyBlockUnaligned(pbuf, ps, strnew.Length);
+            }
+            strnew.Buffer = pbuf;
+            return strnew;
+        }
+    
+        public static UNICODE_STRING CreateFromSpan(ReadOnlySpan<System.Char> span)
+        {
+            if (span.Length > 32767) { throw new ArgumentOutOfRangeException(nameof(span), "The provided string is too large to fit into a UNICODE_STRING structure"); }
+            UNICODE_STRING strnew = new();
+            strnew.MaximumLength = strnew.Length = (span.Length * sizeof(System.Char)).ToUInt16();
+            System.Char* pbuf = (System.Char*)Ole32.CoTaskMemAlloc(strnew.Length);
+            if (pbuf is null) {
+                throw new OutOfMemoryException("Not enough memory to create the UNICODE_STRING instance!");
+            }
+            Unsafe.CopyBlockUnaligned(
+                ref *(System.Byte*)pbuf , 
+                ref Unsafe.As<System.Char , System.Byte>(ref Unsafe.AsRef(in span[0])) , 
+                strnew.Length
+            );
+            strnew.Buffer = pbuf;
+            return strnew;
+        }
     }
 
     /// <summary>
@@ -246,7 +391,14 @@ internal static partial class Interop
         [FieldOffset(0)]
         public System.Int64 TicksSince1601;
 
-        public DateTimeOffset ToDateTimeOffset() => new DateTimeOffset(DateTime.FromFileTimeUtc(TicksSince1601));
+        public LongFileTime(DateTime dt) => TicksSince1601 = dt.ToFileTimeUtc();
+
+        public LongFileTime(DateTimeOffset ofs) => TicksSince1601 = ofs.ToFileTime();
+
+        public DateTimeOffset ToDateTimeOffset() => new(DateTime.FromFileTimeUtc(TicksSince1601));
+
+        // Special value to not update a date value during date information update.
+        public static LongFileTime MinusOne => new() { TicksSince1601 = -1 };
 
         public static explicit operator FILETIME(LongFileTime lft) => new(lft.TicksSince1601);
     }
@@ -411,6 +563,16 @@ internal static partial class Interop
             Union.Pointer = null;
             HEvent = System.IntPtr.Zero;
         }
+    }
+
+    private static System.String GetAndTrimString(Span<System.Char> buffer)
+    {
+        int length = buffer.Length;
+        while (length > 0 && buffer[length - 1] <= 32)
+        {
+            length--; // trim off spaces and non-printable ASCII chars at the end of the resource
+        }
+        return buffer.Slice(0, length).ToString();
     }
 
 }

@@ -2,11 +2,11 @@
 using MP.ComInterop;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Win32
+namespace MP.Dialogs
 {
-    public unsafe sealed class MPSaveFileDialog : MPFileDialog
+    public unsafe sealed class SaveFileDialog : FileDialog
     {
-        public MPSaveFileDialog() : base(CommonInteropClsIds.CLSID_FileSaveDialog) { }
+        public SaveFileDialog() : base(CommonInteropClsIds.CLSID_FileSaveDialog) { }
 
         protected override bool SpawnDialogSpecificImplementation(IFileDialog dialog, nint parenthandle)
         {

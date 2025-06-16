@@ -233,9 +233,9 @@
 	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoEncryptor.cs" />
 	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoOneShot.cs" />
 	  <Compile Include="Microsoft\Security\Cryptography\UniversalCryptoTransform.cs" />
-	  <Compile Include="Microsoft\Win32\FileOpenDialog.cs" />
-	  <Compile Include="Microsoft\Win32\FileSaveDialog.cs" />
-	  <Compile Include="Microsoft\Win32\FolderOpenDialog.cs" />
+	  <Compile Include="MP\Dialogs\FileOpenDialog.cs" />
+	  <Compile Include="MP\Dialogs\FileSaveDialog.cs" />
+	  <Compile Include="MP\Dialogs\FolderOpenDialog.cs" />
 	  <Compile Include="Microsoft\Win32\MemoryHeapBlock.cs" />
 	  <Compile Include="Microsoft\Win32\SafeHandles\SafeBCryptAlgorithmProviderHandle.cs" />
 	  <Compile Include="Microsoft\Win32\SafeHandles\SafeBCryptHashHandle.cs" />
@@ -244,7 +244,7 @@
 	  <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
 	  <Compile Include="Microsoft\Win32\SafeHandles\SafeLibcMemoryHandle.cs" />
 	  <Compile Include="Microsoft\Win32\SafeHandles\SafeWindowsLibraryHandle.cs" />
-	  <Compile Include="Microsoft\Win32\ShellCommonFileDialog.cs" />
+	  <Compile Include="MP\Dialogs\FileDialog.cs" />
 	  <Compile Include="MP\Archiving\ArchiveEntryAttribute.cs" />
 	  <Compile Include="MP\Archiving\ArchiveByteOrder.cs" />
 	  <Compile Include="MP\Archiving\ArchiveEntry.cs" />

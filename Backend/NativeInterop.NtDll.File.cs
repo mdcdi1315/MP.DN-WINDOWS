@@ -1,7 +1,10 @@
-﻿using MP;
+﻿
+using MP;
 using System;
 using Microsoft.IO;
+using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 unsafe partial class Interop
 {
@@ -39,84 +42,11 @@ unsafe partial class Interop
             public System.IntPtr Pointer;
         }
 
-        /// <summary>Specifies file information attributes.</summary>
-        public enum FILE_INFORMATION_CLASS : System.UInt32
-        {
-            FileDirectoryInformation = 1,
-            FileFullDirectoryInformation = 2,
-            FileBothDirectoryInformation = 3,
-            FileBasicInformation = 4,
-            FileStandardInformation = 5,
-            FileInternalInformation = 6,
-            FileEaInformation = 7,
-            FileAccessInformation = 8,
-            FileNameInformation = 9,
-            FileRenameInformation = 10,
-            FileLinkInformation = 11,
-            FileNamesInformation = 12,
-            FileDispositionInformation = 13,
-            FilePositionInformation = 14,
-            FileFullEaInformation = 15,
-            FileModeInformation = 16,
-            FileAlignmentInformation = 17,
-            FileAllInformation = 18,
-            FileAllocationInformation = 19,
-            FileEndOfFileInformation = 20,
-            FileAlternateNameInformation = 21,
-            FileStreamInformation = 22,
-            FilePipeInformation = 23,
-            FilePipeLocalInformation = 24,
-            FilePipeRemoteInformation = 25,
-            FileMailslotQueryInformation = 26,
-            FileMailslotSetInformation = 27,
-            FileCompressionInformation = 28,
-            FileObjectIdInformation = 29,
-            FileCompletionInformation = 30,
-            FileMoveClusterInformation = 31,
-            FileQuotaInformation = 32,
-            FileReparsePointInformation = 33,
-            FileNetworkOpenInformation = 34,
-            FileAttributeTagInformation = 35,
-            FileTrackingInformation = 36,
-            FileIdBothDirectoryInformation = 37,
-            FileIdFullDirectoryInformation = 38,
-            FileValidDataLengthInformation = 39,
-            FileShortNameInformation = 40,
-            FileIoCompletionNotificationInformation = 41,
-            FileIoStatusBlockRangeInformation = 42,
-            FileIoPriorityHintInformation = 43,
-            FileSfioReserveInformation = 44,
-            FileSfioVolumeInformation = 45,
-            FileHardLinkInformation = 46,
-            FileProcessIdsUsingFileInformation = 47,
-            FileNormalizedNameInformation = 48,
-            FileNetworkPhysicalNameInformation = 49,
-            FileIdGlobalTxDirectoryInformation = 50,
-            FileIsRemoteDeviceInformation = 51,
-            FileUnusedInformation = 52,
-            FileNumaNodeInformation = 53,
-            FileStandardLinkInformation = 54,
-            FileRemoteProtocolInformation = 55,
-            FileRenameInformationBypassAccessCheck = 56,
-            FileLinkInformationBypassAccessCheck = 57,
-            FileVolumeNameInformation = 58,
-            FileIdInformation = 59,
-            FileIdExtdDirectoryInformation = 60,
-            FileReplaceCompletionInformation = 61,
-            FileHardLinkFullIdInformation = 62,
-            FileIdExtdBothDirectoryInformation = 63,
-            FileDispositionInformationEx = 64,
-            FileRenameInformationEx = 65,
-            FileRenameInformationExBypassAccessCheck = 66,
-            FileDesiredStorageClassInformation = 67,
-            FileStatInformation = 68
-        }
-
         /// <summary>
         /// <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/wdm/ns-wdm-_file_full_ea_information">FILE_FULL_EA_INFORMATION</a> structure.
         /// Provides extended attribute (EA) information. This structure is used primarily by network drivers.
         /// </summary>
-        [StructLayout(LayoutKind.Explicit , Size = 8)]
+        [StructLayout(LayoutKind.Explicit , Size = 8 , Pack = 8)]
         public struct FILE_FULL_EA_INFORMATION
         {
             /// <summary>
@@ -235,6 +165,196 @@ unsafe partial class Interop
 
             [FieldOffset(8)]
             public fixed System.Byte FileID[16];
+        }
+
+        [StructLayout(LayoutKind.Explicit , Pack = 4)]
+        public struct FILE_STANDARD_INFORMATION
+        {
+            [FieldOffset(0)]
+            public System.Int64 AllocationSize;
+            [FieldOffset(8)]
+            public System.Int64 EndOfFile;
+            [FieldOffset(16)]
+            public System.UInt32 NumberOfLinks;
+            [FieldOffset(20)]
+            public BOOLEAN DeletePending;
+            [FieldOffset(21)]
+            public BOOLEAN Directory;
+        }
+
+        [StructLayout(LayoutKind.Explicit, Size = 40, Pack = 8)]
+        public struct FILE_BASIC_INFORMATION
+        {
+            [FieldOffset(0)]
+            public LongFileTime CreationTime;
+            [FieldOffset(8)]
+            public LongFileTime LastAccessTime;
+            [FieldOffset(16)]
+            public LongFileTime LastWriteTime;
+            [FieldOffset(24)]
+            public LongFileTime ChangeTime;
+            [FieldOffset(32)]
+            public FileAttributes FileAttributes;
+        }
+
+        [StructLayout(LayoutKind.Explicit , Size = 8 , Pack = 8)]
+        public struct FILE_POSITION_INFORMATION
+        {
+            [FieldOffset(0)]
+            public System.Int64 CurrentByteOffset;
+        }
+
+        [StructLayout(LayoutKind.Explicit , Size = 8 , Pack = 8)]
+        public struct FILE_END_OF_FILE_INFORMATION
+        {
+            [FieldOffset(0)]
+            public System.Int64 EndOfFile;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct FILE_MODE_INFORMATION
+        {
+            [FieldOffset(0)]
+            public CreateOptions Mode;
+        }
+
+        [StructLayout(LayoutKind.Sequential , Pack = 8)]
+        private struct FILE_RENAME_INFORMATION_OLD
+        {
+            public BOOLEAN ReplaceIfExists;
+            public System.IntPtr RootDirectory;
+            public System.UInt32 FileNameLength;
+            // This must be treated as a reference.
+            public System.Char ReferenceToName;
+
+            public static SafeLibcMemoryHandle GetRenameInformation(System.Boolean replaceifexists , System.String name, System.IntPtr root)
+            {
+                System.Int32 size = sizeof(FILE_RENAME_INFORMATION_OLD);
+                System.Int32 leninbytes = name.Length * sizeof(System.Char);
+                SafeLibcMemoryHandle mem = new(size + leninbytes);
+                FILE_RENAME_INFORMATION_OLD* p = (FILE_RENAME_INFORMATION_OLD*)mem.MemoryPointer;
+                p->ReplaceIfExists = replaceifexists ? BOOLEAN.TRUE : BOOLEAN.FALSE;
+                p->RootDirectory = root;
+                p->FileNameLength = leninbytes.ToUInt32();
+                ref System.Char pref = ref Unsafe.AsRef(in name.GetPinnableReference());
+                Unsafe.CopyBlockUnaligned(ref Unsafe.As<System.Char, System.Byte>(ref p->ReferenceToName), ref Unsafe.As<System.Char, System.Byte>(ref pref), p->FileNameLength);
+                return mem;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential , Pack = 8)]
+        private struct FILE_RENAME_INFORMATION_NEW
+        {
+            [StructLayout(LayoutKind.Explicit , Size = 4)]
+            public struct DUMMYUNIONNAME
+            {
+                [FieldOffset(0)]
+                public BOOLEAN ReplaceIfExists;
+                [FieldOffset(0)]
+                public System.UInt32 Flags;
+            }
+
+            public DUMMYUNIONNAME Union;
+            public System.IntPtr RootDirectory;
+            public System.UInt32 FileNameLength;
+            // This must be treated as a reference.
+            public System.Char ReferenceToName;
+
+            public static SafeLibcMemoryHandle GetRenameInformation(System.Boolean replaceifexists, System.String name, System.IntPtr root)
+            {
+                System.Int32 size = sizeof(FILE_RENAME_INFORMATION_NEW);
+                System.Int32 leninbytes = name.Length * sizeof(System.Char);
+                SafeLibcMemoryHandle mem = new(size + leninbytes);
+                FILE_RENAME_INFORMATION_NEW* p = (FILE_RENAME_INFORMATION_NEW*)mem.MemoryPointer;
+                p->Union.ReplaceIfExists = replaceifexists ? BOOLEAN.TRUE : BOOLEAN.FALSE;
+                p->RootDirectory = root;
+                p->FileNameLength = leninbytes.ToUInt32();
+                ref System.Char pref = ref Unsafe.AsRef(in name.GetPinnableReference());
+                Unsafe.CopyBlockUnaligned(ref Unsafe.As<System.Char, System.Byte>(ref p->ReferenceToName), ref Unsafe.As<System.Char , System.Byte>(ref pref), p->FileNameLength);
+                return mem;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct FILE_NAME_INFORMATION
+        {
+            public System.UInt32 FileNameLength;
+
+            public static System.String ReadName(FILE_NAME_INFORMATION* pi)
+                => new((System.Char*)((System.Byte*)pi + sizeof(System.UInt32)) , 0, (pi->FileNameLength / sizeof(System.Char)).ToInt32());
+        }
+
+        /// <summary>Specifies file information attributes.</summary>
+        public enum FILE_INFORMATION_CLASS : System.UInt32
+        {
+            FileDirectoryInformation = 1,
+            FileFullDirectoryInformation = 2,
+            FileBothDirectoryInformation = 3,
+            FileBasicInformation = 4,
+            FileStandardInformation = 5,
+            FileInternalInformation = 6,
+            FileEaInformation = 7,
+            FileAccessInformation = 8,
+            FileNameInformation = 9,
+            FileRenameInformation = 10,
+            FileLinkInformation = 11,
+            FileNamesInformation = 12,
+            FileDispositionInformation = 13,
+            FilePositionInformation = 14,
+            FileFullEaInformation = 15,
+            FileModeInformation = 16,
+            FileAlignmentInformation = 17,
+            FileAllInformation = 18,
+            FileAllocationInformation = 19,
+            FileEndOfFileInformation = 20,
+            FileAlternateNameInformation = 21,
+            FileStreamInformation = 22,
+            FilePipeInformation = 23,
+            FilePipeLocalInformation = 24,
+            FilePipeRemoteInformation = 25,
+            FileMailslotQueryInformation = 26,
+            FileMailslotSetInformation = 27,
+            FileCompressionInformation = 28,
+            FileObjectIdInformation = 29,
+            FileCompletionInformation = 30,
+            FileMoveClusterInformation = 31,
+            FileQuotaInformation = 32,
+            FileReparsePointInformation = 33,
+            FileNetworkOpenInformation = 34,
+            FileAttributeTagInformation = 35,
+            FileTrackingInformation = 36,
+            FileIdBothDirectoryInformation = 37,
+            FileIdFullDirectoryInformation = 38,
+            FileValidDataLengthInformation = 39,
+            FileShortNameInformation = 40,
+            FileIoCompletionNotificationInformation = 41,
+            FileIoStatusBlockRangeInformation = 42,
+            FileIoPriorityHintInformation = 43,
+            FileSfioReserveInformation = 44,
+            FileSfioVolumeInformation = 45,
+            FileHardLinkInformation = 46,
+            FileProcessIdsUsingFileInformation = 47,
+            FileNormalizedNameInformation = 48,
+            FileNetworkPhysicalNameInformation = 49,
+            FileIdGlobalTxDirectoryInformation = 50,
+            FileIsRemoteDeviceInformation = 51,
+            FileUnusedInformation = 52,
+            FileNumaNodeInformation = 53,
+            FileStandardLinkInformation = 54,
+            FileRemoteProtocolInformation = 55,
+            FileRenameInformationBypassAccessCheck = 56,
+            FileLinkInformationBypassAccessCheck = 57,
+            FileVolumeNameInformation = 58,
+            FileIdInformation = 59,
+            FileIdExtdDirectoryInformation = 60,
+            FileReplaceCompletionInformation = 61,
+            FileHardLinkFullIdInformation = 62,
+            FileIdExtdBothDirectoryInformation = 63,
+            FileDispositionInformationEx = 64,
+            FileRenameInformationEx = 65,
+            FileRenameInformationExBypassAccessCheck = 66,
+            FileDesiredStorageClassInformation = 67,
+            FileStatInformation = 68
         }
 
         /// <summary>
@@ -667,86 +787,120 @@ unsafe partial class Interop
             OBJECT_ATTRIBUTES* ObjectAttributes,
             IO_STATUS_BLOCK* IoStatusBlock,
             System.Int64* AllocationSize,
-            System.IO.FileAttributes FileAttributes,
+            FileAttributes FileAttributes,
             FileShare ShareAccess,
             CreateDisposition CreateDisposition,
             CreateOptions CreateOptions,
             void* EaBuffer,
             System.UInt32 EaLength);
 
-        internal static (NTSTATUS status, IntPtr handle) CreateFile(
+        public static (NTSTATUS status, IntPtr handle) CreateFile(
             ReadOnlySpan<char> path,
             IntPtr rootDirectory,
             CreateDisposition createDisposition,
             DesiredAccess desiredAccess = DesiredAccess.FILE_GENERIC_READ | DesiredAccess.SYNCHRONIZE,
             FileShare shareAccess = FileShare.ReadWrite | FileShare.Delete,
-            System.IO.FileAttributes fileAttributes = 0,
+            FileAttributes fileAttributes = 0,
             CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
             ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE,
             void* eaBuffer = null,
             uint eaLength = 0)
         {
-            fixed (char* c = &MemoryMarshal.GetReference(path))
-            {
-                UNICODE_STRING name = new UNICODE_STRING
-                {
-                    Length = checked((ushort)(path.Length * sizeof(char))),
-                    MaximumLength = checked((ushort)(path.Length * sizeof(char))),
-                    Buffer = (IntPtr)c
-                };
+            UNICODE_STRING name = UNICODE_STRING.CreateFromSpan(path);
 
-                OBJECT_ATTRIBUTES attributes = new OBJECT_ATTRIBUTES(
-                    &name,
-                    objectAttributes,
-                    rootDirectory);
+            OBJECT_ATTRIBUTES attributes = new(&name, objectAttributes, rootDirectory);
 
-                System.IntPtr handle;
-                IO_STATUS_BLOCK sbb;
+            System.IntPtr handle;
+            IO_STATUS_BLOCK sbb;
 
-                var status = NtCreateFile(
-                    &handle,
-                    desiredAccess,
-                    &attributes,
-                    &sbb,
-                    AllocationSize: null,
-                    fileAttributes,
-                    shareAccess,
-                    createDisposition,
-                    createOptions,
-                    eaBuffer,
-                    eaLength);
+            var status = NtCreateFile(
+                &handle,
+                desiredAccess,
+                &attributes,
+                &sbb,
+                AllocationSize: null,
+                fileAttributes,
+                shareAccess,
+                createDisposition,
+                createOptions,
+                eaBuffer,
+                eaLength);
 
-                return (status, handle);
-            }
+            // Even on NtCreateFile success or failure , the created string will always be successfully freed
+            name.FreeCreatedString();
+
+            return (status, handle);
         }
 
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff556633.aspx
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff567047.aspx
-        [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode, ExactSpelling = true)]
-        public static extern int NtQueryDirectoryFile(
-            IntPtr FileHandle,
-            IntPtr Event,
+        [DllImport(Libraries.NtDll , ExactSpelling = true , EntryPoint = "NtQueryDirectoryFile")]
+        private static extern NTSTATUS NtQueryDirectoryFile_Native(
+            IntPtr filehandle,
+            IntPtr evnt,
             IntPtr ApcRoutine,
             IntPtr ApcContext,
-            out IO_STATUS_BLOCK IoStatusBlock,
-            IntPtr FileInformation,
-            System.UInt32 Length,
-            FILE_INFORMATION_CLASS FileInformationClass,
+            IO_STATUS_BLOCK* iostatus,
+            void* fileinformation,
+            System.UInt32 length,
+            FILE_INFORMATION_CLASS fileinfoclass,
             BOOLEAN ReturnSingleEntry,
-            UNICODE_STRING* FileName,
-            BOOLEAN RestartScan);
+            UNICODE_STRING* filename,
+            BOOLEAN RestartScan
+        );
+
+        public static NTSTATUS NtQueryDirectoryFile(
+            IntPtr filehandle,
+            IntPtr evnt,
+            IntPtr ApcRoutine,
+            IntPtr ApcContext,
+            out IO_STATUS_BLOCK iostatus,
+            IntPtr fileinformation,
+            System.UInt32 length,
+            FILE_INFORMATION_CLASS fileinfoclass,
+            BOOLEAN ReturnSingleEntry,
+            System.String filename,
+            BOOLEAN RestartScan)
+        {
+            IO_STATUS_BLOCK blk;
+            NTSTATUS nts;
+            UNICODE_STRING pstr = default;
+            if (filename is not null) {
+                pstr = UNICODE_STRING.CreateFromString(filename);
+            }
+            nts = NtQueryDirectoryFile_Native(
+                        filehandle,
+                        evnt,
+                        ApcRoutine,
+                        ApcContext,
+                        &blk,
+                        fileinformation.ToPointer(),
+                        length,
+                        fileinfoclass,
+                        ReturnSingleEntry,
+                        filename is null ? null : &pstr,
+                        RestartScan
+                );
+            // Even if being 'default', FreeCreatedString will elsewise bail out because on 'default' all fields are zeroes
+            pstr.FreeCreatedString();
+            iostatus = blk;
+            return nts;
+        }
 
         [DllImport(Libraries.NtDll, ExactSpelling = true)]
         public static extern System.UInt32 RtlNtStatusToDosError(NTSTATUS Status);
 
-        [DllImport(Libraries.NtDll , EntryPoint = "NtQueryInformationFile", ExactSpelling = true)]
+        [DllImport(Libraries.NtDll, ExactSpelling = true , EntryPoint = "NtQueryInformationFile")]
         private static extern NTSTATUS NtQueryInformationFile_Native(System.IntPtr hfe, IO_STATUS_BLOCK* blk, void* fileinfo, System.UInt32 length, FILE_INFORMATION_CLASS cls);
 
-        public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out CreateOptions options , out IO_STATUS_BLOCK stat)
+        [DllImport(Libraries.NtDll , ExactSpelling = true , EntryPoint = "NtSetInformationFile")]
+        private static extern NTSTATUS NtSetInformationFile_Native(System.IntPtr hfe , IO_STATUS_BLOCK* blk , void* fileinfo , System.UInt32 length, FILE_INFORMATION_CLASS cls);
+
+        public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out FILE_MODE_INFORMATION options , out IO_STATUS_BLOCK stat)
         {
             IO_STATUS_BLOCK blk;
-            CreateOptions opts;
-            NTSTATUS status = NtQueryInformationFile_Native(hfe, &blk, &opts, sizeof(CreateOptions).ToUInt32(), FILE_INFORMATION_CLASS.FileModeInformation);
+            FILE_MODE_INFORMATION opts;
+            NTSTATUS status = NtQueryInformationFile_Native(hfe, &blk, &opts, sizeof(FILE_MODE_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FileModeInformation);
             stat = blk;
             options = opts;
             return status;
@@ -771,6 +925,116 @@ unsafe partial class Interop
             fileidinfo = native;
             return status;
         }
+
+        public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out FILE_STANDARD_INFORMATION fsinfo , out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            FILE_STANDARD_INFORMATION native;
+            NTSTATUS status = NtQueryInformationFile_Native(hfe, &blk, &native, sizeof(FILE_STANDARD_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FileStandardInformation);
+            stat = blk;
+            fsinfo = native;
+            return status;
+        }
+
+        public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out FILE_BASIC_INFORMATION basicinf , out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            FILE_BASIC_INFORMATION native;
+            NTSTATUS status = NtQueryInformationFile_Native(hfe, &blk, &native, sizeof(FILE_BASIC_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FileBasicInformation);
+            stat = blk;
+            basicinf = native;
+            return status;
+        }
+    
+        public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out FILE_POSITION_INFORMATION posinf , out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            FILE_POSITION_INFORMATION native;
+            NTSTATUS nts = NtQueryInformationFile_Native(hfe, &blk, &native, sizeof(FILE_POSITION_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FilePositionInformation);
+            stat = blk;
+            posinf = native;
+            return nts;
+        }
+
+        public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out System.String filename)
+        {
+            IO_STATUS_BLOCK blk;
+            SafeLibcMemoryHandle mem = new(504);
+            FILE_NAME_INFORMATION* pf = (FILE_NAME_INFORMATION*)mem.MemoryPointer;
+            System.UInt32 lennow = 500;
+            pf->FileNameLength = lennow;
+            NTSTATUS nts;
+
+        G_retry:
+            nts = NtQueryInformationFile_Native(hfe, &blk, pf, mem.MemoryLength.ToUInt32(), FILE_INFORMATION_CLASS.FileNameInformation);
+
+            switch (nts)
+            {
+                case NTSTATUS.STATUS_SUCCESS:
+                    filename = FILE_NAME_INFORMATION.ReadName(pf);
+                    mem.Dispose();
+                    return NTSTATUS.STATUS_SUCCESS;
+                case NTSTATUS.STATUS_BUFFER_OVERFLOW:
+                    mem.Reallocate(mem.MemoryLength + 500);
+                    pf = (FILE_NAME_INFORMATION*)mem.MemoryPointer;
+                    lennow += 500;
+                    pf->FileNameLength = lennow;
+                    goto G_retry;
+                default:
+                    mem.Dispose();
+                    filename = null;
+                    return nts;
+            }
+        }
+
+        public static NTSTATUS NtSetInformationFile(System.IntPtr hfe , FILE_BASIC_INFORMATION basic , out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            NTSTATUS nts = NtSetInformationFile_Native(hfe, &blk, &basic, sizeof(FILE_BASIC_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FileBasicInformation);
+            stat = blk;
+            return nts;
+        }
+
+        public static NTSTATUS NtSetInformationFile(System.IntPtr hfe , FILE_POSITION_INFORMATION posinf, out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            NTSTATUS nts = NtSetInformationFile_Native(hfe, &blk, &posinf, sizeof(FILE_POSITION_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FilePositionInformation);
+            stat = blk;
+            return nts;
+        }
+
+        public static NTSTATUS NtSetInformationFile(System.IntPtr hfe , FILE_END_OF_FILE_INFORMATION feof ,  out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            NTSTATUS nts = NtSetInformationFile_Native(hfe, &blk, &feof, sizeof(FILE_END_OF_FILE_INFORMATION).ToUInt32(), FILE_INFORMATION_CLASS.FileEndOfFileInformation);
+            stat = blk;
+            return nts;
+        }
+
+        public static NTSTATUS NtSetInformationFile(System.IntPtr hfe , System.Boolean replaceifexisting , System.IntPtr root , System.String name , out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK blk;
+            NTSTATUS nts;
+            SafeLibcMemoryHandle temp = null;
+            try {
+                var v = RtlGetVersion().Version;
+                if (v.Major >= 10 && v.Build >= 12000) {
+                    // Then the newer FILE_RENAME_INFORMATION_NEW must be used
+                    temp = FILE_RENAME_INFORMATION_NEW.GetRenameInformation(replaceifexisting , name , root);
+                } else {
+                    // Otherwise fall back to the older version of the structure
+                    temp = FILE_RENAME_INFORMATION_OLD.GetRenameInformation(replaceifexisting, name, root);
+                }
+                nts = NtSetInformationFile_Native(hfe, &blk, temp.MemoryPointer, temp.MemoryLength.ToUInt32(), FILE_INFORMATION_CLASS.FileRenameInformation);
+            } finally {
+                temp?.Dispose();
+                temp = null;
+            }
+            stat = blk;
+            return nts;
+        }
+
+
     }
 }
 

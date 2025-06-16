@@ -14,7 +14,7 @@ namespace Microsoft.Security.Cryptography
 
             Interop.NTSTATUS status = Interop.BCrypt.BCryptGenRandom(System.IntPtr.Zero, pbBuffer, count, Interop.BCrypt.BCRYPT_USE_SYSTEM_PREFERRED_RNG);
             if (status != Interop.NTSTATUS.STATUS_SUCCESS)
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(status).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(status);
         }
     }
 }

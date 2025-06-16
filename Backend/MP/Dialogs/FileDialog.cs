@@ -1,32 +1,30 @@
 ﻿
-using MP;
 using System;
 using MP.ComInterop;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using Microsoft.Win32.SafeHandles;
-using System.Runtime.InteropServices;
 
-namespace Microsoft.Win32
+namespace MP.Dialogs
 {
     /// <summary>
     /// Defines a file filter for all the MusicPlayer-defined file dialogs.
     /// </summary>
-    public struct MPFileDialogFilter
+    public struct FileDialogFilter
     {
         public System.String FilterPattern;
 
         public System.String FilterDisplay;
 
-        public MPFileDialogFilter(System.String pattern , System.String display)
+        public FileDialogFilter(System.String pattern , System.String display)
         {
             FilterPattern = pattern; FilterDisplay = display;
         }
 
-        public static MPFileDialogFilter GetFromWin32Filter(System.String filter)
+        public static FileDialogFilter GetFromWin32Filter(System.String filter)
         {
             if (System.String.IsNullOrEmpty(filter)) { throw new ArgumentNullException(nameof(filter)); }
-            MPFileDialogFilter fltret = new();
+            FileDialogFilter fltret = new();
             System.String[] ftokens = filter.Split('|');
             if (ftokens.Length != 2) { throw new ArgumentException("There is not a pipe character or are too many pipe characters on the string."); }
             fltret.FilterPattern = ftokens[1];
@@ -38,7 +36,7 @@ namespace Microsoft.Win32
     /// <summary>
     /// Defines the base implementation class for all the MusicPlayer-defined file dialogs.
     /// </summary>
-    public abstract class MPFileDialog
+    public abstract class FileDialog
     {
         // While we would need more than 4 bytes to hold for the defined Boolean properties,
         // another 1 to hold the dialog result and another 1 to hold the dialog type , 
@@ -65,10 +63,10 @@ namespace Microsoft.Win32
         private System.Int32 fltidx;
         private MPFileDialogFlags flags;
         protected System.String[] retpaths;
-        private List<MPFileDialogFilter> filters;
+        private List<FileDialogFilter> filters;
         private System.String startingfolderpath , title , defaultext;
 
-        private MPFileDialog()
+        private FileDialog()
         {
             // Do not set any flags these will be done by the ctors to determine correct dialog
             flags = MPFileDialogFlags.None;
@@ -78,9 +76,9 @@ namespace Microsoft.Win32
             startingfolderpath = title = defaultext = null;
         }
 
-        protected MPFileDialog(System.String guid) : this(guid , false) { }
+        protected FileDialog(System.String guid) : this(guid , false) { }
 
-        protected MPFileDialog(System.String guid , System.Boolean useopenfolderdialoglogic) : this()
+        protected FileDialog(System.String guid , System.Boolean useopenfolderdialoglogic) : this()
         {
             if (guid == CommonInteropClsIds.CLSID_FileOpenDialog) {
                 if (useopenfolderdialoglogic) {
@@ -95,7 +93,7 @@ namespace Microsoft.Win32
             }
         }
 
-        public void AddFilter(MPFileDialogFilter filter) => filters.Add(filter);
+        public void AddFilter(FileDialogFilter filter) => filters.Add(filter);
 
         public void ClearFilters() => filters.Clear();
 
@@ -182,7 +180,7 @@ namespace Microsoft.Win32
             System.String[] filters = str.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
             foreach (var flt in filters) 
             {
-                this.filters.Add(MPFileDialogFilter.GetFromWin32Filter(flt));
+                this.filters.Add(FileDialogFilter.GetFromWin32Filter(flt));
             }
         }
 

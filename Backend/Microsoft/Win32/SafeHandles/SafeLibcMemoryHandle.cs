@@ -6,7 +6,7 @@ namespace Microsoft.Win32.SafeHandles
 {
     /// <summary>
     /// Allocates data from the native memory. <br />
-    /// Conventionally called as 'Safe Libc Memory Handle' because on Unix the mem allocation function that is commonly is used is that exproted by libc. (libc.so on Linux and libc.dylib on OSX)
+    /// Conventionally called as 'Safe Libc Memory Handle' because on Unix the mem allocation function that is commonly used is that exported by libc. (libc.so on Linux and libc.dylib on OSX)
     /// </summary>
     public unsafe sealed class SafeLibcMemoryHandle : SafeBaseMemoryHandle
     {

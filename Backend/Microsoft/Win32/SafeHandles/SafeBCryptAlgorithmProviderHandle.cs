@@ -1,5 +1,4 @@
 ﻿
-using MP;
 using Microsoft.Security.Cryptography;
 
 namespace Microsoft.Win32.SafeHandles
@@ -14,7 +13,7 @@ namespace Microsoft.Win32.SafeHandles
             Interop.NTSTATUS nts = Interop.BCrypt.BCryptOpenAlgorithmProvider(algorithm, null, usehmac ? Interop.BCrypt.OpenAlgorithmProviderFlags.BCRYPT_ALG_HANDLE_HMAC_FLAG : Interop.BCrypt.OpenAlgorithmProviderFlags.None, out handle);
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
         }
 
@@ -23,7 +22,7 @@ namespace Microsoft.Win32.SafeHandles
             Interop.NTSTATUS nts = Interop.BCrypt.BCryptCreateHash(handle, out var hashalg, secretkey);
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
             return new(hashalg);
         }
@@ -36,7 +35,7 @@ namespace Microsoft.Win32.SafeHandles
             {
                 mem?.Dispose();
                 mem = null;
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
             return new(hencdec);
         }
@@ -74,7 +73,7 @@ namespace Microsoft.Win32.SafeHandles
 
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
         }
 
@@ -84,7 +83,7 @@ namespace Microsoft.Win32.SafeHandles
 
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
         }
 
@@ -94,7 +93,7 @@ namespace Microsoft.Win32.SafeHandles
 
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
         }
 

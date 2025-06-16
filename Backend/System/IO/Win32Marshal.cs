@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 #nullable enable
+using MP;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.IO
 {
@@ -18,7 +18,7 @@ namespace System.IO
         /// including the specified path in the error message.
         /// </summary>
         internal static Exception GetExceptionForLastWin32Error(string? path = "")
-            => GetExceptionForWin32Error(Marshal.GetLastWin32Error(), path);
+            => GetExceptionForWin32Error(Interop.Kernel32.GetLastError(), path);
 
         /// <summary>
         /// Converts the specified Win32 error into a corresponding <see cref="Exception"/> object, optionally
@@ -65,6 +65,9 @@ namespace System.IO
                         MakeHRFromErrorCode(errorCode));
             }
         }
+
+        internal static Exception GetExceptionForNtStatus(Interop.NTSTATUS nts , System.String path = "")
+            => GetExceptionForWin32Error(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32() , path);
 
         /// <summary>
         /// If not already an HRESULT, returns an HRESULT for the specified Win32 error code.

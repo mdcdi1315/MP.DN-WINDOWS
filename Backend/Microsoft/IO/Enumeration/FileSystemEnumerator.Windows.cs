@@ -84,20 +84,18 @@ namespace Microsoft.IO.Enumeration
             Debug.Assert(_directoryHandle != (IntPtr)(-1) && _directoryHandle != IntPtr.Zero && !_lastEntryFound);
 
             Interop.NtDll.IO_STATUS_BLOCK statusBlock;
-            int status = Interop.NtDll.NtQueryDirectoryFile(
-                FileHandle: _directoryHandle,
-                Event: IntPtr.Zero,
+            Interop.NTSTATUS nts = Interop.NtDll.NtQueryDirectoryFile(
+                filehandle: _directoryHandle,
+                evnt: IntPtr.Zero,
                 ApcRoutine: IntPtr.Zero,
                 ApcContext: IntPtr.Zero,
-                IoStatusBlock: out statusBlock,
-                FileInformation: _buffer,
-                Length: (uint)_bufferLength,
-                FileInformationClass: Interop.NtDll.FILE_INFORMATION_CLASS.FileFullDirectoryInformation,
+                iostatus: out statusBlock,
+                fileinformation: _buffer,
+                length: (uint)_bufferLength,
+                fileinfoclass: Interop.NtDll.FILE_INFORMATION_CLASS.FileFullDirectoryInformation,
                 ReturnSingleEntry: Interop.BOOLEAN.FALSE,
-                FileName: null,
+                filename: null,
                 RestartScan: Interop.BOOLEAN.FALSE);
-
-            Interop.NTSTATUS nts = (Interop.NTSTATUS)status;
 
             switch (nts)
             {
@@ -176,7 +174,7 @@ namespace Microsoft.IO.Enumeration
 
             if (handle == IntPtr.Zero || handle == (IntPtr)(-1))
             {
-                int error = Marshal.GetLastPInvokeError();
+                int error = Interop.Kernel32.GetLastError();
 
                 if (ContinueOnDirectoryError(error, ignoreNotFound))
                 {

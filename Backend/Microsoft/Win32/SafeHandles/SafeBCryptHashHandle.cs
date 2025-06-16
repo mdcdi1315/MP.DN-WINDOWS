@@ -15,7 +15,7 @@ namespace Microsoft.Win32.SafeHandles
             Interop.NTSTATUS nts = Interop.BCrypt.BCryptDuplicateHash(handle, out var duped);
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
             return new(duped);
         }

@@ -58,7 +58,7 @@ namespace Microsoft.Security.Cryptography
             var nts = Interop.BCrypt.BCryptGetProperty_UINT32(hash.Handle, Interop.BCrypt.BCRYPT_HASH_LENGTH, out retv);
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
             return retv.ToInt32();
         }
@@ -70,7 +70,7 @@ namespace Microsoft.Security.Cryptography
                 Interop.NTSTATUS nts = Interop.BCrypt.BCryptGetProperty_String(hh.Handle , Interop.BCrypt.BCRYPT_ALGORITHM_NAME , out alg);
                 if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
                 {
-                    throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                    throw new MP.ExceptionSystem.NativeWindowsException(nts);
                 }
                 return alg;
             }
@@ -83,7 +83,7 @@ namespace Microsoft.Security.Cryptography
             Interop.NTSTATUS nts = Interop.BCrypt.BCryptHashData(hh.Handle , data);
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Microsoft.Security.Cryptography
             Interop.NTSTATUS nts = Interop.BCrypt.BCryptFinishHash(hh.Handle , destination);
             if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
             {
-                throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                throw new MP.ExceptionSystem.NativeWindowsException(nts);
             }
             System.Int32 hs = HashSizeInBytesInternal(hh);
             Reset();
@@ -114,7 +114,7 @@ namespace Microsoft.Security.Cryptography
                 Interop.NTSTATUS nts = Interop.BCrypt.BCryptFinishHash(dp.Handle, destination);
                 if (nts != Interop.NTSTATUS.STATUS_SUCCESS)
                 {
-                    throw new MP.ExceptionSystem.NativeWindowsException(Interop.NtDll.RtlNtStatusToDosError(nts).ToInt32());
+                    throw new MP.ExceptionSystem.NativeWindowsException(nts);
                 }
                 return HashSizeInBytesInternal(dp);
             }
