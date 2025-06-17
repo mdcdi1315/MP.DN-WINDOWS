@@ -81,6 +81,46 @@ Under this format all your preferences are saved safely , even on app failure.
 
 **CGI Setting** stands for '**C**ompact-**G**enerated **I**nformation Setting'.
 
+### Building/Running the app
+
+You can `git clone` this repository directly into your development environment, without additional requirements.
+
+To at least have a working version of the app you just need to install the latest .NET 8 SDK , which it can be retrieved from [here](https://dotnet.microsoft.com/en-us/download).
+
+Then, just use `dotnet build` on the `MusicPlayer.csproj` file located into the `Implementation` directory.
+
+The above will create a framework-dependent flavor of the app, suitable for testing, usual modification and development of the app's features.
+
+After the `dotnet build` command succeeds, you can just open the `MusicPlayer.exe` file produced under the binary output folder.
+
+#### Building the app - framework independent installation 
+
+Building a framework-independent installation is a more complicated process, since the Native Loader must be built.
+
+To build that installation, you will need Visual Studio 2022. Community Edition should do the work too. 
+If you do not know what to do, an installer for it is provided [here](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false).
+
+Next, you will need the C/C++ toolset. 
+This is selected through the workloads of the Visual Studio setup. 
+If I remember it correctly, you select the `Desktop Development` workload.
+The Loader is currently built against the version 143, so download the build tools for that version only.
+
+You will also need the .NET SDK and it's WPF part to be installed along the C/C++ toolset, so also select the `.NET Desktop Development` workload.
+
+After Visual Studio completes it's installation, close the installer, go to Windows Search.
+
+Search for something called `Developer Command Prompt for VS2022`. 
+Open that, and execute `cd /d <YOUR-REPO-DIR>`.
+Where **YOUR-REPO-DIR** the directory where you cloned this repository.
+
+Now, execute the command `msbuild ReleaseBuilds.proj`.
+
+The above builds a framework-independent installation of the app. 
+The results will be produced under a directory called `MP_DOTNET_RELEASE`.
+
+You can now close the command prompt.
+
+From there, you execute the `MP.exe` which it is the loader of the app, and the gateway that makes this installation framework-independent.
 
 © mdcdi1315 (2023-2025). The project has been published under the MIT License.
 

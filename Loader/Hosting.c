@@ -120,16 +120,17 @@ PDOTNET_SYSTEMWIDE_INSTALLATION GetSystemWideDotNetInstallation(void)
 {
 	SYSTEM_INFO si;
 	GetNativeSystemInfo(&si);
-	LPWSTR pparch = (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 || si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) ? L"x64" : L"arm64";
-	LPWSTR pformatted = FormatString(L"SOFTWARE\\dotnet\\Setup\\InstalledVersions\\%s\\sharedhost" , pparch);
+	LPWSTR pformatted = FormatString(L"SOFTWARE\\dotnet\\Setup\\InstalledVersions\\%s\\sharedhost" , (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 || si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) ? L"x64" : L"arm64");
 	HKEY phk;
 	LSTATUS ls = RegOpenKeyExW(HKEY_LOCAL_MACHINE, pformatted , 0 , GENERIC_READ, &phk);
 	UnallocateString(pformatted);
 	if (ls != ERROR_SUCCESS) { return NULL; }
+	// The .NET installation path can be arbitrarily long - so make sure to allocate enough mem to retrieve it's path.
 	LPWSTR ppathdata = DefaultAllocateString();
 	DWORD dused = TheoriticalUpperBound;
 	ls = RegGetValueW(phk, NULL, L"Path", RRF_RT_REG_SZ, NULL, ppathdata, &dused);
-	if (ls != ERROR_SUCCESS) { 
+	if (ls != ERROR_SUCCESS) {
+		RegCloseKey(phk);
 		UnallocateString(ppathdata);
 		return NULL; 
 	}
@@ -137,6 +138,7 @@ PDOTNET_SYSTEMWIDE_INSTALLATION GetSystemWideDotNetInstallation(void)
 	dused = 50;
 	ls = RegGetValueW(phk, NULL, L"Version", RRF_RT_REG_SZ, NULL, pverdata, &dused);
 	if (ls != ERROR_SUCCESS) {
+		RegCloseKey(phk);
 		UnallocateString(pverdata);
 		return NULL;
 	}
@@ -145,6 +147,7 @@ PDOTNET_SYSTEMWIDE_INSTALLATION GetSystemWideDotNetInstallation(void)
 	pdt->Version = CloneString(pverdata);
 	UnallocateString(ppathdata);
 	UnallocateString(pverdata);
+	RegCloseKey(phk);
 	return pdt;
 }
 
