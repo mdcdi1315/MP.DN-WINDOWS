@@ -41,6 +41,10 @@ Some things have only left to be implemented, and more specifically for the Musi
 
 - Extensions versioning
 
+One thing that I also would like to see at some point is to port this app to OSX. I am currently working on it but be noted 
+that I am not rushing it. I will release that at some point later, either in the end of this year or at the beginning of the 
+next one.
+
 However, I would like to hear more ideas and features from you!
 
 ## Credits
@@ -122,5 +126,5 @@ You can now close the command prompt.
 
 From there, you execute the `MP.exe` which it is the loader of the app, and the gateway that makes this installation framework-independent.
 
-© mdcdi1315 (2023-2025). The project has been published under the MIT License.
+ï¿½ mdcdi1315 (2023-2025). The project has been published under the MIT License.
 

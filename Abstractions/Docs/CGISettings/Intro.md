@@ -16,6 +16,11 @@ that implement the CGI Settings Loader Class logic.
 Apart from these, here is also the home of the CGI Interchargeable Binary Format,
 a binary format that describes the settings that are subject to be saved in a simple binary format.
 
+Table Of Contents:
 
-
+| Index Entry                  | Link                                  |
+|------------------------------|---------------------------------------|
+| Rough introduction           | [Link](cgi-roughintroduction.md)      |
+| CGI `IBF` Format Definition  | [Link](cgi-ibf.md)                    |
+| CGI Settings Loader Classes  | [Link](cgi-settingsloader.md)         |
 

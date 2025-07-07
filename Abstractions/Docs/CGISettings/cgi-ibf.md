@@ -101,4 +101,30 @@ their first bytes which identify a length in bytes of a single element.
 | Reserved Field                            |                2              | Reserved field - must be set to zero.                                                                                                                                                                                                                                    |
 | Pad Bytes before Setting Name  |   Variable-length    | The block of pad bytes before the actual setting name.                                                                                                                                                                                                      |
 | Setting Name                                |   Variable-length    | The setting's name.                                                                                                                                                                                                                                                                 |
+| Setting Value                               |   Variable-length    | The setting's value, expressed as an array of bytes. It's size depends on the `Setting Value length in bytes` field.                              |
 
+Unless the `Setting Flags` field has the `Array` flag defined, the header is acting like it was a V1 header.
+
+The V2 header has the ability to store up to 65535 different array elements at once. More elements are disallowed due to the fact that saving such a large array of values is too much. Additionally it adds a security bound.
+
+Note also that the header's size has not been changed, it just uses some reserved zones into the header.
+
+Each value in the array is always of the type depicted in the setting header.
+
+Data depiction in array settings is defined as follows: 
+
+| Field Name                                    |  Field Size in Bytes | Field description                                                                                                                                                                                                                                                                     |
+|----------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Element Value Size In Bytes            |           4            | The size of the particular element value. It's size can be up to `System.Array.MaxLength - 4` , which in .NET 8 is 2147483587. |
+| Element Data                           |    Variable-Length     | The data of the particular element. It's size is depicted by the previous field. The next following element also has it's size and it's data, in the same way as described in this table. |
+
+
+### Notes
+
+An implementing reader and writer set should at least implement the V1 entry header. 
+
+While it is not required, both the reader and the writer should also implement the V2 entry header to support the setting's value to also be an array.
+
+Each entry is precceded by the last byte of the previous setting value, and it's next entry is beginning after the last byte of the current entry's setting value.
+
+It is also recommended to add logic to support the `Entries Mask` field. It is helpful for verifying that the entries added are falling into this range. This also helps to identify corrupted `IBF` streams.

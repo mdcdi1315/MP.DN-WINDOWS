@@ -17,6 +17,7 @@
 	<ItemGroup>
 		<Compile Include="Microsoft\IO\InternalMemoryStream.cs" />
 		<Compile Include="Microsoft\Win32\SafeHandles\SafeNativeMemoryEnumerator.cs" />
+		<Compile Include="MP/DefaultPlatformLayer.cs" />
 		<Compile Include="MP\AbstractPlatformLayer.cs" />
 		<Compile Include="MP\AbstractPlayerInstance.cs" />
 		<Compile Include="MP\AbstractPropertyStream.cs" />
@@ -26,6 +27,8 @@
 		<Compile Include="MP\Annotations\NativeLayerAttribute.cs" />
 		<Compile Include="MP\Annotations\IsPointerToCOMInterfaceTypeAttribute.cs" />
 		<Compile Include="MP\Annotations\PreliminaryAttribute.cs" />
+		<Compile Include="MP/Annotations/ObjectiveCGeneratedSignatureAttribute.cs" />
+		<Compile Include="MP/Annotations/ObjectiveCWrappedTypeAttribute.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttribute.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttributeCollection.cs" />
 		<Compile Include="MP\AudioLibrary\AudioFormat.cs" />
@@ -78,6 +81,8 @@
 		<Compile Include="MP\Collections\DelegateEqualityComparerOfTD.cs" />
 		<Compile Include="MP\Collections\DisposableListOfT.cs" />
 		<Compile Include="MP\Collections\ReadOnlyListOfT.cs" />
+		<Compile Include="MP/Collections/ICollectableAttributeable.cs" />
+		<Compile Include="MP/Collections/AttributeKeyValuePair.cs" />
 		<Compile Include="MP\CommandMetadata.cs" />
 		<Compile Include="AssemblyInfo.cs" />
 		<Compile Include="MP\CommandMetadataItem.cs" />

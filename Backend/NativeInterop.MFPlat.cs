@@ -273,6 +273,7 @@ partial class Interop
                 // Return COM out of memory , do not throw exceptions here, let the error be managed by higher-level clients.
                 return CommonHResults.E_OUTOFMEMORY;
             }
+        G_Retry:
             hr = MFGetAttributesAsBlob_Native(pattributes , memtemp.MemoryPointer , memtemp.MemoryLength.ToUInt32());
             if (hr == MediaFoundationErrorCodes.MF_E_BUFFERTOOSMALL)
             {
@@ -286,11 +287,12 @@ partial class Interop
                     // Return COM out of memory , do not throw exceptions here, let the error be managed by higher-level clients.
                     return CommonHResults.E_OUTOFMEMORY;
                 }
-            }
-            if (hr.SUCCEEDED)
-            {
+                goto G_Retry;
+            } else if (hr.SUCCEEDED) {
+                // Success, create managed buffer and return that instead.
                 buffer = memtemp.ToManaged();
             }
+            // On any case, ensure to dispose the buffer.
             memtemp.Dispose();
             return hr;
         }
