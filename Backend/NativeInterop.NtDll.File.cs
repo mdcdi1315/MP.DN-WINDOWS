@@ -139,10 +139,10 @@ unsafe partial class Interop
             /// </summary>
             public unsafe static FILE_FULL_DIR_INFORMATION* GetNextInfo(FILE_FULL_DIR_INFORMATION* info)
             {
-                if (info == null)
+                if (info is null)
                     return null;
 
-                uint nextOffset = (*info).NextEntryOffset;
+                uint nextOffset = info->NextEntryOffset;
                 if (nextOffset == 0)
                     return null;
 

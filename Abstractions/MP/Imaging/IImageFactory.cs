@@ -1,0 +1,135 @@
+﻿
+using System;
+using System.Drawing;
+using System.Runtime.CompilerServices;
+
+namespace MP.Imaging
+{
+    /// <summary>
+    /// Defines static methods for creating fast in-memory <see cref="IImage"/>-derived objects.
+    /// </summary>
+    [Annotations.RequiresNativeLayer]
+    public static unsafe class IImageFactory
+    {
+        /// <summary>
+        /// Creates a new <see cref="IImage"/> object from the specified raw RGB data and the desired image size.
+        /// </summary>
+        /// <param name="rgb">The raw RGB data to initialize the <see cref="IImage"/> object from.</param>
+        /// <param name="desiredsize">The desired size of the newly created image.</param>
+        /// <returns>The image object, having it's RGB data copied from the specified array.</returns>
+        /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="rgb"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 3.</exception>
+        public static IImage FromRGB(System.Byte[] rgb, Size desiredsize)
+        {
+            if (rgb is null) { throw new ArgumentNullException(nameof(rgb)); }
+            if (desiredsize.Width * desiredsize.Height * 3 != rgb.LongLength)
+            {
+                throw new ArgumentException($"The array does not contain enough or valid data to be an RGB image with size {desiredsize} .");
+            }
+            DefaultImage dfi = new(desiredsize);
+            dfi.PixelFormat = ImagePixelFormat.RGB;
+            dfi.InitializeMemoryWithSize(dfi.GetMemoryByteLength());
+            Unsafe.CopyBlockUnaligned(ref dfi.NativePointer[0], ref rgb[0], rgb.LongLength.ToUInt32());
+            return dfi;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IImage"/> object from the specified raw ARGB data and the desired image size.
+        /// </summary>
+        /// <param name="argb">The raw ARGB data to initialize the <see cref="IImage"/> object from.</param>
+        /// <param name="desiredsize">The desired size of the newly created image.</param>
+        /// <returns>The image object, having it's RGB data copied from the specified array.</returns>
+        /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="argb"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 4.</exception>
+        public static IImage FromARGB(System.Byte[] argb, Size desiredsize)
+        {
+            if (argb is null) { throw new ArgumentNullException(nameof(argb)); }
+            if (desiredsize.Width * desiredsize.Height * 4 != argb.LongLength)
+            {
+                throw new ArgumentException($"The array does not contain enough or valid data to be an ARGB image with size {desiredsize} .");
+            }
+            DefaultImage dfi = new(desiredsize);
+            dfi.PixelFormat = ImagePixelFormat.ARGB;
+            dfi.InitializeMemoryWithSize(dfi.GetMemoryByteLength());
+            Unsafe.CopyBlockUnaligned(ref dfi.NativePointer[0], ref argb[0], argb.LongLength.ToUInt32());
+            return dfi;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IImage"/> object from the specified raw RGBA data and the desired image size.
+        /// </summary>
+        /// <param name="rgba">The raw RGBA data to initialize the <see cref="IImage"/> object from.</param>
+        /// <param name="desiredsize">The desired size of the newly created image.</param>
+        /// <returns>The image object, having it's RGB data copied from the specified array.</returns>
+        /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="rgba"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 4.</exception>
+        public static IImage FromRGBA(System.Byte[] rgba, Size desiredsize)
+        {
+            if (rgba is null) { throw new ArgumentNullException(nameof(rgba)); }
+            if (desiredsize.Width * desiredsize.Height * 4 != rgba.LongLength)
+            {
+                throw new ArgumentException($"The array does not contain enough or valid data to be an RGBA image with size {desiredsize} .");
+            }
+            DefaultImage dfi = new(desiredsize);
+            dfi.PixelFormat = ImagePixelFormat.RGBA;
+            dfi.InitializeMemoryWithSize(dfi.GetMemoryByteLength());
+            Unsafe.CopyBlockUnaligned(ref dfi.NativePointer[0], ref rgba[0], rgba.LongLength.ToUInt32());
+            return dfi;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IImage"/> object from the specified 2-dimensional <see cref="Color"/> array. <br />
+        /// The image's dimensions are auto-determined from the array itself.
+        /// </summary>
+        /// <param name="cls">The color array to define the image data as well as it's dimensions.</param>
+        /// <returns>The newly created <see cref="IImage"/> object describing the image.</returns>
+        /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="cls"/> was <see langword="null"/>.</exception>
+        public static IImage FromColors(Color[,] cls)
+        {
+            if (cls is null) { throw new ArgumentNullException(nameof(cls)); }
+            Size se = new(cls.GetLength(0), cls.GetLength(1));
+            DefaultImage img = new(se);
+            img.PixelFormat = ImagePixelFormat.ARGB;
+            img.InitializeMemoryWithSize(img.GetMemoryByteLength());
+            Color cl;
+            System.Byte* temp;
+            for (System.Int32 Y = 0; Y < se.Height; Y++)
+            {
+                for (System.Int32 X = 0; X < se.Width; X++)
+                {
+                    cl = cls[X, Y];
+                    temp = img.NativePointer + (Y * se.Width + X) * 4;
+                    temp[0] = cl.A;
+                    temp[1] = cl.R;
+                    temp[2] = cl.G;
+                    temp[3] = cl.B;
+                }
+            }
+            return img;
+        }
+
+        /// <summary>
+        /// Creates an empty <see cref="IImage"/> object whose colors are to be specified by the caller.
+        /// </summary>
+        /// <param name="size">The desired dimensions of the new image object.</param>
+        /// <param name="format">The pixel format to use for completeing the image data.</param>
+        /// <returns>The newly created <see cref="IImage"/> object describing the empty image whose colors must be filled in by the caller.</returns>
+        /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
+        /// <exception cref="ArgumentException">One of the image dimensions was less than 1 pixel.</exception>
+        public static IImage CreateEmpty(Size size, ImagePixelFormat format)
+        {
+            if (size.Height < 1 || size.Width < 1)
+            {
+                throw new ArgumentException("The image dimensions must not be negative or zero!!");
+            }
+            DefaultImage img = new(size);
+            img.PixelFormat = format;
+            img.InitializeMemoryWithSize(img.GetMemoryByteLength());
+            return img;
+        }
+    }
+}

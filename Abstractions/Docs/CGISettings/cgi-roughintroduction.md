@@ -20,7 +20,7 @@ just simply focus on the implementation details rather on how implement the base
 The CGI settings model does not care how you will write and get the data from a data source; 
 It does care though how it will 'provide' the data into the app instance.
 
-For example, you could create a CGI Settings reader and writer that transmit and recieve CGI Settings over the network.
+For example, you could create a CGI Settings reader and writer that transmit and recieve CGI Settings over the network, without any factual restriction on how the reader and the writer will be written upon.
 
 This allows the entire model to be built on and create the entire 'CGI Settings Infrastracture'.
 

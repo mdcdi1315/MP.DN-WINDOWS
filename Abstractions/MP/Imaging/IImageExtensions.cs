@@ -1,9 +1,9 @@
 ﻿
-using MP;
-using Microsoft.Win32.SafeHandles;
+using System;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 
-namespace System.Drawing
+namespace MP.Imaging
 {
     /// <summary>
     /// Defines extension methods for the <see cref="IImage"/> interface.
@@ -61,7 +61,7 @@ namespace System.Drawing
             System.Int32 row;
             System.Byte* bytes = ret.NativePointer;
             Unsafe.CopyBlockUnaligned(bytes, source.NativePointer, GetMemoryByteLength(source).ToUInt32());
-            SafeLibcMemoryHandle temp = new(2048);
+            IMemoryHandle temp = SystemInfo.CreateNativeMemory(2048UL);
             for (row = 0; row < (source.Size.Height >> 1); row++)
             {
                 System.Byte* row0 = bytes + row * bytes_per_row;
@@ -350,48 +350,5 @@ namespace System.Drawing
                 stream.Write(temp, 0, rem);
             }
         }
-
-#if WINDOWS10_0_19041_0_OR_GREATER
-        /// <summary>
-        /// Converts the current <see cref="IImage"/> interface object to a new GDI+ <see cref="Bitmap"/> class.
-        /// </summary>
-        /// <param name="source">The image to convert.</param>
-        /// <returns>The created bitmap.</returns>
-        public static Bitmap ToBitmap(this IImage source)
-        {
-            Bitmap bm = new(source.Size.Width, source.Size.Height, Imaging.PixelFormat.Format32bppArgb);
-            IImage img = source;
-            if (source.IsFlippedVertically) { img = source.FlipVertically(); }
-            Color[,] data = img.GetPixels2DPlane();
-            if (source.IsFlippedVertically) { img.Dispose(); }
-            for (System.Int32 Y = 0; Y < source.Size.Height; Y++)
-            {
-                for (System.Int32 X = 0; X < source.Size.Width; X++)
-                {
-                    bm.SetPixel(X, Y, data[X, Y]);
-                }
-            }
-            data = null;
-            return bm;
-        }
-
-        /// <summary>
-        /// Converts the current GDI+ bitmap image to a new instance of the <see cref="IImage"/> interface.
-        /// </summary>
-        /// <param name="bitmap">The GDI+ bitmap image to convert.</param>
-        /// <returns>The converted image.</returns>
-        public static IImage ToImage(this Bitmap bitmap)
-        {
-            // Try first to lock the bitmap bits , if it fails it will not allocate anything else.
-            var data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb);
-            DefaultImage img = new(bitmap.Size); // Create the image object
-            img.PixelFormat = ImagePixelFormat.RGBA; // The Bitmap bits are packed as RGBA, although specified to retrieve them as ARGB.
-            System.Int32 len = img.GetMemoryByteLength();
-            img.InitializeMemoryWithSize(len);
-            Unsafe.CopyBlockUnaligned(img.NativePointer, data.Scan0.ToPointer(), len.ToUInt32());
-            bitmap.UnlockBits(data);
-            return img;
-        }
-#endif
     }
 }

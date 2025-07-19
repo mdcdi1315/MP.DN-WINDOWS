@@ -1,4 +1,5 @@
 ﻿
+using MP.Collections;
 using System.Runtime.Versioning;
 
 namespace MP
@@ -15,7 +16,7 @@ namespace MP
 
         private static void UnloadPlatformLayer(System.Object obj, System.EventArgs e)
         {
-            apl?.UnloadLayer(); 
+            apl?.UnloadLayer();
             apl = null;
         }
 
@@ -161,6 +162,21 @@ namespace MP
         public static EnvironmentVariable[] GetEnvironmentVariables() => apl.GetEnvironmentVariables();
 
         /// <summary>
+        /// Gets all the currently defined environment variables defined in this app instance. 
+        /// </summary>
+        /// <returns>A new instance of the <see cref="EnvironmentVariablesDictionary"/> containing all the process variables.</returns>
+        public static EnvironmentVariablesDictionary GetEnvironmentVariablesAsDictionary()
+        {
+            EnvironmentVariable[] d = GetEnvironmentVariables();
+            EnvironmentVariablesDictionary dict = new(d.Length);
+            foreach (var i in d)
+            {
+                dict.Add(i);
+            }
+            return dict;
+        }
+
+        /// <summary>
         /// Gets a common user or known folder path from a number of pre-defined values.
         /// </summary>
         /// <param name="folder">The user of known folder path to look up.</param>
@@ -181,5 +197,19 @@ namespace MP
         /// <param name="type">The computer name type to look up.</param>
         /// <returns>The computer name requested by <paramref name="type"/>.</returns>
         public static System.String GetComputerName(ComputerNameTypes type) => apl.GetComputerName(type);
+
+        /// <summary>
+        /// Gets a memory handle factory instance, that is able to construct native memory handles directly.
+        /// </summary>
+        /// <returns>A newly created <see cref="MemoryHandleFactory"/> instance able to construct native memory handles.</returns>
+        public static MemoryHandleFactory GetMemoryHandleFactory() => apl.GetMemoryHandleFactory();
+
+        /// <summary>
+        /// Creates a new native memory handle of the specified size, and returns it.
+        /// </summary>
+        /// <param name="size">The size of the newly created memory handle.</param>
+        /// <returns>The memory block of the size requested in the <paramref name="size"/> parameter.</returns>
+        /// <exception cref="System.OutOfMemoryException">Not enough memory to create the memory handle.</exception>
+        public static IMemoryHandle CreateNativeMemory(System.UInt64 size) => GetMemoryHandleFactory().CreateMemoryHandle(size);
     }
 }

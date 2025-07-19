@@ -63,13 +63,13 @@ namespace MP
         public static T[] ToManagedTArray<T>(this IMemoryHandle handle)
             where T : unmanaged
         {
-            System.Int32 tsize = sizeof(T) , memlen = handle.MemoryLength;
+            System.Int32 tsize = sizeof(T), memlen = handle.MemoryLength;
             if (memlen % tsize != 0)
             {
                 throw new ArgumentException("Memory handle length is not T-aligned.");
             }
             T[] ret = new T[memlen / tsize];
-            fixed (T* dst = ret) 
+            fixed (T* dst = ret)
             {
                 Unsafe.CopyBlockUnaligned(dst, handle.MemoryPointer, memlen.ToUInt32());
             }
@@ -134,5 +134,20 @@ namespace MP
             if (dsthandle.MemoryLength < srchandle.MemoryLength) { throw new InsufficientMemoryException("The destination handle is not large enough to accomondate the data of the current handle."); }
             Unsafe.CopyBlockUnaligned(dsthandle.MemoryPointer, srchandle.MemoryPointer, srchandle.MemoryLength.ToUInt32());
         }
+
+        /// <summary>
+        /// Translates the native pointer that the current memory handle represents as a mutable .NET reference.
+        /// </summary>
+        /// <param name="handle">The source memory handle</param>
+        /// <returns>The translated .NET reference to <see cref="IMemoryHandle.MemoryPointer"/>, whatever that is.</returns>
+        public static ref System.Byte PointerAsReference(this IMemoryHandle handle) => ref *handle.MemoryPointer;
+
+        /// <summary>
+        /// Translates the native pointer that the current memory handle represents as a mutable .NET reference of the specified unmanaged structure.
+        /// </summary>
+        /// <typeparam name="T">The structure to traslate the <see cref="IMemoryHandle.MemoryPointer"/> as.</typeparam>
+        /// <param name="handle">The source memory handle</param>
+        /// <returns>The translated .NET reference of type <typeparamref name="T"/> to <see cref="IMemoryHandle.MemoryPointer"/>, whatever that is.</returns>
+        public static ref T PointerAsReferenceTo<T>(this IMemoryHandle handle) where T : unmanaged => ref *(T*)handle.MemoryPointer;
     }
 }

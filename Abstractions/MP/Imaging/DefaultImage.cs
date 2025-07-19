@@ -1,8 +1,7 @@
 ﻿
-using MP;
-using Microsoft.Win32.SafeHandles;
+using System.Drawing;
 
-namespace System.Drawing
+namespace MP.Imaging
 {
     /// <summary>
     /// Typed <see cref="IImage"/> implementation shared by <see cref="IImageExtensions"/> and <see cref="IImageFactory"/> classes.
@@ -12,13 +11,13 @@ namespace System.Drawing
         private Size size;
         private System.Boolean flipped;
         private ImagePixelFormat pixfmt;
-        private SafeLibcMemoryHandle mem;
+        private IMemoryHandle mem;
 
         public DefaultImage(IImage other)
         {
             size = other.Size;
             pixfmt = other.PixelFormat;
-            mem = new(other.GetMemoryByteLength());
+            mem = SystemInfo.CreateNativeMemory(other.GetMemoryByteLength().ToUInt64());
             flipped = other.IsFlippedVertically;
         }
 
@@ -30,11 +29,11 @@ namespace System.Drawing
         public void InitializeMemoryWithSize(System.Int32 size)
         {
             mem?.Dispose();
-            mem = new(size);
+            mem = SystemInfo.CreateNativeMemory(size.ToUInt32());
             mem.ZeroMemory();
         }
 
-        public SafeBaseMemoryHandle Handle => mem;
+        public IMemoryHandle Handle => mem;
 
         public unsafe System.Byte* NativePointer => mem.MemoryPointer;
 

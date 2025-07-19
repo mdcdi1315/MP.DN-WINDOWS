@@ -1,5 +1,6 @@
 ﻿
 using System;
+using MP.Annotations;
 
 namespace MP.Threading
 {
@@ -9,6 +10,7 @@ namespace MP.Threading
     /// before these do actually run by the dispatch thread , which is also managed by an instance of this class. <br />
     /// Completely thread-safe.
     /// </summary>
+    [RequiresNativeLayer]
     public sealed class OperationsTasker : IOperationsTasker
     {
         private WorkItemInternal current;

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using MP.Annotations;
 using System.Runtime.CompilerServices;
 
 namespace MP.Random
@@ -32,10 +33,21 @@ namespace MP.Random
         /// <summary>
         /// Creates a new instance of the <see cref="Xoroshiro256PlusPlus"/> class, with a seed intialized from the current date and time.
         /// </summary>
+        [RequiresNativeLayer]
         public Xoroshiro256PlusPlus()
         {
             state = new System.UInt64[4];
             Init(SystemInfo.Now.Ticks);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="Xoroshiro256PlusPlus"/> class, with the specified seed, initializing the random number generator.
+        /// </summary>
+        /// <param name="seed">The seed to use so that to initilalize the Xoroshiro random number generator.</param>
+        public Xoroshiro256PlusPlus(System.Int64 seed)
+        {
+            state = new System.UInt64[4];
+            Init(seed);
         }
 
         /// <inheritdoc />

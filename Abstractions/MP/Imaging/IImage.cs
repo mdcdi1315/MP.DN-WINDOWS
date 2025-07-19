@@ -1,4 +1,8 @@
-﻿namespace System.Drawing
+﻿
+using System;
+using System.Drawing;
+
+namespace MP.Imaging
 {
     /// <summary>
     /// Defines an abstraction for loadable images that can be loaded into any window/UI contexts. <br />

@@ -171,6 +171,7 @@
 	  <Compile Include="MP\ExceptionSystem\NativeWindowsCOMException.cs" />
 	  <Compile Include="MP\Imaging\BitFieldDecoder.cs" />
 	  <Compile Include="MP\Imaging\RawIconWriter.cs" />
+	  <Compile Include="MP\Imaging\AdditionalImagingExtensions.cs" />
 	  <Compile Include="MP\WindowsInterop\WindowsVersions.cs" />
 	  <Compile Include="NativeInterop.Gdi32.cs" />
 	  <Compile Include="NativeInterop.Kernel32.PerformanceCounting.cs" />
@@ -380,11 +381,6 @@
 	  <Compile Include="System\Buffers\CryptoPool.cs" />
 	  <Compile Include="System\Buffers\NativeMemoryPool.cs" />
 	  <Compile Include="System\Drawing\CursorImage.cs" />
-	  <Compile Include="System\Drawing\DefaultImage.cs" />
-	  <Compile Include="System\Drawing\IImage.cs" />
-	  <Compile Include="System\Drawing\IImageExtensions.cs" />
-	  <Compile Include="System\Drawing\IImageFactory.cs" />
-	  <Compile Include="System\Drawing\ImagePixelFormat.cs" />
 	  <Compile Include="System\FixedBufferExtensions.cs" />
 	  <Compile Include="Microsoft\IO\Directory.cs" />
 	  <Compile Include="Microsoft\IO\DirectoryInfo.cs" />

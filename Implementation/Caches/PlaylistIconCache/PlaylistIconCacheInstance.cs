@@ -1,4 +1,5 @@
 ﻿
+using MP.Imaging;
 using Microsoft.IO;
 using System.Drawing;
 using System.Collections.Generic;

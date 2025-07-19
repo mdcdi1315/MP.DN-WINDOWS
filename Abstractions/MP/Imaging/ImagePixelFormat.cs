@@ -1,6 +1,6 @@
 ﻿
 
-namespace System.Drawing
+namespace MP.Imaging
 {
     /// <summary>
     /// Depicts the data organization inside the <see cref="IImage.NativePointer"/> property data. <br />

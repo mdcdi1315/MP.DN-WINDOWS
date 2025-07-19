@@ -190,9 +190,6 @@ partial class Interop
 
         public static System.IntPtr InternetConnect(System.IntPtr hinternet , System.String url , System.UInt16 port , System.String username , System.String password , InternetConnectService serv , InternetConnectFlags flags)
         {
-            url += "\0";
-            if (username is not null) { username += "\0"; }
-            if (password is not null) { password += "\0"; }
             fixed (System.Char* purl = url)
             fixed (System.Char* pusername = username)
             fixed (System.Char* ppassword = password)
@@ -206,10 +203,6 @@ partial class Interop
 
         public static System.IntPtr HttpOpenRequest(System.IntPtr hinternet  , System.String verb , System.String target , System.String httpversion , System.String referrer , System.String[] accepttypes, InternetConnectFlags flags)
         {
-            verb += "\0";
-            target += "\0";
-            if (httpversion is not null) { httpversion += "\0"; }
-            if (referrer is not null) { referrer += "\0"; }
             SafeLibcMemoryHandle memory = null;
             System.Char** acttypes = null;
             List<SafeLibcMemoryHandle> memhandles = null;

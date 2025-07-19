@@ -1,6 +1,8 @@
 
 using System;
 using System.Collections;
+using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
 
 namespace MP
 {
@@ -13,6 +15,42 @@ namespace MP
     // I will not mark this with NativeLayer attribute, since it uses API's defined by .NET itself.
     public sealed class DefaultPlatformLayer : AbstractPlatformLayer
     {
+        private InteropServicesMemoryFactory mf;
+
+        private sealed class InteropServicesMemoryFactory : MemoryHandleFactory
+        {
+            private sealed unsafe class DefaultMemoryHandle : SafeBaseMemoryHandle
+            {
+                private int size;
+
+                public DefaultMemoryHandle(System.UIntPtr size)
+                {
+                    this.size = size.ToUInt32().ToInt32();
+                    handle = new(NativeMemory.Alloc(size));
+                }
+
+                public override int MemoryLength => size;
+
+                protected override bool ReleaseHandle()
+                {
+                    NativeMemory.Free(handle.ToPointer());
+                    return true;
+                }
+            }
+
+            public IMemoryHandle CreateMemoryHandle(ulong size) => new DefaultMemoryHandle(new(size));
+
+            public IAttributeable GetStatistics() => null;
+        }
+
+        /// <summary>
+        /// Destroys internal state used by the platform layer.
+        /// </summary>
+        protected internal override void UnloadLayer() => mf = null;
+
+        /// <inheritdoc />
+        public override MemoryHandleFactory GetMemoryHandleFactory() => mf ??= new InteropServicesMemoryFactory();
+
         /// <inheritdoc />
         public override string UserName => Environment.UserName;
 
@@ -44,8 +82,14 @@ namespace MP
         /// <summary>This call is not supported and will always throw <see cref="NotSupportedException"/>.</summary>
         public override ProcessorArchitecture ProcessorArchitecture
         {
-            [System.Diagnostics.CodeAnalysis.DoesNotReturn]
-            get => throw new NotSupportedException("Cannot retrieve CPU type from .NET API's.");
+            get => RuntimeInformation.OSArchitecture switch {
+                Architecture.X86 => ProcessorArchitecture.X86,
+                Architecture.X64 => ProcessorArchitecture.AMD64,
+                Architecture.Arm => ProcessorArchitecture.ARM32,
+                Architecture.Arm64 => ProcessorArchitecture.ARM64,
+                Architecture.Armv6 => ProcessorArchitecture.ARM32,
+                _ => throw new NotSupportedException($"Processor architecture type {RuntimeInformation.OSArchitecture} is not supported.")
+            };
         }
 
         /// <summary>This call is not supported and will always return <see langword="false"/>.</summary>

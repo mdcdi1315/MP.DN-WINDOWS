@@ -126,5 +126,5 @@ You can now close the command prompt.
 
 From there, you execute the `MP.exe` which it is the loader of the app, and the gateway that makes this installation framework-independent.
 
-� mdcdi1315 (2023-2025). The project has been published under the MIT License.
+© mdcdi1315 (2023-2025). The project has been published under the MIT License.
 

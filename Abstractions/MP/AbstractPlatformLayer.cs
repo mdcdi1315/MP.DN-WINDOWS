@@ -13,6 +13,12 @@ namespace MP
     public abstract class AbstractPlatformLayer
     {
         /// <summary>
+        /// Gets a factory object that can arbitrarily create memory blocks and return them.
+        /// </summary>
+        /// <returns>The created factory object, wrapped around with the <see cref="MemoryHandleFactory"/> interface.</returns>
+        public abstract MemoryHandleFactory GetMemoryHandleFactory();
+
+        /// <summary>
         /// Called just before the app's domain unloads. <br />
         /// Useful for destroying state that the layer itself uses to work.
         /// </summary>

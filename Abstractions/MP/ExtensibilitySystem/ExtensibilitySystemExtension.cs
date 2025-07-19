@@ -48,7 +48,7 @@ namespace MP.ExtensibilitySystem
 
         /// <summary>
         /// Called by the engine when it is ready to unload this extension. <br />
-        /// In this stage you must destroy the extension must free all the internal state that is holding.
+        /// In this stage you must destroy the extension and free all the internal state that is holding.
         /// </summary>
         /// <remarks>
         /// This code should throw exceptions on failed uninitialization tasks. <br />

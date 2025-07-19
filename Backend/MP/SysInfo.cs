@@ -1,7 +1,40 @@
-﻿namespace MP
+﻿using System;
+using Microsoft.Win32;
+using System.Diagnostics.CodeAnalysis;
+
+namespace MP
 {
     public sealed class SystemInfo_Windows : AbstractPlatformLayer
     {
+        private sealed class WindowsMemHandleFactory : MemoryHandleFactory, IDisposable
+        {
+            private MemoryHeap hp;
+
+            public IMemoryHandle CreateMemoryHandle(ulong size) => (hp ??= MemoryHeap.Create()).Allocate(size.ToInt32());
+
+            [return: MaybeNull]
+            public IAttributeable GetStatistics()
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public void Dispose()
+            {
+                hp?.Dispose();
+            }
+        }
+
+        private WindowsMemHandleFactory fac;
+
+        protected override void UnloadLayer()
+        {
+            fac?.Dispose();
+            fac = null;
+            base.UnloadLayer();
+        }
+
+        public override MemoryHandleFactory GetMemoryHandleFactory() => fac ??= new WindowsMemHandleFactory();
+
         public override System.String UserName => Interop.Advapi32.GetUserName();
 
         public override System.String CurrentProcessDirectory => Interop.Kernel32.GetProcessDirectory();

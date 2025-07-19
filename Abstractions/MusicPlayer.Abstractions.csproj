@@ -29,6 +29,7 @@
 		<Compile Include="MP\Annotations\PreliminaryAttribute.cs" />
 		<Compile Include="MP/Annotations/ObjectiveCGeneratedSignatureAttribute.cs" />
 		<Compile Include="MP/Annotations/ObjectiveCWrappedTypeAttribute.cs" />
+		<Compile Include="MP/Annotations/RequiresNativeLayerAttribute.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttribute.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttributeCollection.cs" />
 		<Compile Include="MP\AudioLibrary\AudioFormat.cs" />
@@ -44,6 +45,7 @@
 		<Compile Include="MP\AudioLibrary\PlaybackState.cs" />
 		<Compile Include="MP\AudioLibrary\PlaybackStoppedDelegate.cs" />
 		<Compile Include="MP\AudioLibrary\PlaybackStoppedEventInfo.cs" />
+		<Compile Include="MP/AudioLibrary/Decibel.cs" />
 		<Compile Include="MP\BinaryPlaylist\BinaryPlaylistReader.cs" />
 		<Compile Include="MP\BinaryPlaylist\BinaryPlaylistWriter.cs" />
 		<Compile Include="MP\BinaryPlaylist\BlobFlags.cs" />
@@ -83,6 +85,17 @@
 		<Compile Include="MP\Collections\ReadOnlyListOfT.cs" />
 		<Compile Include="MP/Collections/ICollectableAttributeable.cs" />
 		<Compile Include="MP/Collections/AttributeKeyValuePair.cs" />
+		<Compile Include="MP/Collections/AttributedCollection.cs" />
+		<Compile Include="MP/Collections/IGettableSettable.cs" />
+		<Compile Include="MP/Collections/EnvironmentVariablesDictionary.cs" />
+		<Compile Include="MP/Collections/Record.cs" />
+		<Compile Include="MP/Imaging/DefaultImage.cs" />
+	  	<Compile Include="MP/Imaging/IImage.cs" />
+	  	<Compile Include="MP/Imaging/IImageExtensions.cs" />
+	  	<Compile Include="MP/Imaging/IImageFactory.cs" />
+	  	<Compile Include="MP/Imaging/ImagePixelFormat.cs" />
+		<Compile Include="MP/Collections/ICollectableAttributeable.cs" />
+		<Compile Include="MP/Collections/AttributeKeyValuePair.cs" />
 		<Compile Include="MP\CommandMetadata.cs" />
 		<Compile Include="AssemblyInfo.cs" />
 		<Compile Include="MP\CommandMetadataItem.cs" />
@@ -97,6 +110,7 @@
 		<Compile Include="MP\ExceptionSystem\IMusicPlayerException.cs" />
 		<Compile Include="MP\ExceptionSystem\INativeException.cs" />
 		<Compile Include="MP\ExceptionSystem\MetadataItemNotFoundException.cs" />
+		<Compile Include="MP/ExceptionSystem/EnvironmentVariableNotFoundException.cs" />
 		<Compile Include="MP\ExceptionSystem\ReadOnlyArchiveAttributeException.cs" />
 		<Compile Include="MP\ExtensibilitySystem\AssetIntegrityFailedException.cs" />
 		<Compile Include="MP\ExtensibilitySystem\AssetVerificationHashType.cs" />
@@ -142,6 +156,7 @@
 		<Compile Include="MP\SavedDataTagReader.cs" />
 		<Compile Include="MP\StreamMethods.cs" />
 		<Compile Include="MP\StreamMethods.SpanSupport.cs" />
+		<Compile Include="MP/MemoryHandleFactory.cs" />
 		<Compile Include="MP\SystemInfo.cs" />
 		<Compile Include="MP\SystemInfoHelpers.cs" />
 		<Compile Include="MP\Threading\ICancellationTokenOfT.cs" />
