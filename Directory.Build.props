@@ -8,9 +8,12 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
+		<MP_UNSTABLE Condition="'$(MP_UNSTABLE)' == ''">True</MP_UNSTABLE>
 		<MP_BaseFileReferenceLoadingPath>$(MSBuildThisFileDirectory)</MP_BaseFileReferenceLoadingPath>
 		<MPBuildTasksProjBasePath>$(MSBuildThisFileDirectory)BuildTasks</MPBuildTasksProjBasePath>
 		<MPBuildTasksBasePath>$(MPBuildTasksProjBasePath)/MP_BUILDTASKS</MPBuildTasksBasePath>
+		<!-- Define warnings and errors that belong to unstable branches of Music Player Abstractions Library. These are required to be globally disabled so that the preliminary code defined in such branches can be freely injected. -->
+		<NoWarn Condition="'$(MP_UNSTABLE)' == 'True'">$(NoWarn);MPAL00001</NoWarn>
 	</PropertyGroup>
 	
 	<Import Project="$(MPBuildTasksProjBasePath)/MP.BuildTasks.targets" />
@@ -25,6 +28,12 @@
 				 />
 		<Exec Command="dotnet msbuild &quot;$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj&quot; -t:Build -p:&quot;OutputPath=$(MPBuildTasksBasePath)&quot; -p:Configuration=Release -p:DebugSymbols=false" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
 		<Exec Command="&quot;$(MSBuildBinPath)/msbuild.exe&quot; &quot;$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj&quot; -t:Build -p:&quot;OutputPath=$(MPBuildTasksBasePath)&quot; -p:Configuration=Release -p:DebugSymbols=false" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
+	</Target>
+
+	<!-- Special target for resetting any project on which this target is invoked -->
+	<Target Name="CleanCompletely">
+		<RemoveDir Directories="$(MSBuildProjectDirectory)/bin" />
+		<RemoveDir Directories="$(MSBuildProjectDirectory)/obj" />
 	</Target>
 	
 </Project>

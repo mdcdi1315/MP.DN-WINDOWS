@@ -5,6 +5,7 @@ using static MP.Settings;
 using System.Windows.Forms;
 using MP.ExtensibilitySystem;
 using MP.AudioLibrary.MMDevice;
+using System.Collections.Generic;
 
 namespace MP
 {
@@ -82,38 +83,52 @@ namespace MP
 
         private void F_NODESEL(object sender, TreeViewEventArgs e)
         {
-            if (e.Node is not null)
+            if (e.Node is null) { return; }
+            System.String nodeid = e.Node.Tag as System.String;
+            CleanSuggestionData();
+            SettingDescriptionLabel.Text = null;
+            if (e.Node.Tag is SettingsEditorHelpers.ExtensionData dt)
             {
-                System.String nodeid = e.Node.Tag as System.String;
-                CleanSuggestionData();
-                SettingDescriptionLabel.Text = null;
-                if (e.Node.Tag is SettingsEditorHelpers.ExtensionData dt)
+                // Special case, we need the settings panel to show package info
+                ShowPackageInfo(dt);
+            }
+            else if (nodeid.StartsWith("__NODE-"))
+            {
+                // It is a settings tree node , ignore it and disappear the setting panel.
+                ValuesSettingPanel.Hide();
+            }
+            else
+            {
+                switch (nodeid)
                 {
-                    // Special case, we need the settings panel to show package info
-                    ShowPackageInfo(dt);
-                }
-                else if (nodeid.StartsWith("__NODE-"))
-                {
-                    // It is a settings tree node , ignore it and disappear the setting panel.
-                    ValuesSettingPanel.Hide();
-                }
-                else
-                {
-                    switch (nodeid)
-                    {
-                        case rootobjname:
-                            // In such case show a suggestion on how using this revamped settings window.
-                            ShowSuggestionData();
-                            break;
-                        case "__G_YTDLPVERIFY":
-                        case "__G_EXTENSIONS":
-                        case "__G_CREDITS":
-                            // Just a default so as to not search these elements with no reason.
-                            break;
-                        default:
-                            CreateSettingPane(builder.RootElement.GetSetting(nodeid));
-                            break;
-                    }
+                    case rootobjname:
+                        // In such case show a suggestion on how using this revamped settings window.
+                        ShowSuggestionData();
+                        break;
+                    case "__G_YTDLPVERIFY":
+                    case "__G_CREDITS":
+                        // Just a default so as to not search these elements with no reason.
+                        break;
+                    case "__G_EXTENSIONS":
+                        ValuesSettingPanel.Show();
+                        StringValueTextBox.Hide();
+                        RangeSettingUpDown.Hide();
+                        SettingValueColorBox.Hide();
+                        SettingDescriptionLabel.Show();
+                        ValidValuesBoxForSetting.Hide();
+                        ConfirmSettingValueButton.Hide();
+                        ChooseFileOrFolderButton.Hide();
+                        System.Text.StringBuilder sb = new(1000);
+                        IList<Version> vers = engine.EngineVersioning.AppVersions;
+                        for (int I = 0; I < vers.Count; I++)
+                        {
+                            sb.AppendFormat("Application Version Ordinal #{0}: {1}\n" , I+1 , vers[I]);
+                        }
+                        SettingDescriptionLabel.Text = MusicPlayerHelper.WrapStringBy($"Extension Engine Information: \nEngine Version: {engine.EngineVersioning.EngineVersion} \nInjected application versions ({vers.Count} versions discovered):\n {sb}\nLoaded Extension packages: {engine.LoadedPackages}\nNumber of extension loading failures: {engine.FailedExtensionsCount}", 70);
+                        break;
+                    default:
+                        CreateSettingPane(builder.RootElement.GetSetting(nodeid));
+                        break;
                 }
             }
         }
@@ -579,13 +594,18 @@ namespace MP
             {
                 case "__G_CREDITS":
                     CreditsPane cp = null;
-                    try {
+                    try
+                    {
                         cp = new();
                         cp.ShowDialog(this);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         DebugProvider.WriteLine($"SettingsManager: Cannot load the Credits panel due to an underlying exception: \n{ex}");
                         return;
-                    } finally {
+                    }
+                    finally
+                    {
                         cp?.Dispose();
                         cp = null;
                     }
@@ -594,15 +614,19 @@ namespace MP
                     if (ShowQuestionMsgWithRes("SettingsEditorNew_VerifyYtDlpInstallationDataQuestion") == false) { return; }
                     DownloadVerifier dv = null;
                     FileInfo fi = Global.YtDlpInstallationDirectory.GetFile("VerifierData.json");
-                    if (fi is null) {
+                    if (fi is null)
+                    {
                         ShowErrorMessageWithRes("SettingsEditorNew_CannotFindYtDlpInstallationFile");
                         return;
                     }
-                    try {
+                    try
+                    {
                         dv = new(Global.YtDlpInstallationDirectory, fi);
                         dv.ShowMinimizeButton = false;
                         dv.ShowDialog(this);
-                    } finally {
+                    }
+                    finally
+                    {
                         dv?.Dispose();
                         dv = null;
                     }

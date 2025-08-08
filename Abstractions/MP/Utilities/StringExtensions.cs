@@ -36,7 +36,7 @@ namespace MP.Utilities
             private System.Char[] strret;
             private NumberTypeFlags flags;
 
-            public ToNumberParsingContext(System.String str , System.Boolean unsigned = false)
+            public ToNumberParsingContext(System.String str, System.Boolean unsigned = false)
             {
                 strret = str.ToCharArray();
                 sidx = 0;
@@ -47,34 +47,44 @@ namespace MP.Utilities
             // Retrieve the data with a non-optimized way.
             private void CreateContext()
             {
-                if (strret.Length == 0) {
+                if (strret.Length == 0)
+                {
                     throw new FormatException("This string is too small to represent any valid number.");
                 }
                 flags |= (strret[sidx] == '-') ? NumberTypeFlags.Negative : NumberTypeFlags.None;
-                if (HasFlagFast(NumberTypeFlags.Negative)) { 
-                    if (HasFlagFast(NumberTypeFlags.Unsigned)) {
+                if (HasFlagFast(NumberTypeFlags.Negative))
+                {
+                    if (HasFlagFast(NumberTypeFlags.Unsigned))
+                    {
                         throw new FormatException("Negative numbers cannot be parsed in unsigned contexts.");
                     }
-                    if (strret.Length == 1) {
+                    if (strret.Length == 1)
+                    {
                         throw new FormatException("This string is too small to represent any valid number.");
                     }
-                    sidx++; 
+                    sidx++;
                 }
                 for (System.Int32 I = sidx; I < strret.Length; I++)
                 {
-                    if (IsDigit(strret[I]) == false) {
+                    if (IsDigit(strret[I]) == false)
+                    {
                         throw new FormatException("This string does not represent a valid numerical sequence.");
                     }
                 }
-                if (HasFlagFast(NumberTypeFlags.Negative)) {
-                    flags |= strret.Length switch {
+                if (HasFlagFast(NumberTypeFlags.Negative))
+                {
+                    flags |= strret.Length switch
+                    {
                         <= LARGEST_NEG_TOSTRING_INT16 => NumberTypeFlags.Int16,
                         <= LARGEST_NEG_TOSTRING_INT32 => NumberTypeFlags.Int32,
                         <= LARGEST_NEG_TOSTRING_INT64 => NumberTypeFlags.Int64,
                         _ => throw new FormatException("The number given is too long."),
                     };
-                } else {
-                    flags |= strret.Length switch {
+                }
+                else
+                {
+                    flags |= strret.Length switch
+                    {
                         <= LARGEST_POS_TOSTRING_INT16 => NumberTypeFlags.Int16,
                         <= LARGEST_POS_TOSTRING_INT32 => NumberTypeFlags.Int32,
                         <= LARGEST_POS_TOSTRING_INT64 => NumberTypeFlags.Int64,
@@ -94,7 +104,8 @@ namespace MP.Utilities
                 // sign parameter means the number sign:
                 // If false, it is negative.
                 // If true, it is zero or positive.
-                if ((sign && NEG) || (sign == false && NEG == false)) {
+                if ((sign && NEG) || (sign == false && NEG == false))
+                {
                     throw new OverflowException("The arithmetic parse operation was overflown.");
                 }
             }
@@ -128,7 +139,7 @@ namespace MP.Utilities
             System.Boolean ret = true;
             // Use managed pointers for faster access to the string data
             ref System.Char c = ref Unsafe.AsRef(str.GetPinnableReference());
-            ref System.Char ct = ref Unsafe.Add(ref c , str.Length);
+            ref System.Char ct = ref Unsafe.Add(ref c, str.Length);
             do
             {
                 if (IsWhiteSpace(c) == false)
@@ -166,7 +177,7 @@ namespace MP.Utilities
         /// <returns>A value whether the given character is a valid hexadecimal character.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         // Older and non valid formula was: IsDigit(c) || (c - 97U) < 103U;
-        public static System.Boolean IsHexadecimalLower(this System.Char c) => IsDigit(c) || (c > 98U & c < 104U);
+        public static System.Boolean IsHexadecimalLower(this System.Char c) => IsDigit(c) || (c > 96U & c < 103U);
 
         /// <summary>
         /// Returns a value whether the specified character is a valid hexadecimal character.
@@ -294,7 +305,8 @@ namespace MP.Utilities
         public static System.Int16 ToInt16(this System.String number)
         {
             ToNumberParsingContext pc = new(number);
-            if (pc.IsInt16 == false) {
+            if (pc.IsInt16 == false)
+            {
                 throw new FormatException("This value is too large so that it can be parsed into a Int16.");
             }
             return ToInt16OPT(pc);
@@ -308,7 +320,7 @@ namespace MP.Utilities
         /// <exception cref="FormatException">The string is malformed.</exception>
         public static System.UInt16 ToUInt16(this System.String number)
         {
-            ToNumberParsingContext pc = new(number , true);
+            ToNumberParsingContext pc = new(number, true);
             if (pc.IsInt16 == false)
             {
                 throw new FormatException("This value is too large so that it can be parsed into an UInt16.");
@@ -325,7 +337,8 @@ namespace MP.Utilities
         public static System.Int32 ToInt32(this System.String number)
         {
             ToNumberParsingContext pc = new(number);
-            if (pc.IsInt32 == false) {
+            if (pc.IsInt32 == false)
+            {
                 throw new FormatException("This value is too large so that it can be parsed into a Int32.");
             }
             return ToInt32OPT(pc);
@@ -339,8 +352,9 @@ namespace MP.Utilities
         /// <exception cref="FormatException">The string is malformed.</exception>
         public static System.UInt32 ToUInt32(this System.String number)
         {
-            ToNumberParsingContext pc = new(number , true);
-            if (pc.IsInt32 == false) {
+            ToNumberParsingContext pc = new(number, true);
+            if (pc.IsInt32 == false)
+            {
                 throw new FormatException("This value is too large so that it can be parsed into an UInt32.");
             }
             return ToUInt32OPT(pc);
@@ -355,7 +369,8 @@ namespace MP.Utilities
         public static System.Int64 ToInt64(this System.String number)
         {
             ToNumberParsingContext pc = new(number);
-            if (pc.IsInt64 == false) {
+            if (pc.IsInt64 == false)
+            {
                 throw new FormatException("This value is too large so that it can be parsed into a Int64.");
             }
             return ToInt64OPT(pc);
@@ -370,7 +385,8 @@ namespace MP.Utilities
         public static System.UInt64 ToUInt64(this System.String number)
         {
             ToNumberParsingContext pc = new(number);
-            if (pc.IsInt64 == false) {
+            if (pc.IsInt64 == false)
+            {
                 throw new FormatException("This value is too large so that it can be parsed into an UInt64.");
             }
             return ToUInt64OPT(pc);
@@ -395,7 +411,7 @@ namespace MP.Utilities
         /// <param name="subject">The string to find the character occurences for.</param>
         /// <param name="characters">The characters to find their occurence in <paramref name="subject"/>.</param>
         /// <returns>An array containing the character occurences from <paramref name="characters"/> and <paramref name="subject"/>.</returns>
-        public static CharOccurence[] FindCharOccurence(this System.String subject , params System.Char[] characters)
+        public static CharOccurence[] FindCharOccurence(this System.String subject, params System.Char[] characters)
         {
             List<CharOccurence> col = new(10);
             System.Char cc;
@@ -404,7 +420,8 @@ namespace MP.Utilities
                 cc = subject[I]; // Load the character only once
                 foreach (var c in characters)
                 {
-                    if (cc == c) {
+                    if (cc == c)
+                    {
                         col.Add(new(c, I));
                         break; // We can break the inner loop since no other character will ever match at this string position.
                     }
@@ -434,15 +451,17 @@ namespace MP.Utilities
             foreach (System.String d in allowedext.Split(';'))
             {
                 if (d.Length == 0) { continue; }
-                if (d[0] == '*') {
+                if (d[0] == '*')
+                {
                     cond = d.Substring(1) == path.Substring(idx + 1);
-                } else {
+                }
+                else
+                {
                     cond = d == path.Substring(idx + 1);
                 }
                 if (cond) { return true; }
             }
             return false;
         }
-
     }
 }

@@ -6,12 +6,12 @@ namespace MP
 {
     [CGISettingsLoaderClass]
     [SettingsTreeLayoutClass]
-    [SettingsTreeNode(null , "audio" , "Audio Playback")]
-    [SettingsTreeNode(null , "controller" , "Controller Settings")]
-    [SettingsTreeNode(null , "expview" , "Exploration Panel")]
-    [SettingsTreeNode(null , "misc" , "Miscellaneous Functions")]
-    [SettingsTreeNode("expview" , "expviewg1" , "Exploration Panel: Column Definitions")]
-    [SettingsTreeNode("expview" , "expviewg2" , "Exploration Panel: Color Definitions")]
+    [SettingsTreeNode("audio" , "Audio Playback")]
+    [SettingsTreeNode("controller" , "Controller Settings")]
+    [SettingsTreeNode("expview" , "Exploration Panel")]
+    [SettingsTreeNode("misc" , "Miscellaneous Functions")]
+    [SettingsTreeNode("expviewg1" , "expview" , "Exploration Panel: Column Definitions")]
+    [SettingsTreeNode("expviewg2" , "expview" , "Exploration Panel: Color Definitions")]
     public class Settings
     {
         [SettingsTreeIgnore]

@@ -12,7 +12,8 @@ namespace MP.Collections
     /// </summary>
     public sealed class EnvironmentVariablesDictionary :
             IList<EnvironmentVariable>,
-            IGettableSettable<System.String, System.String>
+            IGettableSettable<System.String, System.String>,
+            IGettableSettable<System.Int32 , EnvironmentVariable>
     {
         private List<EnvironmentVariable> data;
 

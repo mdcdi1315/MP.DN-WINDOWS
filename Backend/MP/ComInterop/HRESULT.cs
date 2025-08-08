@@ -86,25 +86,16 @@ namespace MP.ComInterop
         {
             if (IS_ERROR)
             {
-                switch (this)
-                {
-                    case CommonHResults.E_OUTOFMEMORY:
-                        return new OutOfMemoryException("There was not sufficient memory in order to complete the COM operation.");
-                    case CommonHResults.E_INVALIDARG:
-                        return new ArgumentException("Argument was invalid.");
-                    case CommonHResults.E_NOINTERFACE:
-                        return new NotSupportedException("The requested interface is not supported by this COM object.");
-                    case CommonHResults.E_NOTIMPL:
-                        return new NotImplementedException("The specified call is not yet implemented.");
-                    case CommonHResults.E_UNEXPECTED:
-                        return new AggregateException("An unexpected error occured.");
-                    case CommonHResults.E_POINTER:
-                        return new ArgumentNullException("The provided pointer was invalid.", innerException: null);
-                    case CommonHResults.E_HANDLE:
-                        return new ArgumentException("The specified handle is invalid.");
-                    default:
-                        return new ExceptionSystem.NativeWindowsCOMException(this);
-                }
+                return Code switch {
+                    CommonHResults.E_OUTOFMEMORY => new OutOfMemoryException("There was not sufficient memory in order to complete the COM operation."),
+                    CommonHResults.E_INVALIDARG => new ArgumentException("Argument was invalid."),
+                    CommonHResults.E_NOINTERFACE => new NotSupportedException("The requested interface is not supported by this COM object."),
+                    CommonHResults.E_NOTIMPL => new NotImplementedException("The specified call is not yet implemented."),
+                    CommonHResults.E_UNEXPECTED => new AggregateException("An unexpected error occured."),
+                    CommonHResults.E_POINTER => new ArgumentNullException("The provided pointer was invalid.", innerException: null),
+                    CommonHResults.E_HANDLE => new ArgumentException("The specified handle is invalid."),
+                    _ => new ExceptionSystem.NativeWindowsCOMException(this),
+                };
             }
             return null;
         }

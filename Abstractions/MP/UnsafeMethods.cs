@@ -942,17 +942,18 @@ namespace MP
         /// <returns>The converted binary string that is equal to <paramref name="number"/>.</returns>
         public static System.String ToBinaryString<T>(this T number) where T : unmanaged
         {
-            System.String result = System.String.Empty;
+            System.Text.StringBuilder sb = new(1024);
             System.Byte[] data = GetBytesTemplate(number);
             for (System.Int32 I = 0; I < data.Length; I++)
             {
+                var b = data[I];
                 for (System.Int32 J = 0; J < 8; J++)
                 {
-                    result += data[I].GetBit(J) ? "1" : "0";
+                    sb.Append(b.GetBit(J) ? '1' : '0');
                 }
-                if (I+1 < data.Length) { result += "_"; }
+                if (I+1 < data.Length) { sb.Append('_'); }
             }
-            return result;
+            return sb.ToString();
         }
         
         /// <summary>

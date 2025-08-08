@@ -1,5 +1,4 @@
 ﻿
-using System;
 using MP.Annotations;
 using System.Runtime.CompilerServices;
 
@@ -53,10 +52,7 @@ namespace MP.Random
         /// <inheritdoc />
         public void Init(System.Int64 seed)
         {
-            state[0] = seed.ToUInt64();
-            state[1] = (seed >> 2).ToUInt64();
-            state[2] = (seed >> 4).ToUInt64();
-            state[3] = (seed >> 8).ToUInt64();
+            new SplitMix64(seed.ToUInt64()).FillArray(state);
             this.seed = seed;
         }
 

@@ -386,17 +386,20 @@ namespace MP
             try {
                 System.Int32 imgidx = 1;
                 DebugProvider.WriteLine("FileMinimalExplorer: Getting drives...");
-                foreach (var drive in Microsoft.IO.DriveInfo.GetDrives())
+                foreach (var drive in DriveInfo.GetDrives())
                 {
-                    DebugProvider.WriteLine($"FileMinimalExplorer: Got drive {drive.Name} with label {drive.VolumeLabel} and filesystem {drive.DriveFormat}. Root directory is {drive.RootDirectory.FullName}.");
-                    if (drive.RootDirectory.FullName.Equals(main)) { imgidx = 0; DebugProvider.WriteLine($"Drive {main} seems to match as being the OS drive (as reported by the OS environment variable 'SYSTEMDRIVE')."); }
-                    data.AddItem(new WindowsListViewElement() {
-                        PrimaryData = drive.RootDirectory.FullName,
-                        ImageIndex = imgidx,
-                        SecondaryData = [drive.VolumeLabel , MusicPlayerHelper.GetSize(drive.AvailableFreeSpace) ,
-                        MusicPlayerHelper.GetSize(drive.TotalSize)]
-                    });
-                    imgidx = 1;
+                    try {
+                        DebugProvider.WriteLine($"FileMinimalExplorer: Got drive {drive.Name} with label {drive.VolumeLabel} and filesystem {drive.DriveFormat}. Root directory is {drive.RootDirectory.FullName}.");
+                        if (drive.RootDirectory.FullName.Equals(main)) { imgidx = 0; DebugProvider.WriteLine($"Drive {main} seems to match as being the OS drive (as reported by the OS environment variable 'SYSTEMDRIVE')."); }
+                        data.AddItem(new WindowsListViewElement() {
+                            PrimaryData = drive.RootDirectory.FullName,
+                            ImageIndex = imgidx,
+                            SecondaryData = [drive.VolumeLabel , MusicPlayerHelper.GetSize(drive.AvailableFreeSpace) , MusicPlayerHelper.GetSize(drive.TotalSize)]
+                        });
+                        imgidx = 1;
+                    } catch (System.IO.IOException ioex) {
+                        DebugProvider.WriteLine($"FileMinimalExplorer: I/O Exception occured on the native call: {ioex}\n\nThis drive entry will not be registered to the drive list.");
+                    }
                 }
                 // Add our desired columns.
                 data.AddItem(new WindowsListViewColumn("Path", 60, false));
@@ -412,12 +415,9 @@ namespace MP
                 RaiseSendCommand(CommonSendCommandTypes.ClearExplorationScreen);
                 RaiseSendCommand(WindowsRCUSendCommandTypes.UpdateSelectedMode);
                 RaiseSendCommand(CommonSendCommandTypes.LoadExplorationScreen, data);
-            } catch (System.Exception e) {
+            } catch (Exception e) {
                 switch (e)
                 {
-                    case System.IO.IOException:
-                        DebugProvider.WriteLine($"FileMinimalExplorer: I/O Exception occured on the native call: {e}");
-                        break;
                     case UnauthorizedAccessException:
                         DebugProvider.WriteLine("FileMinimalExplorer: Access Error occured while gathering drives!!!");
                         RaiseMessage(Global.Resources.GetStringResource("Error_DriveGather_AccessDenied"));
@@ -456,7 +456,7 @@ namespace MP
                 {
                     infos.AddRange(searchdatabase.GetFiles(fmt));
                 }
-            } catch (System.Exception e) {
+            } catch (Exception e) {
                 switch (e)
                 {
                     case UnauthorizedAccessException:
@@ -499,7 +499,7 @@ namespace MP
                     data.AddItem(new WindowsListViewElement() { ImageIndex = 0, PrimaryData = di.Name, SecondaryData = [di.CreationTimeUtc.ToString(), di.LastAccessTimeUtc.ToString(), DirectoryIdentifierString] });
                 } else if (info is FileInfo fi)
                 {
-                    switch (fi.Extension)
+                    switch (fi.Extension.ToLower())
                     {
                         case ".m3u":
                         case ".m3u8":

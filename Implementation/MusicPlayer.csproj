@@ -15,7 +15,11 @@
 		<MP_OutputResFilePath Condition="'$(IsFullMPReleaseBuild)' != 'true'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\Data\Resources.rsrc</MP_OutputResFilePath>
 		<ApplicationIcon>..\AppIcon.ico</ApplicationIcon>
 		<ApplicationManifest>App.manifest</ApplicationManifest>
+		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
 		<_BASEWPFGENDIR__II>$(MSBuildThisFileDirectory)\obj\WPF</_BASEWPFGENDIR__II>
+
+		<PublishDocumentationFiles>False</PublishDocumentationFiles>
+		<PublishReferencesDocumentationFiles>False</PublishReferencesDocumentationFiles>
 	</PropertyGroup>
 	
 	<ItemDefinitionGroup>
@@ -27,6 +31,7 @@
 	</ItemDefinitionGroup>
 
 	<UsingTask AssemblyFile="$(MPBuildTasksAssemblyPath)" TaskName="MusicPlayer.BuildTasks.CopyFilesMatchingWin32Filter" />
+	<UsingTask AssemblyFile="$(MPBuildTasksAssemblyPath)" TaskName="MusicPlayer.BuildTasks.DeleteFilesMatchingWin32Filter" />
 
 	<Import Project="Resources/ResourceBuilding.props" />
 	
@@ -84,6 +89,23 @@
 		<MakeDir Directories="$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\Data" Condition="'$(IsFullMPReleaseBuild)' != 'true'" />
 		<CopyFilesMatchingWin32Filter InputDirectory="$(MSBuildThisFileDirectory)Resources\" TargetDirectory="$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\Data" Filter="*.json" Condition="'$(IsFullMPReleaseBuild)' != 'true'" />
 		<CallTarget Targets="MP_ResourceGeneration" Condition="'$(MP_OnlyDryRestoreRun)' != 'true'" />
+	</Target>
+
+	<Target Name="PUBLISHDIRCPY" AfterTargets="Publish">
+		<PropertyGroup>
+			<PUBLISHDIR>$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\publish</PUBLISHDIR>
+			<DATADIR>$(PUBLISHDIR)/Data</DATADIR>
+		</PropertyGroup>
+		<MakeDir Directories="$(DATADIR)" />
+		<CopyFilesMatchingWin32Filter InputDirectory="$(MSBuildThisFileDirectory)Resources\" TargetDirectory="$(DATADIR)" Filter="*.json" />
+		<Copy SourceFiles="$(MP_OutputResFilePath)" DestinationFolder="$(DATADIR)" />
+		<MSBuild Projects="..\NativeAssets\PackageBuilderProj.proj"
+				 Targets="Build"
+				 UnloadProjectsOnCompletion="true" />
+		<Copy SourceFiles="../NativeAssets/bin/MP.NativeAssets.pkgrsrc"
+			  DestinationFolder="$(DATADIR)/Plugins" />
+		<DeleteFilesMatchingWin32Filter InputDirectory="$(PUBLISHDIR)" Filter="*.pdb" />
+		<DeleteFilesMatchingWin32Filter InputDirectory="$(PUBLISHDIR)" Filter="*.deps.json" />
 	</Target>
 
 	<Target Name="DSF" BeforeTargets="Run">

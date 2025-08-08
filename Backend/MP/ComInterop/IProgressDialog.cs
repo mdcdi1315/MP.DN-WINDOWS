@@ -1,7 +1,7 @@
 ﻿
+using MP.WindowsInterop;
 using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
-using MP.WindowsInterop;
 
 namespace MP.ComInterop
 {

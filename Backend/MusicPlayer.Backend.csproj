@@ -348,12 +348,6 @@
 	  <Compile Include="MP\ProcessLaunching\ProcessCreationFlags.cs" />
 	  <Compile Include="MP\ProcessLaunching\ProcessLauncher.cs" />
 	  <Compile Include="MP\ProcessLaunching\VariablesDictionary.cs" />
-	  <Compile Include="MP\SettingsTree\Attributes.cs" />
-	  <Compile Include="MP\SettingsTree\BuilderHelpers.cs" />
-	  <Compile Include="MP\SettingsTree\Exceptions.cs" />
-	  <Compile Include="MP\SettingsTree\SettingsTreeBuilder.cs" />
-	  <Compile Include="MP\SettingsTree\SettingsTreeNode.cs" />
-	  <Compile Include="MP\SettingsTree\SettingsTreeSetting.cs" />
 	  <Compile Include="MP\SysInfo.cs" />
 	  <Compile Include="NativeInterop.BCrypt.Cryptography.cs" />
 	  <Compile Include="NativeInterop.AdvApi32.SysInfo.cs" />

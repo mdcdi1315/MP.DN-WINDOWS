@@ -35,7 +35,23 @@ namespace MP.Dialogs
 
         public void Show()
         {
-            if (waitthread is not null) { return; }
+            if (waitthread is not null)
+            {
+                if (waitthread.IsAlive)
+                {
+                    if (dialogform.InvokeRequired)
+                    {
+                        dialogform.Invoke(dialogform.Show);
+                        dialogform.Invoke(dialogform.BringToFront);
+                    }
+                    else
+                    {
+                        dialogform.Show();
+                        dialogform.BringToFront();
+                    }
+                }
+                return;
+            }
             waitthread = new(Init);
             waitthread.TrySetApartmentState(System.Threading.ApartmentState.STA);
             waitthread.Priority = System.Threading.ThreadPriority.Lowest;
@@ -132,10 +148,16 @@ namespace MP.Dialogs
             UpdateText();
         }
 
+        public void Hide()
+        {
+            if (dialogform is null) { return; }
+            if (dialogform.IsHandleCreated) { dialogform.Invoke(dialogform.Hide); }
+        }
+
         /// <summary>
         /// Disposes this <see cref="WaitDialog"/> class instance. 
         /// </summary>
-        public void Dispose() 
+        public void Dispose()
         {
             if (dialogform is null) { return; }
             close = true; // Now the window can close.

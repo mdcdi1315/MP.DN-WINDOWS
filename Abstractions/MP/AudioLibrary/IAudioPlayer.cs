@@ -16,7 +16,7 @@ namespace MP.AudioLibrary
         /// <param name="provider">The audio provider to associate</param>
         /// <returns>
         /// A value whether the audio provider was succesfully attached to the instance. <br />
-        /// The only case that this should return <see langword="false"/> is when an another audio provider has been already attached.
+        /// The only case that this should return <see langword="false"/> is when another audio provider has been already attached.
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="provider"/> was <see langword="null"/>.</exception>
         public System.Boolean Initialize(IAudioProvider provider);

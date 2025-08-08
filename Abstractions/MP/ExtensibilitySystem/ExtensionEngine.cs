@@ -3,6 +3,7 @@ using System;
 using MP.Utilities;
 using MP.ExceptionSystem;
 using System.Collections.Generic;
+using MP.Annotations.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MP.ExtensibilitySystem
@@ -138,10 +139,11 @@ namespace MP.ExtensibilitySystem
         /// Calls <see cref="ExtensibilitySystemExtension.GetService"/> on each of the currently registered extensions.
         /// </summary>
         /// <param name="type">The type of the request to dispatch.</param>
-        /// <param name="additional">Additional data required to additionally pass.</param>
+        /// <param name="additional">Additional data required to additionally pass. May be null as well.</param>
         /// <returns>The results returned from all the extensions. If no extensions can provide this request with data , this returns an empty list.</returns>
         /// <exception cref="AggregateException">One or more exceptions were thrown and none did provide data.</exception>
-        public IList<System.Object> DispatchRequest(SystemRequestType type , System.Object additional)
+        [return: MaybeReturnEmptyCollectionButNeverNull]
+        public IList<System.Object> DispatchRequest(SystemRequestType type, [MaybeNull] System.Object additional)
         {
             DebugProvider.WriteLine($"EXTENGINE: Dispatching request, type is {type}.");
             System.Object ret;
@@ -153,7 +155,9 @@ namespace MP.ExtensibilitySystem
                 {
                     DebugProvider.WriteLine("EXTENGINE: GetService succeeded, registering results.");
                     results.Add(ret);
-                } else if (ext.LastException is not null) {
+                }
+                else if (ext.LastException is not null)
+                {
                     DebugProvider.WriteLine($"EXTENGINE: Recording exception {ext.LastException.GetType()}. This exception may be thrown if the request is not handled by any extensions after all.");
                     exceptions.Add(ext.LastException);
                 }
@@ -167,16 +171,18 @@ namespace MP.ExtensibilitySystem
                     DebugProvider.WriteLine("EXTENGINE: Reporting the recoded exceptions for completeness: ");
                     for (System.Int32 I = 0; I < exceptions.Count; I++)
                     {
-                        DebugProvider.WriteLine($"EXTENGINE: Exception {I+1}: \n{exceptions[I]}");
+                        DebugProvider.WriteLine($"EXTENGINE: Exception {I + 1}: \n{exceptions[I]}");
                     }
 #endif
                     exceptions.Clear();
                 }
                 return results;
-            } else if (exceptions.Count == 0) {
+            }
+            else if (exceptions.Count == 0)
+            {
                 return results;
             }
-            throw new AggregateException("The dispatching request was failed." , exceptions);
+            throw new AggregateException("The dispatching request was failed.", exceptions);
         }
 
         /// <summary>
@@ -289,17 +295,34 @@ namespace MP.ExtensibilitySystem
         public IEnumerable<ExtensionPackage> Packages => pkgs;
 
         /// <summary>
+        /// Gets the number of loaded extension packages for this engine session.
+        /// </summary>
+        public System.Int32 LoadedPackages => pkgs.Count;
+
+        /// <summary>
+        /// Gets the number of failed extensions for this engine session.
+        /// </summary>
+        public System.Int32 FailedExtensionsCount => extsfailed.Count;
+
+        /// <summary>
+        /// Gets the version of the underlying extension engine that is running.
+        /// </summary>
+        public EngineVersioningInformation EngineVersioning => versioninginfo;
+
+        /// <summary>
         /// Given a package name, the method searches through all the loaded extension packages to see if the name provided is loaded as a package.
         /// </summary>
         /// <param name="packageid">The package name to find.</param>
         /// <returns>A value whether the package was loaded into this instance.</returns>
         public System.Boolean IsPackageLoaded(System.String packageid)
         {
-            if (flags.HasFlag(ExtEngineStateFlags.Unloaded)) {
+            if (flags.HasFlag(ExtEngineStateFlags.Unloaded))
+            {
                 throw new InvalidOperationException("The results are undefined now that the engine is in unload stage.");
             }
-            foreach (var p in pkgs) { 
-                if (p.Name.Equals(packageid , StringComparison.InvariantCultureIgnoreCase)) { return true; }
+            foreach (var p in pkgs)
+            {
+                if (p.Name.Equals(packageid, StringComparison.InvariantCultureIgnoreCase)) { return true; }
             }
             return false;
         }

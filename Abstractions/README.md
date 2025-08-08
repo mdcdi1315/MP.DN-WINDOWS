@@ -26,3 +26,5 @@ for example, you need an instance of the RCU Engine, only the required bytes to 
 The answer is relatively simple: .NET Framework is now somewhat deprecated and there 
 is no need to use this assembly from .NET Framework. (Even if I enabled such support 
 you would encounter issues because you will need the .NET Core SDK and C# 10 features to gain full functionality).
+
+I am also doing this to force developers moving to .NET Core - it is much faster, cross-platform and much more code-performant and less error-prone.

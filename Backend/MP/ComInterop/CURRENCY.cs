@@ -4,10 +4,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 
-// CS0659: 'CURRENCY' overrides Object.Equals(object o) but does not override Object.GetHashCode()
-// CS0661: 'CURRENCY' defines operator == or operator != but does not override Object.GetHashCode()
-#pragma warning disable 0659 , 0661
-
 namespace MP.ComInterop
 { 
     /// <summary>
@@ -163,17 +159,22 @@ namespace MP.ComInterop
                 _ => false,
             };
 
+        public override int GetHashCode() => Raw.GetHashCode();
+
         public override System.String ToString()
         {
             Interop.OleAut32.OleAutomation_MapException(
-                Interop.OleAut32.VarBstrFromCy(this, 
-                Interop.OleAut32.LOCALE_USE_NLS, 
-                Interop.OleAut32.VarAPIFlags.None, 
+                Interop.OleAut32.VarBstrFromCy(this,
+                Interop.OleAut32.LOCALE_USE_NLS,
+                Interop.OleAut32.VarAPIFlags.None,
                 out BSTR bstr)
             );
-            try {
+            try
+            {
                 return bstr.ToString();
-            } finally {
+            }
+            finally
+            {
                 bstr.Dispose();
             }
         }

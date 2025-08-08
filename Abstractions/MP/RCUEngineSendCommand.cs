@@ -33,10 +33,10 @@ namespace MP
         /// <summary>Throws an error or informational message to the user directly.</summary>
         ThrowMessage,
         /// <summary>Deprecated , will be removed in a subsequent release</summary>
-        [Annotations.DeprecatedMayBeRemoved]
+        [Annotations.DeprecatedMayBeRemoved("1.0.1.0")]
         ThrowTitleMessage, // Deprecated, use instead the ThrowWaitMessage command.
         /// <summary>Deprecated , will be removed in a subsequent release</summary>
-        [Annotations.DeprecatedMayBeRemoved]
+        [Annotations.DeprecatedMayBeRemoved("1.0.1.0")]
         ClearTitleMessage, // Deprecated, use instead the ClearWaitMessage command.
         /// <summary>Updates the selected index of the current track.</summary>
         UpdateSelectedIndex,

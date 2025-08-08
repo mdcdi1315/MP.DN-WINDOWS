@@ -1,5 +1,6 @@
 ﻿
 using MP.ExceptionSystem;
+using MP.Annotations.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MP.ExtensibilitySystem
@@ -73,7 +74,8 @@ namespace MP.ExtensibilitySystem
         /// should return <see langword="false"/>. <br />
         /// Note that, if it returns <see langword="false"/> and the <see cref="LastException"/> is <see langword="null"/>, then the extension just cannot handle this request.
         /// </remarks>
-        public abstract System.Boolean GetService(SystemRequestType type, System.Object data , [NotNullWhen(true)] out System.Object service);
+        [MustNotReportException]
+        public abstract System.Boolean GetService(SystemRequestType type, System.Object data, [NotNullWhen(true)] out System.Object service);
 
         /// <summary>
         /// Called by the extensibility engine to determine whether this extension can be safely loaded. <br />

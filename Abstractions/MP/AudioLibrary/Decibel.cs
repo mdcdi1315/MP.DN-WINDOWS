@@ -6,6 +6,7 @@ namespace MP.AudioLibrary
     /// <summary>
     /// The <see cref="Decibel"/> structure defines another volume measurement in contrast to the most common attentuation scale from 0 to 1 in floating point.
     /// </summary>
+    [Annotations.Preliminary]
     public struct Decibel
     {
         private System.Single db;

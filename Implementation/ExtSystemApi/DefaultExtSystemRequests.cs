@@ -31,7 +31,7 @@ namespace MP.ExtSystemApi
         public const SystemRequestType InvokeRightClickOptionButton = (SystemRequestType)4;
         /// <summary>
         /// Useful for registering codecs when a new player instance is created. <br />
-        /// A <see cref="AbstractPropertyStream"/> is passed as the request argument, and it must be returned back a <see cref="CodecProbeRequestResult"/> object. <br />
+        /// An <see cref="AbstractPropertyStream"/> is passed as the request argument, and it must be returned back a <see cref="CodecProbeRequestResult"/> object. <br />
         /// For Windows only, the <see cref="AbstractPropertyStream"/> object recieved also implements the <see cref="ComInterop.IStream"/> interface. <br />
         /// </summary>
         public const SystemRequestType GetAudioStream = (SystemRequestType)5;

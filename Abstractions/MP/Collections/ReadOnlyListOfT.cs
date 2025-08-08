@@ -6,23 +6,29 @@ using System.Collections.Generic;
 namespace MP.Collections
 {
     /// <summary>
-    /// Represents a read-only list of <typeparamref name="T"/> objects. <br />
+    /// Represents a read-only view of <typeparamref name="T"/> objects. <br />
     /// It wraps any <see cref="IList{T}"/> object by just selecting those methods that ensure the collection's readonlyness.
     /// </summary>
     /// <typeparam name="T">The type of the object that this list will hold.</typeparam>
-    public sealed class ReadOnlyList<T> : IList<T> , ICloneable
+    public sealed class ReadOnlyList<T> : IList<T> , ICloneable , IGettableSettable<System.Int32 , T>
     {
         private IList<T> list;
 
         /// <summary>
-        /// Creates a new <see cref="ReadOnlyList{T}"/> object from the specified list, which is to be made read-only.
+        /// Creates a new <see cref="ReadOnlyList{T}"/> object from the specified list, which is to be made read-only. <br />
+        /// This is a direct wrapping of the provided list and does not consume either memory or CPU power. <br />
+        /// On cases where an another <see cref="ReadOnlyList{T}"/> is provided here, it's internal collection instead is referenced.
         /// </summary>
         /// <param name="list">The list object to make it as a read-only collection.</param>
         /// <exception cref="ArgumentNullException"><paramref name="list"/> was <see langword="null"/>.</exception>
         public ReadOnlyList(IList<T> list)
         {
             ArgumentNullException.ThrowIfNull(list);
-            this.list = list;
+            if (list is ReadOnlyList<T> d) {
+                this.list = d.list;
+            } else {
+                this.list = list;
+            }
         }
 
         /// <summary>
@@ -33,7 +39,18 @@ namespace MP.Collections
         public ReadOnlyList(IEnumerable<T> items)
         {
             ArgumentNullException.ThrowIfNull(items);
-            list = new List<T>(items);
+            switch (items)
+            {
+                case ReadOnlyList<T> rdonly:
+                    list = rdonly.list;
+                    break;
+                case IList<T> listitems:
+                    list = listitems;
+                    break;
+                default:
+                    list = new List<T>(items);
+                    break;
+            }
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Reflection;
+using MP.Annotations.CodeAnalysis;
 
 namespace MP.Utilities
 {
@@ -10,7 +11,7 @@ namespace MP.Utilities
     public static class TypeExtensions
     {
         // A helper to provide the actual implementation of DerivesFrom and IsTypeOrDerivesFrom methods.
-        private static System.Boolean DerivesFromInternal(Type current , Type other)
+        private static System.Boolean DerivesFromInternal(Type current, Type other)
         {
             Type temp = current, ct;
             // Search the inheritance tree whether the current class extends the class provided in 'other' parameter.
@@ -24,13 +25,15 @@ namespace MP.Utilities
         }
 
         [System.Diagnostics.StackTraceHidden]
-        private static void DerivesFromCommonValidation(Type current , Type other)
+        private static void DerivesFromCommonValidation(Type current, Type other)
         {
-            if (current.IsClass == false) {
+            if (current.IsClass == false)
+            {
                 throw new InvalidOperationException("The current type object is not a class object.");
             }
             if (other is null) { throw new ArgumentNullException(nameof(other)); }
-            if (other.IsClass == false) {
+            if (other.IsClass == false)
+            {
                 throw new ArgumentException("Derivability can be checked only between classes.", nameof(other));
             }
         }
@@ -44,10 +47,15 @@ namespace MP.Utilities
         /// <exception cref="InvalidOperationException">The current <see cref="Type"/> object does not represent a class.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="other"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="other"/> was not a <see cref="Type"/> object describing a class type.</exception>
-        public static System.Boolean DerivesFrom(this Type current , Type other)
+        [Throws(
+            typeof(ArgumentNullException),
+            typeof(ArgumentException),
+            typeof(InvalidOperationException)
+        )]
+        public static System.Boolean DerivesFrom(this Type current, Type other)
         {
-            DerivesFromCommonValidation(current , other);
-            return DerivesFromInternal(current , other);
+            DerivesFromCommonValidation(current, other);
+            return DerivesFromInternal(current, other);
         }
 
         /// <summary>
@@ -59,10 +67,15 @@ namespace MP.Utilities
         /// <exception cref="InvalidOperationException">The current <see cref="Type"/> object does not represent a class.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="other"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="other"/> was not a <see cref="Type"/> object describing a class type.</exception>
+        [Throws(
+            typeof(ArgumentNullException),
+            typeof(ArgumentException),
+            typeof(InvalidOperationException)
+        )]
         public static System.Boolean IsTypeOrDerivesFrom(this Type current, Type other)
         {
             DerivesFromCommonValidation(current, other);
-            return current == other || DerivesFromInternal(current , other);
+            return current == other || DerivesFromInternal(current, other);
         }
 
         /// <summary>
@@ -73,10 +86,15 @@ namespace MP.Utilities
         /// <returns>A value whether the type represented by the current <see cref="Type"/> instance implements the specified interface.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="other"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="other"/> was not a <see cref="Type"/> object describing an interface type.</exception>
-        public static System.Boolean ImplementsInterface(this Type current, Type other) 
+        [Throws(
+            typeof(ArgumentNullException),
+            typeof(ArgumentException)
+        )]
+        public static System.Boolean ImplementsInterface(this Type current, Type other)
         {
-            if (other is null) { throw new ArgumentNullException(nameof(other)); }
-            if (other.IsInterface == false) {
+            ArgumentNullException.ThrowIfNull(other, nameof(other));
+            if (other.IsInterface == false)
+            {
                 throw new ArgumentException("The current Type object does not represent an interface.");
             }
             foreach (var i in current.GetInterfaces())
@@ -94,13 +112,14 @@ namespace MP.Utilities
         /// <returns>A value whether the member represented by the current <see cref="ICustomAttributeProvider"/> instance has the specified attribute.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="attributetype"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="attributetype"/> does not represent a valid .NET attribute class.</exception>
+        [Throws(
+            typeof(ArgumentNullException),
+            typeof(ArgumentException)
+        )]
         public static System.Boolean HasAttribute(this ICustomAttributeProvider current, Type attributetype)
         {
-            if (attributetype is null)
-            {
-                throw new ArgumentNullException(nameof(attributetype));
-            }
-            if (DerivesFromInternal(attributetype , typeof(Attribute)) == false)
+            ArgumentNullException.ThrowIfNull(attributetype, nameof(attributetype));
+            if (DerivesFromInternal(attributetype, typeof(Attribute)) == false)
             {
                 throw new ArgumentException("A custom attribute must inherit from the System.Attribute class.");
             }
@@ -116,18 +135,33 @@ namespace MP.Utilities
         /// <returns>A value whether one or more attribute instances of type <paramref name="attributetype"/> were written to <paramref name="attrinstances"/>.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="attributetype"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="attributetype"/> does not represent a valid .NET attribute class.</exception>
-        public static System.Boolean TryGetAttributeInstances(this ICustomAttributeProvider current , Type attributetype, out System.Object[] attrinstances)
+        [Throws(
+            typeof(ArgumentNullException),
+            typeof(ArgumentException)
+        )]
+        public static System.Boolean TryGetAttributeInstances(this ICustomAttributeProvider current, Type attributetype, out System.Object[] attrinstances)
         {
-            if (attributetype is null)
-            {
-                throw new ArgumentNullException(nameof(attributetype));
-            }
+            ArgumentNullException.ThrowIfNull(attributetype, nameof(attributetype));
             if (DerivesFromInternal(attributetype, typeof(Attribute)) == false)
             {
                 throw new ArgumentException("A custom attribute must inherit from the System.Attribute class.");
             }
-            attrinstances = current.GetCustomAttributes(attributetype , false);
+            attrinstances = current.GetCustomAttributes(attributetype, false);
             return attrinstances.LongLength > 0;
+        }
+
+        /// <summary>
+        /// Gets a value whether the current <see cref="Type"/> represents or derives from the <see cref="Exception"/> class.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> to test.</param>
+        /// <returns><see langword="true"/> if this <see cref="Type"/> represents or derives from the <see cref="Exception"/> class; otherwise, <see langword="false"/>.</returns>
+        public static System.Boolean IsException(this Type type)
+        {
+            if (type.IsClass == false)
+            {
+                return false;
+            }
+            return type.IsTypeOrDerivesFrom(typeof(Exception));
         }
     }
 }

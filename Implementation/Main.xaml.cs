@@ -518,7 +518,7 @@ namespace MP
                 return;
             } else if (backend.ListViewMode == ListViewMode.PlaylistSelect)
             {
-                Dialogs.OpenFolderDialog OFD = new();
+                Dialogs.OpenFileDialog OFD = new();
                 OFD.AddFilter(Dialogs.FileDialogFilter.GetFromWin32Filter(Global.Resources.GetStringResource("ArchOpener_FileFilter")));
                 OFD.DefaultFilterExtension = ".aplaylist";
                 OFD.Title = Global.Resources.GetStringResource("Message_SaveArchivedPlaylistDialog_Title");
@@ -674,7 +674,7 @@ namespace MP
             RecieveCmd(null, new(CommonSendCommandTypes.ThrowWaitMessage) { MessageData = "Loading settings tree..." });
             SettingsTree.SettingsTreeBuilder stb = new(Global);
             stb.Build();
-            using MP.SettingsEditorNew editor = new(stb , backend.ExtensionEngineInstance);
+            using SettingsEditorNew editor = new(stb , backend.ExtensionEngineInstance);
             RecieveCmd(null, new(CommonSendCommandTypes.ClearWaitMessage));
             editor.ShowDialog();
             stb = null;
@@ -1362,13 +1362,14 @@ namespace MP
                 case CommonSendCommandTypes.ThrowWaitMessage:
                     if (waitdlg is null) {
                         waitdlg = new(eventargs.MessageData, MusicPlayerHelper.WinFormsHandle);
+                        waitdlg.Show();
                     } else {
+                        waitdlg.Show();
                         waitdlg.Text = eventargs.MessageData;
                     }
-                    waitdlg.Show();
                     break;
                 case CommonSendCommandTypes.ClearWaitMessage:
-                    waitdlg?.Dispose();
+                    waitdlg?.Hide();
                     break;
             }
         }

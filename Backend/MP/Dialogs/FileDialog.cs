@@ -48,13 +48,13 @@ namespace MP.Dialogs
             None = 0,
             Type_OpenFileDialog = 1,
             Type_SaveFileDialog = 2,
-            Type_OpenFolderDialog = 4,
-            // Reserve 8 and 16 for future file dialog types.
+            // Reserve 4 , 8 and 16 for future file dialog types.
             Options_NoValidate = 32,
             Options_PathMustExist = 64,
             Options_FileMustExist = 128,
             Options_AllowMultiSelect = 256,
-            // Bit data 512..4096 are unused.
+            Mode_IsFolderOpenDialog = 512,
+            // Bit data 1024..4096 are unused.
             Dialog_ResultOk = 8192,
             Dialog_ResultCancel = 16384,
             Dialog_ExecutionCompleted = 32768
@@ -81,10 +81,9 @@ namespace MP.Dialogs
         protected FileDialog(System.String guid , System.Boolean useopenfolderdialoglogic) : this()
         {
             if (guid == CommonInteropClsIds.CLSID_FileOpenDialog) {
+                flags = MPFileDialogFlags.Type_OpenFileDialog;
                 if (useopenfolderdialoglogic) {
-                    flags = MPFileDialogFlags.Type_OpenFolderDialog;
-                } else {
-                    flags = MPFileDialogFlags.Type_OpenFileDialog;
+                    flags |= MPFileDialogFlags.Mode_IsFolderOpenDialog;
                 }
             } else if (guid == CommonInteropClsIds.CLSID_FileSaveDialog) {
                 flags = MPFileDialogFlags.Type_SaveFileDialog;
@@ -225,8 +224,7 @@ namespace MP.Dialogs
         private unsafe void SpawnDialog_ThreadCode(System.Object objhandle)
         {
             IFileDialog dialog = null;
-            if (flags.HasFlag(MPFileDialogFlags.Type_OpenFileDialog) ||
-                flags.HasFlag(MPFileDialogFlags.Type_OpenFolderDialog))
+            if (flags.HasFlag(MPFileDialogFlags.Type_OpenFileDialog))
             {
                 dialog = ComMarshalling.GetClassInstanceAsInterface<IFileOpenDialog>(new(CommonInteropClsIds.CLSID_FileOpenDialog), CLSCTX.CLSCTX_ALL);
             } else if (flags.HasFlag(MPFileDialogFlags.Type_SaveFileDialog))
@@ -234,8 +232,9 @@ namespace MP.Dialogs
                 dialog = ComMarshalling.GetClassInstanceAsInterface<IFileSaveDialog>(new(CommonInteropClsIds.CLSID_FileSaveDialog), CLSCTX.CLSCTX_ALL);
             }
             FILEOPENDIALOGOPTIONS opts = FILEOPENDIALOGOPTIONS.None;
-            if (flags.HasFlag(MPFileDialogFlags.Type_OpenFolderDialog))
+            if (flags.HasFlag(MPFileDialogFlags.Mode_IsFolderOpenDialog))
             {
+                DebugProvider.WriteLine("FD: Setting up folder open dialog.");
                 // Both flags must have been set so that an Open Folder dialog can succeed.
                 opts |= FILEOPENDIALOGOPTIONS.FOS_PICKFOLDERS | FILEOPENDIALOGOPTIONS.FOS_FILEMUSTEXIST;
             }
@@ -292,13 +291,7 @@ namespace MP.Dialogs
                 {
                     var hr = dialog.SetFileTypes(filters.Length.ToUInt32(), specs);
                     if (hr.FAILED) {
-                        ComMarshalling.ReleaseInteropObject(dialog);
-                        foreach (var smem in memhandles)
-                        {
-                            smem.Dispose();
-                        }
-                        memhandles.Clear();
-                        throw hr.MappingException;
+                        DebugProvider.WriteLine($"An unexpected error occured while invoking SetFileTypes: {hr.CreateException()}");
                     }
                 }
                 filters = null;

@@ -10,7 +10,7 @@ namespace MP.Collections
     /// Represents a list that does contain objects that implement the <see cref="IDisposable"/> interface.
     /// </summary>
     /// <typeparam name="T">The type of objects for this list object to manage. All objects must implement the <see cref="IDisposable"/> interface.</typeparam>
-    public sealed class DisposableList<T> : IList<T> , IDisposable
+    public sealed class DisposableList<T> : IList<T> , IDisposable , IGettableSettable<System.Int32 , T>
         where T : IDisposable
     {
         /// <summary>

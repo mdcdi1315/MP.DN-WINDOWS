@@ -15,13 +15,30 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<!-- Build the analyzer transitively but do not statically link it in the project. -->
+		<ProjectReference Include="../Abstractions-Analyzer/Analyzer.csproj" ReferenceOutputAssembly="false" />
+		<!-- Instead pass it through this item declaration -->
+		<Analyzer 
+			Include="$(MSBuildProjectDirectory)/../Abstractions-Analyzer/bin/$(Configuration)/netstandard2.0/MP.AbstractionsLibAnalyzer.dll" 
+			IsImplicitlyDefined="true"
+		/>
+	</ItemGroup>
+
+	<ItemGroup>
 		<Compile Include="Microsoft\IO\InternalMemoryStream.cs" />
 		<Compile Include="Microsoft\Win32\SafeHandles\SafeNativeMemoryEnumerator.cs" />
+		<Compile Include="MP/TagReading/*.cs" />
+		<Compile Include="MP/TagReading/Ogg/*.cs" />
+		<Compile Include="MP/TagReading/Flac/*.cs" />
+		<Compile Include="MP/TagReading/MP4/*.cs" />
+		<Compile Include="MP/TagReading/ID3/*.cs" />
+		<Compile Include="MP/SettingsTree/*.cs" />
+		<Compile Include="MP/SettingsTree/Attributes/*.cs" />
+		<Compile Include="MP/Graphics/*.cs"/>
 		<Compile Include="MP/DefaultPlatformLayer.cs" />
 		<Compile Include="MP\AbstractPlatformLayer.cs" />
 		<Compile Include="MP\AbstractPlayerInstance.cs" />
 		<Compile Include="MP\AbstractPropertyStream.cs" />
-		<Compile Include="MP\Annotations\AlwaysReturnsTypeThroughBoxedObjectAttribute.cs" />
 		<Compile Include="MP\Annotations\DefaultCOMInterfaceObjectGuidAttribute.cs" />
 		<Compile Include="MP\Annotations\DeprecatedMayBeRemovedAttribute.cs" />
 		<Compile Include="MP\Annotations\NativeLayerAttribute.cs" />
@@ -30,6 +47,7 @@
 		<Compile Include="MP/Annotations/ObjectiveCGeneratedSignatureAttribute.cs" />
 		<Compile Include="MP/Annotations/ObjectiveCWrappedTypeAttribute.cs" />
 		<Compile Include="MP/Annotations/RequiresNativeLayerAttribute.cs" />
+		<Compile Include="MP/Annotations/CodeAnalysis/*.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttribute.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttributeCollection.cs" />
 		<Compile Include="MP\AudioLibrary\AudioFormat.cs" />
@@ -88,14 +106,14 @@
 		<Compile Include="MP/Collections/AttributedCollection.cs" />
 		<Compile Include="MP/Collections/IGettableSettable.cs" />
 		<Compile Include="MP/Collections/EnvironmentVariablesDictionary.cs" />
+		<Compile Include="MP/Collections/TreeNodeOfT.cs" />
+		<Compile Include="MP/Collections/TreeOfT.cs" />
 		<Compile Include="MP/Collections/Record.cs" />
 		<Compile Include="MP/Imaging/DefaultImage.cs" />
 	  	<Compile Include="MP/Imaging/IImage.cs" />
 	  	<Compile Include="MP/Imaging/IImageExtensions.cs" />
 	  	<Compile Include="MP/Imaging/IImageFactory.cs" />
 	  	<Compile Include="MP/Imaging/ImagePixelFormat.cs" />
-		<Compile Include="MP/Collections/ICollectableAttributeable.cs" />
-		<Compile Include="MP/Collections/AttributeKeyValuePair.cs" />
 		<Compile Include="MP\CommandMetadata.cs" />
 		<Compile Include="AssemblyInfo.cs" />
 		<Compile Include="MP\CommandMetadataItem.cs" />
@@ -146,9 +164,11 @@
 		<Compile Include="MP\PlaylistMetadataItemCollection.cs" />
 		<Compile Include="MP\PlaylistPreferences.cs" />
 		<Compile Include="MP\Preference.cs" />
-		<Compile Include="MP\Random\IRandomSource.cs" />
-		<Compile Include="MP\Random\IRandomSourceExtensions.cs" />
-		<Compile Include="MP\Random\Xoroshiro256PlusPlus.cs" />
+		<Compile Include="MP/Random/IRandomSource.cs" />
+		<Compile Include="MP/Random/IRandomSourceExtensions.cs" />
+		<Compile Include="MP/Random/Xoroshiro256PlusPlus.cs" />
+		<Compile Include="MP/Random/Xoshiro256Plus.cs" />
+		<Compile Include="MP/Random/SplitMix64.cs" />
 		<Compile Include="MP\RCUEngine.cs" />
 		<Compile Include="MP\RCUEngineRecieveCommand.cs" />
 		<Compile Include="MP\RCUEngineSendCommand.cs" />
@@ -175,6 +195,7 @@
 		<Compile Include="MP\Utilities\StreamExtensions.cs" />
 		<Compile Include="MP\Utilities\StringExtensions.cs" />
 		<Compile Include="MP\Utilities\TypeExtensions.cs" />
+		<Compile Include="MP/Utilities/Hex32.cs" />
 	</ItemGroup>
 	
 </Project>
