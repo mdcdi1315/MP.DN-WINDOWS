@@ -1,7 +1,5 @@
 ﻿
-using System.Drawing;
-
-namespace MP.Imaging
+namespace MP.Graphics.Imaging
 {
     /// <summary>
     /// Typed <see cref="IImage"/> implementation shared by <see cref="IImageExtensions"/> and <see cref="IImageFactory"/> classes.

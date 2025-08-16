@@ -58,7 +58,7 @@ namespace MP
         [EditorBrowsable(EditorBrowsableState.Always)]
         public void UpdateColor()
         {
-            Graphics g = CreateGraphics();
+            System.Drawing.Graphics g = CreateGraphics();
             if (depcolor.IsEmpty)
             {
                 g.Clear(fallbackcolor);
@@ -170,7 +170,7 @@ namespace MP
     public class ColorBoxDesigner : System.Windows.Forms.Design.ControlDesigner
     {
         private ColorBox cb;
-        private Graphics designgraph;
+        private System.Drawing.Graphics designgraph;
         
         public ColorBoxDesigner() : base() { 
             cb = new();
@@ -178,7 +178,7 @@ namespace MP
             cb.BackColor = Color.Black;
             cb.Size = new(10, 10);
             base.Initialize(cb);
-            designgraph = Graphics.FromHwndInternal(cb.Handle);
+            designgraph = System.Drawing.Graphics.FromHwndInternal(cb.Handle);
             cb.DepictedColorChanged += Cb_DepictedColorChanged;
         }
 

@@ -83,6 +83,6 @@ namespace MP.ExtensibilitySystem
         /// </summary>
         /// <param name="verinfo">The versioning information that the extension should test to find compatibility.</param>
         /// <returns><see langword="true"/> when this extension is supported by the provided versioning information; otherwise it should return <see langword="false"/>,</returns>
-        public abstract System.Boolean IsSupported([NotNull] EngineVersioningInformation verinfo);
+        public abstract System.Boolean IsSupported([DisallowNull] EngineVersioningInformation verinfo);
     }
 }

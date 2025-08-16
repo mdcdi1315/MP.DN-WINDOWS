@@ -1,5 +1,8 @@
 ﻿
 
+using System;
+using MP.Utilities;
+
 namespace MP.SettingsTree
 {
     /// <summary>
@@ -29,8 +32,8 @@ namespace MP.SettingsTree
             additionaldata = null;
         }
 
-        internal SettingsTreeSetting(SettingType type, System.String id, System.Type settingtype, System.String desc = null, 
-            System.Boolean descisres = false, System.String friendlyname = null , System.String imageid = null ,
+        internal SettingsTreeSetting(SettingType type, System.String id, System.Type settingtype, System.String desc = null,
+            System.Boolean descisres = false, System.String friendlyname = null, System.String imageid = null,
             System.Object additionaldata = null)
         {
             this.settingtype = settingtype;
@@ -113,6 +116,34 @@ namespace MP.SettingsTree
         {
             get => additionaldata as SettingTreeSettingValidRange;
             internal set => additionaldata = value;
+        }
+
+        /// <summary>
+        /// When <see cref="SettingType.ValueList"/> is specified, this property should return a valid instance of the <see cref="IDynamicValueListProvider{T}"/>, whereas T the <see cref="TypeOfValue"/>. <br />
+        /// If the list is not defined, null is returned. 
+        /// </summary>
+        public System.Object DynamicValuesList
+        {
+            get {
+                // To call GetType() we need to ensure that we have a non-null reference
+                if (additionaldata is null) { return null; }
+                if (additionaldata.GetType().ImplementsInterface(typeof(IDynamicValueListProvider<>).MakeGenericType(TypeOfValue))) {
+                    return additionaldata;
+                } else {
+                    return null;
+                }
+            }
+            internal set {
+                if (value is null) {
+                    additionaldata = null;
+                    return;
+                }
+                if (value.GetType().ImplementsInterface(typeof(IDynamicValueListProvider<>).MakeGenericType(TypeOfValue))) {
+                    additionaldata = value;
+                } else {
+                    throw new ArgumentException($"The provided value is not implementing the IDynamicValueListProvider<{TypeOfValue.FullName}> interface." , nameof(value));
+                }
+            }
         }
     }
 }

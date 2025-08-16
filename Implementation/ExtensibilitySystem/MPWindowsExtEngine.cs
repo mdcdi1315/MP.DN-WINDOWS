@@ -169,7 +169,7 @@ namespace MP.ExtensibilitySystem
             }
         }
 
-        protected override System.Boolean VerifyAssetHash([NotNull] IAsset asset, [NotNull] ExtensionPackage pkg)
+        protected override System.Boolean VerifyAssetHash([DisallowNull] IAsset asset, [DisallowNull] ExtensionPackage pkg)
         {
             System.IO.Stream strm = null;
             try {
@@ -181,7 +181,7 @@ namespace MP.ExtensibilitySystem
             }
         }
 
-        protected override void OnAssetLoadAdditionalUserCode([NotNull] IAsset asset, [NotNull] ExtensionPackage pkg)
+        protected override void OnAssetLoadAdditionalUserCode([DisallowNull] IAsset asset, [DisallowNull] ExtensionPackage pkg)
         {
             // If the given asset name ends in .DLL it is a native DLL and must be copied to a custom directory and AddDllDirectory to it
             // so that the managed components can find the required native DLL's.

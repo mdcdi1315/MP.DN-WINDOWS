@@ -1,19 +1,23 @@
 ﻿
+using MP.AudioLibrary.MMDevice;
 using MP.SettingsTree;
+using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace MP
 {
     internal static class SettingsEditorHelpers
     {
-        public static void RunRecursively(TreeNode ntarget , SettingsTreeNode nsource)
+        public static void RunRecursively(TreeNode ntarget, SettingsTreeNode nsource)
         {
             if (nsource.ChildrenNodesCount > 0)
             {
                 TreeNode t;
                 foreach (var el in nsource.ChildNodes)
                 {
-                    t = new TreeNode() {
+                    t = new TreeNode()
+                    {
                         Tag = $"__NODE-{el.NodeID}",
                         Text = el.Description ?? el.NodeID
                     };
@@ -21,7 +25,8 @@ namespace MP
                     {
                         foreach (var s in el.Settings)
                         {
-                            t.Nodes.Add(new TreeNode() {
+                            t.Nodes.Add(new TreeNode()
+                            {
                                 Name = null,
                                 Text = s.FriendlyName ?? s.ID,
                                 Tag = s.ID
@@ -47,6 +52,19 @@ namespace MP
             public System.String DeviceID;
 
             public readonly override System.String ToString() => FriendlyName;
+        }
+
+        public sealed class AudioDeviceDynamicCollection : IDynamicValueListProvider<MMDevice>
+        {
+            private MMDeviceEnumerator mmd;
+
+            public AudioDeviceDynamicCollection() => mmd = new();
+
+            public void Dispose() => mmd?.Dispose();
+
+            public Func<MMDevice, System.String> Formatter => item => item.FriendlyName;
+
+            public IEnumerable<MMDevice> GetItems() => mmd.EnumAudioEndpoints(EDataFlow.Render, DEVICE_STATE.ACTIVE);
         }
     }
 }

@@ -41,6 +41,14 @@ namespace MP.SettingsTree
         /// </summary>
         /// <param name="msg">The message specifying the specific reason why this exception is created.</param>
         public InvalidSettingClassDefinitionLayoutException(System.String msg) : base(msg) { }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="InvalidSettingClassDefinitionLayoutException"/>, 
+        /// specifying the specific reason why this exception instance is created, and the exception that caused this exception to be thrown.
+        /// </summary>
+        /// <param name="msg">The message specifying the specific reason why this exception is created.</param>
+        /// <param name="inner">The culprit exception for this exception to be thrown.</param>
+        public InvalidSettingClassDefinitionLayoutException(System.String msg, Exception inner) : base(msg, inner) { }
     }
 
     /// <summary>

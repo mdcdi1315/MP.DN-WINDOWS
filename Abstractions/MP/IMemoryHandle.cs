@@ -145,7 +145,7 @@ namespace MP
         /// <summary>
         /// Translates the native pointer that the current memory handle represents as a mutable .NET reference of the specified unmanaged structure.
         /// </summary>
-        /// <typeparam name="T">The structure to traslate the <see cref="IMemoryHandle.MemoryPointer"/> as.</typeparam>
+        /// <typeparam name="T">The structure to translate the <see cref="IMemoryHandle.MemoryPointer"/> as.</typeparam>
         /// <param name="handle">The source memory handle</param>
         /// <returns>The translated .NET reference of type <typeparamref name="T"/> to <see cref="IMemoryHandle.MemoryPointer"/>, whatever that is.</returns>
         public static ref T PointerAsReferenceTo<T>(this IMemoryHandle handle) where T : unmanaged => ref *(T*)handle.MemoryPointer;

@@ -107,11 +107,11 @@ namespace MP
         public static ProcessorArchitecture ProcessorArchitecture => apl.ProcessorArchitecture;
 
         /// <summary>Gets the Windows hardware profile ID. This value is only defined on the Windows platform.</summary>
-        [SupportedOSPlatformGuard("windows")]
+        [SupportedOSPlatform("windows")]
         public static System.Guid HardwareProfileID => apl.HardwareProfileID;
 
         /// <summary>Gets the Windows hardware profile name. This value is only defined on the Windows platform.</summary>
-        [SupportedOSPlatformGuard("windows")]
+        [SupportedOSPlatform("windows")]
         public static System.String HardwareProfile => apl.HardwareProfile;
 
         /// <summary>

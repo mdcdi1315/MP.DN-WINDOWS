@@ -67,14 +67,14 @@ namespace MP.Dialogs
         /// Override this method to provide code to be executed while the form is closing.
         /// </summary>
         /// <param name="e">The event arguments also passed thru the event.</param>
-        protected virtual void OnClosing([NotNull] FormClosingEventArgs e) { }
+        protected virtual void OnClosing([DisallowNull] FormClosingEventArgs e) { }
 
         /// <summary>
         /// Override this method to provide code to be executed while the <see cref="Dispose"/> method is running. <br />
         /// Note that this method is called just before the loading dialog is destroyed, thus you can provide additional shutdown tasks as you expect through the <paramref name="formdispose"/> parameter.
         /// </summary>
         /// <param name="formdispose">The dialog form that will be disposed once this method completes.</param>
-        protected virtual void OnDisposing([NotNull] Form formdispose) { }
+        protected virtual void OnDisposing([DisallowNull] [NotNull] Form formdispose) { }
 
         /// <summary>
         /// Must be overriden so that the actual form instance is provided.

@@ -1,7 +1,8 @@
 ﻿
 using System;
 using Microsoft.IO;
-using System.Drawing;
+using MP.Graphics;
+using MP.Graphics.Imaging;
 using System.Collections.Generic;
 
 namespace MP.Imaging
@@ -43,7 +44,7 @@ namespace MP.Imaging
             CreateImage(img.GetPixels2DPlane(), img.IsFlippedVertically);
         }
 
-        private void CreateImage(Color[,] colors , System.Boolean flipped)
+        private void CreateImage(IColor[,] colors , System.Boolean flipped)
         {
             BITMAPV4HEADER bv4 = new();
             bv4.CoreHeader.Width = colors.GetLength(0);
@@ -59,7 +60,7 @@ namespace MP.Imaging
             MemoryStream ms = new();
             bv4.CoreHeader.Height *= 2;
             ms.WriteStructure(bv4);
-            Color cl;
+            IColor cl;
             for (System.Int32 Y = 0; Y < y; Y++)
             {
                 for (System.Int32 X = 0; X < bv4.CoreHeader.Width; X++)

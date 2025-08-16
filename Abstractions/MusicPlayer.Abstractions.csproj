@@ -35,6 +35,10 @@
 		<Compile Include="MP/SettingsTree/*.cs" />
 		<Compile Include="MP/SettingsTree/Attributes/*.cs" />
 		<Compile Include="MP/Graphics/*.cs"/>
+		<Compile Include="MP/Graphics/Imaging/*.cs"/>
+		<Compile Include="MP/Serialization/*.cs" />
+		<Compile Include="MP/Serialization/Json/*.cs" />
+		<Compile Include="MP/Serialization/Constraints/*.cs" />
 		<Compile Include="MP/DefaultPlatformLayer.cs" />
 		<Compile Include="MP\AbstractPlatformLayer.cs" />
 		<Compile Include="MP\AbstractPlayerInstance.cs" />
@@ -109,11 +113,6 @@
 		<Compile Include="MP/Collections/TreeNodeOfT.cs" />
 		<Compile Include="MP/Collections/TreeOfT.cs" />
 		<Compile Include="MP/Collections/Record.cs" />
-		<Compile Include="MP/Imaging/DefaultImage.cs" />
-	  	<Compile Include="MP/Imaging/IImage.cs" />
-	  	<Compile Include="MP/Imaging/IImageExtensions.cs" />
-	  	<Compile Include="MP/Imaging/IImageFactory.cs" />
-	  	<Compile Include="MP/Imaging/ImagePixelFormat.cs" />
 		<Compile Include="MP\CommandMetadata.cs" />
 		<Compile Include="AssemblyInfo.cs" />
 		<Compile Include="MP\CommandMetadataItem.cs" />

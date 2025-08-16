@@ -40,8 +40,7 @@ namespace MP.Graphics
             }
             float lum = ((max + min) / 2) * 100f;
             luminance = (System.Byte)Math.Round(lum, 0);
-            saturation = (System.Byte)((min == max) ? 0d : Math.Round((lum > 50f) ? (max - min) / (2.0f - max - min) : (max - min) / (max + min), 0));
-            if (saturation == 0f)
+            if ((saturation = (System.Byte)((min == max) ? 0d : Math.Round((lum > 50f) ? (max - min) / (2.0f - max - min) : (max - min) / (max + min), 0))) == 0)
             {
                 hue = 0;
                 return;

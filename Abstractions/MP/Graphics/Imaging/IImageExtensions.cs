@@ -1,9 +1,8 @@
 ﻿
 using System;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 
-namespace MP.Imaging
+namespace MP.Graphics.Imaging
 {
     /// <summary>
     /// Defines extension methods for the <see cref="IImage"/> interface.
@@ -16,23 +15,14 @@ namespace MP.Imaging
         /// <param name="format">The image pixel format to query.</param>
         /// <returns>The size, in bytes, of a single pixel.</returns>
         /// <exception cref="ArgumentException">The specified format is out of range of valid values.</exception>
-        public static System.Byte GetByteSize(this ImagePixelFormat format)
-        {
-            switch (format)
-            {
-                case ImagePixelFormat.R:
-                    return 1;
-                case ImagePixelFormat.RG:
-                    return 2;
-                case ImagePixelFormat.RGB:
-                    return 3;
-                case ImagePixelFormat.RGBA:
-                case ImagePixelFormat.ARGB:
-                    return 4;
-                default:
-                    throw new ArgumentException($"The value given is invalid: {format}");
-            }
-        }
+        public static System.Byte GetByteSize(this ImagePixelFormat format) => format switch {
+            ImagePixelFormat.R => 1,
+            ImagePixelFormat.RG => 2,
+            ImagePixelFormat.RGB => 3,
+            ImagePixelFormat.RGBA or
+            ImagePixelFormat.ARGB => 4,
+            _ => throw new ArgumentException($"The value given is invalid: {format}"),
+        };
 
         /// <summary>
         /// Gets the size in bytes of the <see cref="IImage.NativePointer"/> property.
@@ -57,7 +47,7 @@ namespace MP.Imaging
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
             DefaultImage ret = new(source);
-            System.Int32 bytes_per_row = (source.Size.Width * source.PixelFormat.GetByteSize());
+            System.Int32 bytes_per_row = source.Size.Width * source.PixelFormat.GetByteSize();
             System.Int32 row;
             System.Byte* bytes = ret.NativePointer;
             Unsafe.CopyBlockUnaligned(bytes, source.NativePointer, GetMemoryByteLength(source).ToUInt32());
@@ -223,22 +213,22 @@ namespace MP.Imaging
         /// <param name="source">The source image to set the result to.</param>
         /// <param name="x">The x coordinate inside the image to get the pixel.</param>
         /// <param name="y">The y coordinate inside the image to get the pixel.</param>
-        /// <returns>The retrieved pixel , casted to a <see cref="Color"/> instance.</returns>
+        /// <returns>The retrieved pixel , casted to a <see cref="IColor"/> instance.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> and/or <paramref name="y"/> had invalid ranges.</exception>
         /// <exception cref="ArgumentException">The <paramref name="source"/>'s <see cref="IImage.PixelFormat"/> property had an invalid value.</exception>
-        public static Color GetPixel(this IImage source, System.Int32 x, System.Int32 y)
+        public static IColor GetPixel(this IImage source, System.Int32 x, System.Int32 y)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
             if (x < 0 || y < 0) { throw new ArgumentOutOfRangeException(nameof(source), "Both X and Y parameters must not be negative."); }
             if (x >= source.Size.Width || y >= source.Size.Height) { throw new ArgumentOutOfRangeException(nameof(source), "Both X and Y parameters must be inside the image bounds."); }
             System.Byte* pbase = source.NativePointer + ((y * source.Size.Width + x) * source.PixelFormat.GetByteSize());
             return source.PixelFormat switch {
-                ImagePixelFormat.R => Color.FromArgb(255, pbase[0], 0, 0),
-                ImagePixelFormat.RG => Color.FromArgb(255, pbase[0], pbase[1], 0),
-                ImagePixelFormat.RGB => Color.FromArgb(255, pbase[0], pbase[1], pbase[2]),
-                ImagePixelFormat.RGBA => Color.FromArgb(pbase[3], pbase[0], pbase[1], pbase[2]),
-                ImagePixelFormat.ARGB => Color.FromArgb(pbase[0], pbase[1], pbase[2], pbase[3]),
+                ImagePixelFormat.R => new RGBColor(*pbase, 0, 0),
+                ImagePixelFormat.RG => new RGBColor(pbase[0], pbase[1], 0),
+                ImagePixelFormat.RGB => new RGBColor(pbase[0], pbase[1], pbase[2]),
+                ImagePixelFormat.RGBA => new RGBAColor(pbase[0], pbase[1], pbase[2], pbase[3]),
+                ImagePixelFormat.ARGB => new ARGBColor(pbase[0], pbase[1], pbase[2], pbase[3]),
                 _ => throw new ArgumentException($"Invalid pixel format {source.PixelFormat}.", nameof(source)),
             };
         }
@@ -250,7 +240,7 @@ namespace MP.Imaging
         /// <param name="pixel">The new color of the specified pixel.</param>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> and/or <paramref name="y"/> had invalid ranges.</exception>
-        public static void SetPixel(this IImage source, System.Int32 x, System.Int32 y, Color pixel)
+        public static void SetPixel(this IImage source, System.Int32 x, System.Int32 y, IColor pixel)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
             if (x < 0 || y < 0) { throw new ArgumentOutOfRangeException("", "Both X and Y parameters must not be negative."); }
@@ -286,14 +276,14 @@ namespace MP.Imaging
         }
 
         /// <summary>
-        /// Gets the entire pixel array as a <see cref="Color"/> 2-dimensional array defining the literal image coordinates.
+        /// Gets the entire pixel array as a <see cref="IColor"/> 2-dimensional array defining the literal image coordinates.
         /// </summary>
         /// <param name="source">The source image to retrieve the image data.</param>
         /// <returns>The created image data.</returns>
-        public static Color[,] GetPixels2DPlane(this IImage source)
+        public static IColor[,] GetPixels2DPlane(this IImage source)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
-            Color[,] colors = new Color[source.Size.Width, source.Size.Height];
+            IColor[,] colors = new IColor[source.Size.Width, source.Size.Height];
             System.Byte* ptemp;
             System.Int32 bs = source.PixelFormat.GetByteSize();
             for (System.Int32 Y = 0; Y < source.Size.Height; Y++)
@@ -303,11 +293,11 @@ namespace MP.Imaging
                     ptemp = source.NativePointer + (Y * source.Size.Width + X) * bs;
                     colors[X, Y] = source.PixelFormat switch
                     {
-                        ImagePixelFormat.R => Color.FromArgb(255, ptemp[0], 0, 0),
-                        ImagePixelFormat.RG => Color.FromArgb(255, ptemp[0], ptemp[1], 0),
-                        ImagePixelFormat.RGB => Color.FromArgb(255, ptemp[0], ptemp[1], ptemp[2]),
-                        ImagePixelFormat.RGBA => Color.FromArgb(ptemp[3], ptemp[0], ptemp[1], ptemp[2]),
-                        ImagePixelFormat.ARGB => Color.FromArgb(ptemp[0], ptemp[1], ptemp[2], ptemp[3]),
+                        ImagePixelFormat.R => new RGBColor(*ptemp, 0, 0),
+                        ImagePixelFormat.RG => new RGBColor(ptemp[0], ptemp[1], 0),
+                        ImagePixelFormat.RGB => new RGBColor(ptemp[0], ptemp[1], ptemp[2]),
+                        ImagePixelFormat.RGBA => new RGBAColor(ptemp[0], ptemp[1], ptemp[2], ptemp[3]),
+                        ImagePixelFormat.ARGB => new ARGBColor(ptemp[0], ptemp[1], ptemp[2], ptemp[3]),
                         _ => default
                     };
                 }

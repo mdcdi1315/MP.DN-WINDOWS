@@ -1,6 +1,8 @@
 ﻿
 using System;
 using Microsoft.IO;
+using MP.Graphics;
+using MP.Graphics.Imaging;
 
 namespace MP.Imaging
 {

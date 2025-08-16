@@ -366,7 +366,7 @@ namespace MP.Graphics
         /// Gets a system-defined color that has an ARGB value of #00FFFFFF.
         /// </summary>
         /// <returns>A <see cref="IColor"/> representing a system-defined color.</returns>
-        public static IColor Transparent => new ARGBColor(255, 255, 255, 0);
+        public static IColor Transparent => new ARGBColor(0, 255, 255, 255);
        
         /// <summary>
         /// Gets a system-defined color that has an ARGB value of #FF40E0D0.

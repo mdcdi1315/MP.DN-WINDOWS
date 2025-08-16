@@ -208,20 +208,20 @@ namespace MP.ExtensibilitySystem
         /// <param name="asset">The asset to check for it's integrity.</param>
         /// <param name="pkg">The package where this asset was loaded from.</param>
         /// <returns><see langword="true"/> if the asset's integrity is OK; otherwise <see langword="false"/>.</returns>
-        protected abstract System.Boolean VerifyAssetHash([NotNull] IAsset asset, [NotNull] ExtensionPackage pkg);
+        protected abstract System.Boolean VerifyAssetHash([DisallowNull] IAsset asset, [DisallowNull] ExtensionPackage pkg);
 
         /// <summary>
         /// Defines a placeholder method for checking and further performing actions after an asset has been verified.
         /// </summary>
         /// <param name="asset">The asset to do additional operations on it.</param>
         /// <param name="pkg">The package where this asset is loaded from</param>
-        protected virtual void OnAssetLoadAdditionalUserCode([NotNull] IAsset asset , [NotNull] ExtensionPackage pkg) { }
+        protected virtual void OnAssetLoadAdditionalUserCode([DisallowNull] IAsset asset , [DisallowNull] ExtensionPackage pkg) { }
 
         /// <summary>
         /// Defines a placeholder method for further performing actions just after a package has been loaded.
         /// </summary>
         /// <param name="pkg">The package that was loaded.</param>
-        protected virtual void OnPackageLoadAdditionalUserCode([NotNull] ExtensionPackage pkg) { }
+        protected virtual void OnPackageLoadAdditionalUserCode([DisallowNull] ExtensionPackage pkg) { }
 
         /// <summary>
         /// This method is called when the <see cref="Load"/> method has been invoked. <br />

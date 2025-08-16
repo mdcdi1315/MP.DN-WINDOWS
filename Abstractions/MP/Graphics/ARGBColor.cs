@@ -29,7 +29,7 @@ namespace MP.Graphics
         /// <param name="g">The green channel value.</param>
         /// <param name="b">The blue channel value.</param>
         /// <param name="a">The alpha channel value.</param>
-        public ARGBColor(byte r, byte g, byte b, byte a)
+        public ARGBColor(byte a, byte r, byte g, byte b)
         {
             this.r = r;
             this.g = g;

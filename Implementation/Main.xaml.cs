@@ -672,20 +672,36 @@ namespace MP
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             RecieveCmd(null, new(CommonSendCommandTypes.ThrowWaitMessage) { MessageData = "Loading settings tree..." });
-            SettingsTree.SettingsTreeBuilder stb = new(Global);
-            stb.Build();
-            using SettingsEditorNew editor = new(stb , backend.ExtensionEngineInstance);
-            RecieveCmd(null, new(CommonSendCommandTypes.ClearWaitMessage));
-            editor.ShowDialog();
-            stb = null;
-            if (editor.ShouldUpdateDevice)
-            {
-                backend.ChangeAudioDevice(Global.AudioDeviceId);
+            SettingsTree.SettingsTreeBuilder stb = null;
+            SettingsEditorNew editor = null;
+            try {
+                stb = new(Global);
+                stb.Build();
+                editor = new(stb, backend.ExtensionEngineInstance);
+                RecieveCmd(null, new(CommonSendCommandTypes.ClearWaitMessage));
+                editor.ShowDialog();
+                if (editor.ShouldUpdateDevice)
+                {
+                    backend.ChangeAudioDevice(Global.AudioDeviceId);
+                }
+                lvw.BackColor = Global.ExplorationViewBackColor;
+                lvw.ForeColor = Global.ExplorationViewForeColor;
+                lvwcms.BackColor = Global.ExplorationViewBackColor;
+                lvwcms.ForeColor = Global.ExplorationViewForeColor;
+            } catch (Exception ex) {
+                RecieveCmd(null, new(CommonSendCommandTypes.ClearWaitMessage));
+                MusicPlayerHelper.ShowErrorMessage(
+                    "A fatal error occured during Settings window lifecycle. The settings window cannot continue execution."
+#if DEBUG
+                    + $"\nException Data: \n{ex}"
+#endif
+                );
+            } finally {
+                editor?.Dispose();
+                editor = null;
+                stb?.Dispose();
+                stb = null;
             }
-            lvw.BackColor = Global.ExplorationViewBackColor;
-            lvw.ForeColor = Global.ExplorationViewForeColor;
-            lvwcms.BackColor = Global.ExplorationViewBackColor;
-            lvwcms.ForeColor = Global.ExplorationViewForeColor;
         }
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)

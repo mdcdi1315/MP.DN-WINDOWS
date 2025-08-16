@@ -1,6 +1,8 @@
 ﻿
 using MP;
 using MP.Imaging;
+using MP.Graphics;
+using MP.Graphics.Imaging;
 
 namespace System.Drawing
 {
@@ -37,7 +39,7 @@ namespace System.Drawing
             }
         }
 
-        private static System.UInt32 ComputeImageSize(ImagePixelFormat pf , Size se , out System.Int32 align)
+        private static System.UInt32 ComputeImageSize(ImagePixelFormat pf , MP.Graphics.Size se , out System.Int32 align)
         {
             System.Int32 bc = pf switch {
                 ImagePixelFormat.RGB => 24,
@@ -50,7 +52,7 @@ namespace System.Drawing
             return ((se.Height * se.Width * (bc / 8)) + (se.Height * (align = UnsafeMethods.PadAlignment(4, se.Width * bc / 8)))).ToUInt32();
         }
 
-        private static void FromARGB(System.Byte* psrc , System.Byte* pdest , Size size)
+        private static void FromARGB(System.Byte* psrc , System.Byte* pdest , MP.Graphics.Size size)
         {
             System.Byte* temp1, temp2;
             for (System.Int32 Y = 0; Y < size.Height; Y++)
@@ -68,7 +70,7 @@ namespace System.Drawing
             }
         }
 
-        private static void FromRGBA(System.Byte* psrc, System.Byte* pdest, Size size)
+        private static void FromRGBA(System.Byte* psrc, System.Byte* pdest, MP.Graphics.Size size)
         {
             System.Byte* temp1, temp2;
             for (System.Int32 Y = 0; Y < size.Height; Y++)
@@ -86,7 +88,7 @@ namespace System.Drawing
             }
         }
 
-        private static void FromRGB(System.Byte* psrc, System.Byte* pdest, Size size , System.Int32 align)
+        private static void FromRGB(System.Byte* psrc, System.Byte* pdest, MP.Graphics.Size size , System.Int32 align)
         {
             System.Byte* temp1, temp2 = pdest;
             for (System.Int32 Y = 0; Y < size.Height; Y++)
@@ -205,7 +207,7 @@ namespace System.Drawing
         public CursorImage(IImage image, Point hotspot)
         {
             ArgumentNullException.ThrowIfNull(image, nameof(image));
-            imgsize = image.Size;
+            imgsize = new(image.Size.Width , image.Size.Height);
             this.hotspot = hotspot;
             CreateCursor(image);
         }

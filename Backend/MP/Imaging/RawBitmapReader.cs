@@ -1,6 +1,7 @@
 ﻿using System;
+using MP.Graphics;
 using Microsoft.IO;
-using System.Drawing;
+using MP.Graphics.Imaging;
 using Microsoft.Win32.SafeHandles;
 
 namespace MP.Imaging

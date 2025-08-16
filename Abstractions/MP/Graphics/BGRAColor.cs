@@ -30,7 +30,7 @@ namespace MP.Graphics
         /// <param name="g">The green channel value.</param>
         /// <param name="b">The blue channel value.</param>
         /// <param name="a">The alpha channel value.</param>
-        public BGRAColor(byte r, byte g, byte b, byte a)
+        public BGRAColor(byte b, byte g, byte r, byte a)
         {
             this.r = r;
             this.g = g;

@@ -6,7 +6,6 @@ namespace MP.AudioLibrary
     /// <summary>
     /// The <see cref="Decibel"/> structure defines another volume measurement in contrast to the most common attentuation scale from 0 to 1 in floating point.
     /// </summary>
-    [Annotations.Preliminary]
     public struct Decibel
     {
         private System.Single db;
@@ -31,24 +30,24 @@ namespace MP.AudioLibrary
         public static Decibel FromAttenuation(System.Single scale)
         {
             if (scale < 0 || scale > 1) { throw new ArgumentOutOfRangeException(nameof(scale), "Attenuation must be a value ranging from 0 to 1."); }
-            return new() { db = (System.Single)(20 * Math.Log(scale, 10)) };
+            return new() { db = 20f * MathF.Log(scale, 10f) };
         }
 
         /// <summary>
         /// Converts the value of this <see cref="Decibel"/> instance back to an attentuation value.
         /// </summary>
         /// <returns>The final attentuation value that is equvalent to the value contained into this instance.</returns>
-        public readonly System.Single ToAttenuation() => (System.Single)(Math.Exp(db) / 20);
+        public readonly System.Single ToAttenuation() => MathF.Exp(db) / 20f;
 
         /// <summary>
         /// Gets the raw value of this <see cref="Decibel"/> structure.
         /// </summary>
-        public System.Single Value => db;
+        public readonly System.Single Value => db;
 
         /// <summary>
         /// Returns the value that this structure holds as a string.
         /// </summary>
         /// <returns>The value held by this structure.</returns>
-        public override System.String ToString() => $"{db:f2} DB";
+        public readonly override System.String ToString() => $"{db:f2} DB";
     }
 }

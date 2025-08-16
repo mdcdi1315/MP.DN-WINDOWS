@@ -18,11 +18,7 @@ namespace MP.Collections
         /// <param name="x">The first delegate to test.</param>
         /// <param name="y">The second delegate to test.</param>
         /// <returns><see langword="true"/> if the specified delegates are the same delegate; otherwise, <see langword="false"/>.</returns>
-        public System.Boolean Equals(TD x, TD y)
-        {
-            if (x is null || y is null) { return false; }
-            return x.Method.MethodHandle.Equals(y.Method.MethodHandle);
-        }
+        public System.Boolean Equals(TD x, TD y) => x == y;
 
         /// <summary>
         /// Gets a hash code that uniquely identifies the provided delegate instance.

@@ -26,7 +26,7 @@ namespace MP.Graphics
         /// <param name="r">The red channel value.</param>
         /// <param name="g">The green channel value.</param>
         /// <param name="b">The blue channel value.</param>
-        public BGRColor(byte r, byte g, byte b)
+        public BGRColor(byte b, byte g, byte r)
         {
             this.r = r;
             this.g = g;

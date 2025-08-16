@@ -201,7 +201,7 @@ namespace MP.Random
             {
                 if (data[I] == '\0')
                 {
-                    // Probability of producing a random capital letter instead of a random letter
+                    // Probability of producing a random upper-case letter instead of a random lower-case letter
                     data[I] = (rng.NextBoolean(0.488f) ?
                         rng.NextInRange((short)65, (short)90) :
                         rng.NextInRange((short)97, (short)122)

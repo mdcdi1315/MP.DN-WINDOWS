@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MP.Collections
 {
@@ -51,16 +52,10 @@ namespace MP.Collections
             /// <returns><see langword="true"/> when a new child was retrieved; <see langword="false"/> if no more child elements are found.</returns>
             public bool MoveNext()
             {
-                if (current is not null)
-                {
+                if (current is not null) {
                     foreach (var c in current.Children) { nodes.Enqueue(c); }
                 }
-                if (nodes.TryDequeue(out var node))
-                {
-                    current = node;
-                    return true;
-                }
-                return false;
+                return nodes.TryDequeue(out current);
             }
 
             /// <summary>
@@ -91,6 +86,9 @@ namespace MP.Collections
         /// </summary>
         public Tree() => root = null;
 
+        // This can be inlined since the method itself is very explicative of what it does,
+        // just it does exist to avoid calling 2 times the same thing when being on the GetEnumerator method.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private TreeNode<T> GetNodePrivate() => root ??= new();
 
         /// <summary>

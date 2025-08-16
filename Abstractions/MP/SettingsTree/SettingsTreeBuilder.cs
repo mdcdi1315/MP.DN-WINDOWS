@@ -89,6 +89,14 @@ namespace MP.SettingsTree
                         set.ValidNumericRange = new(temp.InvokeMember("MinimumValue", bflags, null, range, Array.Empty<Object>()),
                                                     temp.InvokeMember("MaximumValue", bflags, null, range, Array.Empty<Object>()));
                     }
+                } else if (set.Type == SettingType.ValueList &&
+                        BuilderHelpers.FindAttribute(cda , out SettingsTreeDynamicValuesAttribute stdv))
+                {
+                    try {
+                        set.DynamicValuesList = Activator.CreateInstance(stdv.Provider);
+                    } catch (Exception e) {
+                        throw new InvalidSettingClassDefinitionLayoutException("Cannot create the dynamic values list provider.", e);
+                    }
                 }
                 if (BuilderHelpers.FindAttribute(cda, out SettingsTreeParentAttribute pa))
                 {
@@ -162,6 +170,14 @@ namespace MP.SettingsTree
                         var bflags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.GetProperty;
                         set.ValidNumericRange = new(temp.InvokeMember("MinimumValue", bflags, null, range, Array.Empty<Object>()),
                                                     temp.InvokeMember("MaximumValue", bflags, null, range, Array.Empty<Object>()));
+                    }
+                } else if (set.Type == SettingType.ValueList &&
+                        BuilderHelpers.FindAttribute(cda , out SettingsTreeDynamicValuesAttribute stdv))
+                {
+                    try {
+                        set.DynamicValuesList = Activator.CreateInstance(stdv.Provider);
+                    } catch (Exception e) {
+                        throw new InvalidSettingClassDefinitionLayoutException("Cannot create the dynamic values list provider.", e);
                     }
                 }
                 if (BuilderHelpers.FindAttribute(cda, out SettingsTreeParentAttribute pa))
@@ -515,6 +531,12 @@ namespace MP.SettingsTree
         public void Dispose()
         {
             reverselookup = null;
+            foreach (var s in this.GetAllSettings())
+            {
+                // A dynamic value list is always an IDisposable.
+                // I use this pattern instead to avoid performing an additional null check.
+                if (s.DynamicValuesList is IDisposable d) { d.Dispose(); }
+            }
             rootnode = null;
             settingsall = null;
             settingsbase = null;
