@@ -51,7 +51,7 @@ namespace MP.Random
         /// <summary>
         /// Creates a new instance of the <see cref="Xoshiro256Plus"/> class, with the specified seed, initializing the random number generator.
         /// </summary>
-        /// <param name="seed">The seed to use so that to initilalize the Xoroshiro random number generator.</param>
+        /// <param name="seed">The seed to use so that to initilalize the Xoshiro random number generator.</param>
         public Xoshiro256Plus(System.Int64 seed)
         {
             state = new System.UInt64[4];

@@ -211,9 +211,9 @@ namespace MP.AudioLibrary.MediaFoundation
             tempsample1.SetSampleTime(outputposition); // hopefully this is not needed
             outputDataBuffer.pSample = Marshal.GetIUnknownForObject(tempsample1).ToPointer();
             outputDataBuffer.pEvents = null;
-
-            MFT_PROCESS_OUTPUT_STATUS status;
-            var hr = transform.ProcessOutput(0, ref outputDataBuffer , out status);
+            
+            // Currently MFT_PROCESS_OUTPUT_STATUS is not needed, so discard the variable directly
+            var hr = transform.ProcessOutput(0, ref outputDataBuffer , out _);
             if (hr.FAILED) {
                 // Destroy sample data.
                 tempsample1.RemoveAllBuffers();

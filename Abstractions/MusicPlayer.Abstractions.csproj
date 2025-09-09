@@ -37,6 +37,7 @@
 		<Compile Include="MP/Graphics/*.cs"/>
 		<Compile Include="MP/Graphics/Imaging/*.cs"/>
 		<Compile Include="MP/Serialization/*.cs" />
+		<Compile Include="MP/Serialization/Xml/*.cs" />
 		<Compile Include="MP/Serialization/Json/*.cs" />
 		<Compile Include="MP/Serialization/Constraints/*.cs" />
 		<Compile Include="MP/DefaultPlatformLayer.cs" />

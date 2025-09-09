@@ -27,7 +27,8 @@ The most recommended way to do this is to provide a new instance of the `Default
 with the `RegisterPlatformLayer` method of the `SystemInfo` class in your Main method of your program,
 possibly before calling these API's or just registering it before anything else runs in your Main method. 
 
-> [!WARNING] Not correctly providing a platform layer instance or if the provided 
+> [!WARNING] 
+Not correctly providing a platform layer instance or if the provided 
 instance is poorly coded it may lead from unexpected exceptions to severe crashes.
 Unless you have very good reasons to write your own platform layer, use the 
 elsewise provided `DefaultPlatformLayer` class.

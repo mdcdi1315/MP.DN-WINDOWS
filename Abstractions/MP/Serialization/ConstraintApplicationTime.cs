@@ -8,11 +8,11 @@ namespace MP.Serialization
     public enum ConstraintApplicationTime : System.Byte
     {
         /// <summary>
-        /// Constraint is enforced during read-time only.
+        /// Constraint is enforced during read-time (deserialization) only.
         /// </summary>
         Reading,
         /// <summary>
-        /// Constraint is enforced during write-time only.
+        /// Constraint is enforced during write-time (serialization) only.
         /// </summary>
         Writing,
         /// <summary>

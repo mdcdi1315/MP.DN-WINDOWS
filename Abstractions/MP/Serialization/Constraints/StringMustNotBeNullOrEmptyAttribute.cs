@@ -14,7 +14,7 @@ namespace MP.Serialization.Constraints
         public sealed override SerializedFieldType[] AppliesTo => new[] { SerializedFieldType.String };
 
         /// <inheritdoc />
-        public override ConstraintApplicationTime AppliesDuring => ConstraintApplicationTime.Both;
+        public override ConstraintApplicationTime AppliesDuring => ConstraintApplicationTime.Writing;
 
         /// <inheritdoc />
         public override bool IsSatisfied(object value, out SerializationException exception)

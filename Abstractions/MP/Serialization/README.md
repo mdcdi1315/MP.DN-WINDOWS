@@ -12,6 +12,8 @@ This implementation takes that and pushes further this concept by adding:
 
 -> Perform concurrent read and write operations on the same object type at the same instance, at the same time.
 
+-> The ability to deserialize from one format and serialize into another
+
 -> And all these, into a single instance of a `SerializationManager` class.
 
 This API will be later used for all those files that are config files 

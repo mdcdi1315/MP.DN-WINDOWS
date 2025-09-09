@@ -195,6 +195,7 @@ namespace MP.Serialization
                             a2.SetValue(a.GetValue(I), I);
                         }
                     }
+                    // Apply the array object
                     fi.SetValue(obj, a2);
                 } else if (sfi.Type == SerializedFieldType.Object) {
                     if (val is ISerializedClassReader anotherreader) {
@@ -220,11 +221,13 @@ namespace MP.Serialization
                     {
                         throw new SerializationException($"Cannot serialize type of {ft.FullName} because it cannot correspond losslessly to {sfi.Type}.");
                     }
-                    if (GetAndApplyConstraints(fi, sfi, val, ConstraintApplicationTime.Reading, out except) == false)
+                    fi.SetValue(obj, val);
+                    // HACK: This allows correct numeric type retrieval.
+                    // If I was directly using the val reference, the constraint would indefinitely fail due to type mismatch.
+                    if (GetAndApplyConstraints(fi, sfi, fi.GetValue(obj), ConstraintApplicationTime.Reading, out except) == false)
                     {
                         throw new SerializationException("Cannot apply an constraint for the current class field.", except);
                     }
-                    fi.SetValue(obj, val);
                 }
             }
         }
@@ -375,7 +378,7 @@ namespace MP.Serialization
             {
                 sft = sfi.Type;
             }
-            return EnumerateConstraints(f, value, sft, apptime, isarray ? ArrayConstraintTest : ElementConstraintTest, out except);
+            return EnumerateConstraints(f, value, sft, apptime, isarray ? new(ArrayConstraintTest) : new(ElementConstraintTest), out except);
         }
 
         #endregion

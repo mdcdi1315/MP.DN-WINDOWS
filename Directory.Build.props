@@ -14,6 +14,7 @@
 		<MPBuildTasksBasePath>$(MPBuildTasksProjBasePath)/MP_BUILDTASKS</MPBuildTasksBasePath>
 		<!-- Define warnings and errors that belong to unstable branches of Music Player Abstractions Library. These are required to be globally disabled so that the preliminary code defined in such branches can be freely injected. -->
 		<NoWarn Condition="'$(MP_UNSTABLE)' == 'True'">$(NoWarn);MPAL00001</NoWarn>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	</PropertyGroup>
 	
 	<Import Project="$(MPBuildTasksProjBasePath)/MP.BuildTasks.targets" />

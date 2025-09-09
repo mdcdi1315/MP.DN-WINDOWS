@@ -183,8 +183,6 @@ partial class Interop
             public System.UInt32 ThreadID;
         }
 
-        // For a reason the same explicit layout does not work , so fall back to sequential semantics 
-        // (although that this could also break at any time)
         [StructLayout(LayoutKind.Sequential)] 
         public struct STARTUPINFO
         {

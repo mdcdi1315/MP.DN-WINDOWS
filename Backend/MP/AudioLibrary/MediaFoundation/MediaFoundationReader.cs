@@ -278,8 +278,8 @@ namespace MP.AudioLibrary.MediaFoundation
                 pSample.ConvertToContiguousBuffer(out pBuffer).ThrowOnFailure();
                 System.Byte* pd;
                 System.UInt32 maxlen, bufsize;
-                pBuffer.Lock(&pd, &maxlen, &bufsize);
                 decoderoutputoffset = 0;
+                pBuffer.Lock(&pd, &maxlen, &bufsize);
                 EnsureBuffer(decoderoutputcount = bufsize.ToInt32());
                 Unsafe.CopyBlockUnaligned(ref decoderoutputbuffer[0], ref pd[0], bufsize);
                 pBuffer.Unlock();
