@@ -187,7 +187,7 @@ namespace MP
             }
         }
 
-        public MusicPlayerStream GetStream(IPlaylistFile file)
+        public MusicPlayerStreamV2 GetStream(IPlaylistFile file)
         {
             if (iaold is not null) {
                 return GetStreamOld(file);
@@ -198,13 +198,13 @@ namespace MP
             }
         }
 
-        private MusicPlayerStream GetStreamNew(IPlaylistFile file)
+        private MusicPlayerStreamV2 GetStreamNew(IPlaylistFile file)
         {
             if (file.Length > MaximumSize)
             {
                 throw new OutOfMemoryException("Could not load the file into memory.");
             }
-            MusicPlayerStream stream = null;
+            MusicPlayerStreamV2 stream = null;
             IArchiveEntryReader reader = null;
             foreach (var entry in tracks)
             {
@@ -221,7 +221,7 @@ namespace MP
                         {
                             if (reader.Entry.EntryPath == file.FullName)
                             {
-                                stream = MusicPlayerStream.CreateMemoryStream(reader.Entry.Length);
+                                stream = MusicPlayerStreamV2.CreateMemoryStream(reader.Entry.Length);
                                 reader.EntryStream.DirectCopyToStream(stream);
                                 stream.SetStringAttribute("FileName", file.Name);
                                 stream.Position = 0;
@@ -255,13 +255,13 @@ namespace MP
             return stream;
         }
 
-        private MusicPlayerStream GetStreamOld(IPlaylistFile file)
+        private MusicPlayerStreamV2 GetStreamOld(IPlaylistFile file)
         {
             if (file.Length > MaximumSize)
             {
                 throw new OutOfMemoryException("Could not load the file into memory.");
             }
-            MusicPlayerStream stream = null;
+            MusicPlayerStreamV2 stream = null;
             ZipEntry ze = null;
             foreach (var entry in tracks) 
             {
@@ -275,7 +275,7 @@ namespace MP
                         {
                             if (ze.Name == file.FullName) 
                             {
-                                stream = MusicPlayerStream.CreateMemoryStream(ze.Size);
+                                stream = MusicPlayerStreamV2.CreateMemoryStream(ze.Size);
                                 iaold.CopyToExactly(stream, 4096, ze.Size);
                                 stream.SetStringAttribute("FileName", file.Name);
                                 stream.Position = 0;

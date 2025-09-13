@@ -136,3 +136,6 @@ MP_DOTNET_RELEASE/
 
 # And ignore the auto-generated strongly-typed resource classes.
 *.Gen.cs
+
+# Do not ignore, however the Abstractions safehandles directory (for a weird reason, that happens)
+!Abstractions/Microsoft/Win32/

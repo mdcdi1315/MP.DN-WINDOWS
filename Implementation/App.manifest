@@ -2,7 +2,7 @@
 
 <!-- © MDCDI1315. Do not modify!! -->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity version="1.6.1.5" name="Mp-DotNet8.dll"/>
+  <assemblyIdentity version="1.6.1.6" name="Mp-DotNet8.dll"/>
 	<trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
 		<security>
 			<!-- UAC Manifest Options

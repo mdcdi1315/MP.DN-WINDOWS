@@ -2,6 +2,7 @@
 using System;
 using MP.Utilities;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MP
 {
@@ -210,5 +211,9 @@ namespace MP
             Wrapped = null;
             base.Dispose(disposing);
         }
+
+        /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize", Justification = "Called already by Dispose")]
+        public override ValueTask DisposeAsync() => new(Task.Factory.StartNew(new(Dispose)));
     }
 }

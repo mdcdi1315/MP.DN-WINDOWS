@@ -1,5 +1,4 @@
 ﻿
-
 using MP.ComInterop;
 using MP.Annotations;
 using MP.WindowsInterop;
@@ -50,7 +49,7 @@ namespace MP.AudioLibrary.MediaFoundation
         public new HRESULT GetString(GUID* guidKey, System.Char* pwszValue, System.UInt32 cchBufSize, System.UInt32* pcchLength);
 
         [PreserveSig]
-        public new HRESULT GetAllocatedString(GUID* guidKey, System.Char* ppwszValue, System.UInt32* pcchLength);
+        public new HRESULT GetAllocatedString(GUID* guidKey, System.Char** ppwszValue, System.UInt32* pcchLength);
 
         [PreserveSig]
         public new HRESULT GetBlobSize(GUID* guidKey, System.UInt32* pcbBlobSize);

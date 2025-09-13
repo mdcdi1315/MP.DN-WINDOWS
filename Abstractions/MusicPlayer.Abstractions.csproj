@@ -12,20 +12,21 @@
 	<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<AssemblyOriginatorKeyFile>AbstractionsKey.snk</AssemblyOriginatorKeyFile>
+	<MP_ANALYZERENABLED Condition="'$(MP_ANALYZERENABLED)' == ''">True</MP_ANALYZERENABLED>
+	<MP_ANALYZERLIB>$(MSBuildProjectDirectory)/../Abstractions-Analyzer/bin/$(Configuration)/netstandard2.0/MP.AbstractionsLibAnalyzer.dll</MP_ANALYZERLIB>
   </PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(MP_ANALYZERENABLED)' == 'true'">
 		<!-- Build the analyzer transitively but do not statically link it in the project. -->
-		<ProjectReference Include="../Abstractions-Analyzer/Analyzer.csproj" ReferenceOutputAssembly="false" />
-		<!-- Instead pass it through this item declaration -->
-		<Analyzer 
-			Include="$(MSBuildProjectDirectory)/../Abstractions-Analyzer/bin/$(Configuration)/netstandard2.0/MP.AbstractionsLibAnalyzer.dll" 
-			IsImplicitlyDefined="true"
-		/>
+		<ProjectReference Include="../Abstractions-Analyzer/Analyzer.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer">
+		  <PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<!-- Instead pass it through this item declaration <Analyzer Include="$(MP_ANALYZERLIB)" IsImplicitlyDefined="false" /> -->
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="Microsoft\IO\InternalMemoryStream.cs" />
+		<Compile Include="Microsoft\Win32\SafeHandles\AbstractFileStreamHandle.cs" />
 		<Compile Include="Microsoft\Win32\SafeHandles\SafeNativeMemoryEnumerator.cs" />
 		<Compile Include="MP/TagReading/*.cs" />
 		<Compile Include="MP/TagReading/Ogg/*.cs" />
@@ -34,8 +35,8 @@
 		<Compile Include="MP/TagReading/ID3/*.cs" />
 		<Compile Include="MP/SettingsTree/*.cs" />
 		<Compile Include="MP/SettingsTree/Attributes/*.cs" />
-		<Compile Include="MP/Graphics/*.cs"/>
-		<Compile Include="MP/Graphics/Imaging/*.cs"/>
+		<Compile Include="MP/Graphics/*.cs" />
+		<Compile Include="MP/Graphics/Imaging/*.cs" />
 		<Compile Include="MP/Serialization/*.cs" />
 		<Compile Include="MP/Serialization/Xml/*.cs" />
 		<Compile Include="MP/Serialization/Json/*.cs" />
@@ -64,6 +65,7 @@
 		<Compile Include="MP\AudioLibrary\CommonChannelTypes.cs" />
 		<Compile Include="MP\AudioLibrary\IAudioPlayer.cs" />
 		<Compile Include="MP\AudioLibrary\IAudioProvider.cs" />
+		<Compile Include="MP\AudioLibrary\IInvalidatableAudioProvider.cs" />
 		<Compile Include="MP\AudioLibrary\MonoToStereoAudioProvider.cs" />
 		<Compile Include="MP\AudioLibrary\PlaybackState.cs" />
 		<Compile Include="MP\AudioLibrary\PlaybackStoppedDelegate.cs" />
@@ -149,11 +151,39 @@
 		<Compile Include="MP\ExtensibilitySystem\SystemRequestType.cs" />
 		<Compile Include="MP\ExtensibilitySystem\UnloadableManagedAssetException.cs" />
 		<Compile Include="MP\ExtensibilitySystem\UnreachableAssetException.cs" />
+		<Compile Include="MP\Graphics\OpenGL\BufferBits.cs" />
+		<Compile Include="MP\Graphics\OpenGL\BufferObject.cs" />
+		<Compile Include="MP\Graphics\OpenGL\BufferObjectType.cs" />
+		<Compile Include="MP\Graphics\OpenGL\DataStoreUsagePattern.cs" />
+		<Compile Include="MP\Graphics\OpenGL\Delegates.cs" />
+		<Compile Include="MP\Graphics\OpenGL\GL.cs" />
+		<Compile Include="MP\Graphics\OpenGL\IOpenGLFunctionLoader.cs" />
+		<Compile Include="MP\Graphics\OpenGL\IOpenGLObject.cs" />
+		<Compile Include="MP\Graphics\OpenGL\OpenGLException.cs" />
+		<Compile Include="MP\Graphics\OpenGL\OpenGLFunctionNameAttribute.cs" />
+		<Compile Include="MP\Graphics\OpenGL\ProgramObject.cs" />
+		<Compile Include="MP\Graphics\OpenGL\ShaderObject.cs" />
+		<Compile Include="MP\Graphics\OpenGL\ShaderType.cs" />
+		<Compile Include="MP\Graphics\OpenGL\UnloadableOpenGLFunctionException.cs" />
+		<Compile Include="MP\Graphics\Windowing\Cursor.cs" />
+		<Compile Include="MP\Graphics\Windowing\Window.cs" />
+		<Compile Include="MP\Graphics\Windowing\WindowDispatcher.cs" />
 		<Compile Include="MP\IAttributeable.cs" />
 		<Compile Include="MP\IID3V2TagReaderBase.cs" />
 		<Compile Include="MP\ILibraryHandle.cs" />
 		<Compile Include="MP\IMemoryHandle.cs" />
 		<Compile Include="MP\IOggTagReaderBase.cs" />
+		<Compile Include="MP\IO\AbstractFileStream.cs" />
+		<Compile Include="MP\IO\CopyMoveDirectoryOptions.cs" />
+		<Compile Include="MP\IO\CopyMoveFileOptions.cs" />
+		<Compile Include="MP\IO\FileAccess.cs" />
+		<Compile Include="MP\IO\FileAttributes.cs" />
+		<Compile Include="MP\IO\FileMode.cs" />
+		<Compile Include="MP\IO\FileOptions.cs" />
+		<Compile Include="MP\IO\FileShare.cs" />
+		<Compile Include="MP\IO\FileSystem.cs" />
+		<Compile Include="MP\IO\FileSystemObjectTimes.cs" />
+		<Compile Include="MP\IO\MemoryStream.cs" />
 		<Compile Include="MP\IPlayerInstanceData.cs" />
 		<Compile Include="MP\IPlaylist.cs" />
 		<Compile Include="MP\IPlaylistFile.cs" />

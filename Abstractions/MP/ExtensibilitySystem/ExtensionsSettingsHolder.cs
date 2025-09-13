@@ -8,7 +8,7 @@ namespace MP.ExtensibilitySystem
     /// <summary>
     /// Used as the base settings class instance that is passed into the extension instances. <br />
     /// However, these classes can only see the <see cref="IAttributeable"/> part of this class implementation. <br />
-    /// This is exported only and only to further support the <see cref="ExtensionEngine.LoadSettings"/> and <see cref="ExtensionEngine.SaveSettings"/> methodx.
+    /// This is exported only and only to further support the <see cref="ExtensionEngine.LoadSettings"/> and <see cref="ExtensionEngine.SaveSettings"/> methods.
     /// </summary>
     public sealed class ExtensionsSettingsHolder : IAttributeable
     {

@@ -22,6 +22,7 @@ namespace MP.ComInterop
         /// Creates a new <see cref="HRESULT"/> instance from a raw value.
         /// </summary>
         /// <param name="code">The raw value to initialize this structure from.</param>
+        [Annotations.CodeAnalysis.MustNotReportException]
         public HRESULT(System.Int32 code) => Code = code;
 
         /// <summary>
@@ -31,8 +32,8 @@ namespace MP.ComInterop
         /// <param name="severity">The error code severity</param>
         /// <param name="facility">The facility where this error comes from</param>
         /// <param name="code">The raw error code</param>
-        public HRESULT(HRESULT_SEVERITY severity, FACILITY facility, System.Int32 code)
-            => Code = ((((System.UInt32)severity) << 31) | (((System.UInt32)facility) << 16) | ((System.UInt32)code)).ToInt32();
+        [Annotations.CodeAnalysis.MustNotReportException]
+        public HRESULT(HRESULT_SEVERITY severity, FACILITY facility, System.Int32 code) => Code = ((((System.UInt32)severity) << 31) | (((System.UInt32)facility) << 16) | ((System.UInt32)code)).ToInt32();
 
         public static HRESULT FromWin32(System.Int32 x)
         {
@@ -41,13 +42,14 @@ namespace MP.ComInterop
             return hr;
         }
 
+        [Annotations.CodeAnalysis.MustNotReportException]
         internal HRESULT(Interop.NTSTATUS status) => Code = ((System.Int32)status) | FACILITY_NT_BIT;
 
         /// <summary>Gets a value whether this code represents a call that was failed.</summary>
         public readonly System.Boolean FAILED => Code < 0;
 
         /// <summary>Gets a value whether this code represents any error.</summary>
-        public readonly System.Boolean IS_ERROR => Code.ToUInt32() >> 31 == 1;
+        public readonly System.Boolean IS_ERROR => (Code.ToUInt32() >> 31) == 1;
 
         /// <summary>Gets a value whether the COM call succeeded.</summary>
         public readonly System.Boolean SUCCEEDED => Code >= 0;
@@ -61,13 +63,8 @@ namespace MP.ComInterop
         /// <summary>Gets the severity of this code.</summary>
         public readonly HRESULT_SEVERITY HRESULT_SEVERITY => (HRESULT_SEVERITY)((Code >> 31) & 0x1);
 
-        /// <summary>Maps this code to a .NET exception if possible.</summary>
-        /// <remarks>For newer designs, it is recommended to use the <see cref="ThrowOnFailure"/> method instead, when you want to throw on any failure.</remarks>
-        [Annotations.DeprecatedMayBeRemoved]
-        public readonly Exception MappingException => Marshal.GetExceptionForHR(Code);
-
         /// <summary>
-        /// Throws an appropriate exception for the current <see cref="HRESULT"/> error code , if this <see cref="HRESULT"/> does represent an error code anyways.
+        /// Throws an appropriate exception for the current <see cref="HRESULT"/> error code , if this <see cref="HRESULT"/> does represent an error code anyway.
         /// </summary>
         /// <exception cref="ExceptionSystem.NativeWindowsCOMException">The exception that is thrown if <see cref="IS_ERROR"/> returns <see langword="true"/>.</exception>
         [System.Diagnostics.StackTraceHidden]
@@ -78,10 +75,10 @@ namespace MP.ComInterop
         }
 
         /// <summary>
-        /// Creates an <see cref="Exception"/> object for this <see cref="HRESULT"/>, if this does represent an error. <br />
-        /// This is the recommeneded to use for newer designs.
+        /// Creates an <see cref="Exception"/> object for this <see cref="HRESULT"/>, if this does represent an error.
         /// </summary>
         /// <returns>An <see cref="Exception"/> object that can be thrown.</returns>
+        [Annotations.CodeAnalysis.MustNotReportException]
         public readonly Exception CreateException()
         {
             if (IS_ERROR)
@@ -94,6 +91,10 @@ namespace MP.ComInterop
                     CommonHResults.E_UNEXPECTED => new AggregateException("An unexpected error occured."),
                     CommonHResults.E_POINTER => new ArgumentNullException("The provided pointer was invalid.", innerException: null),
                     CommonHResults.E_HANDLE => new ArgumentException("The specified handle is invalid."),
+                    CommonHResults.E_BOUNDS => new InvalidOperationException("The operation attempted to access data out of the range of valid values."),
+                    CommonHResults.E_ACCESSDENIED => new UnauthorizedAccessException("Access denied."),
+                    CommonHResults.E_ABORT => new OperationCanceledException("The operation was aborted."),
+                    CommonHResults.E_FAIL => new AggregateException("The operation failed unexpectedly."),
                     _ => new ExceptionSystem.NativeWindowsCOMException(this),
                 };
             }
@@ -107,6 +108,7 @@ namespace MP.ComInterop
         /// <param name="hr">The <see cref="HRESULT"/> to translate.</param>
         // We can aggressively inline this operator in JIT since it does only load the already known field.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Annotations.CodeAnalysis.MustNotReportException]
         public static implicit operator System.Int32(HRESULT hr) => hr.Code;
 
         /// <summary>

@@ -151,7 +151,10 @@ namespace MP.Dialogs
         public void Hide()
         {
             if (dialogform is null) { return; }
-            if (dialogform.IsHandleCreated) { dialogform.Invoke(dialogform.Hide); }
+            // The catched exception is reported due to race conditions on disposing/closing the dialog itself.
+            try {
+                if (dialogform.IsHandleCreated) { dialogform.Invoke(dialogform.Hide); }
+            } catch (System.ComponentModel.InvalidAsynchronousStateException) { }
         }
 
         /// <summary>

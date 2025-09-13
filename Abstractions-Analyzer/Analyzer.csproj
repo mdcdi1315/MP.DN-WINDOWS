@@ -1,15 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Nullable>disable</Nullable>
-	  <RootNamespace></RootNamespace>
-    <SignAssembly>true</SignAssembly>
-    <LangVersion>10</LangVersion>
-	  <ImplicitUsings>disable</ImplicitUsings>
-	  <AssemblyName>MP.AbstractionsLibAnalyzer</AssemblyName>
-	  <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-	  <EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+	<TargetFramework>netstandard2.0</TargetFramework>
+	<Nullable>disable</Nullable>
+	<RootNamespace></RootNamespace>
+	<SignAssembly>true</SignAssembly>
+	<LangVersion>10</LangVersion>
+	<ImplicitUsings>disable</ImplicitUsings>
+	<AssemblyName>MP.AbstractionsLibAnalyzer</AssemblyName>
+	<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+	<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+	<IsPackable>false</IsPackable>
+    <!-- Avoid ID conflicts with the abstractions library project. -->
+    <PackageId>*$(MSBuildProjectFile)*</PackageId>
+	<DevelopmentDependency>true</DevelopmentDependency>
+	<NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +24,7 @@
   <ItemGroup>
     <Compile Include="./DiagnosticIds.cs" />
     <Compile Include="./AnalyzerUtils.cs" />
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="./AttributesAnalysis/*.cs" />
   </ItemGroup>
 

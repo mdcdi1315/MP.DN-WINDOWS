@@ -34,7 +34,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.9.6")]
-[assembly: AssemblyFileVersion("1.0.9.6")]
+[assembly: AssemblyVersion("1.0.9.7")]
+[assembly: AssemblyFileVersion("1.0.9.7")]
 [assembly: SupportedOSPlatform(MP.WindowsInterop.WindowsVersions.NTDDI_WIN7)]
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories | DllImportSearchPath.System32)]

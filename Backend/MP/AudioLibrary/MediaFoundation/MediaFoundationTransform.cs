@@ -16,13 +16,15 @@ using System;
 using MP.ComInterop;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using MP.Annotations;
 
 namespace MP.AudioLibrary.MediaFoundation
 {
     /// <summary>
-    /// Defines the base class for MFT's.
+    /// Defines the base class for MFT's. <br />
+    /// It can assist you to easily create new I/O MFT's by just providing the MFT object itself.
     /// </summary>
-    public abstract class MediaFoundationTransform : IAudioProvider
+    public abstract class MediaFoundationTransform : IInvalidatableAudioProvider
     {
         [Flags]
         private enum MEDTRANSFORMFLAGS : System.Byte
@@ -45,11 +47,12 @@ namespace MP.AudioLibrary.MediaFoundation
         private IMFTransform transform; // The actual COM object.
         private System.Int64 inputposition; // in ref-time, so we can timestamp the input samples
         private System.Int64 outputposition; // also in ref-time
-        private MEDTRANSFORMFLAGS flags;
+        private MEDTRANSFORMFLAGS flags; // The transform's behavioral flags.
 
-        private IMFSample tempsample1 , tempsample2;
+        private IMFSample tempsample1 , tempsample2; // Temporary samples - are pooled so that no additional samples are allocated at run time
 
-        private System.IntPtr tbf2;
+        [IsPointerToCOMInterfaceType(typeof(IMFMediaBuffer))]
+        private System.IntPtr tbf2; // This is a native COM object of the IMFMediaBuffer interface
 
         private static System.Int64 BytesToNsPosition(System.Int32 bytes, AudioFormat format) => (10000000L * bytes) / format.AverageBytesPerSecond;
 
@@ -65,7 +68,12 @@ namespace MP.AudioLibrary.MediaFoundation
             }
             fmtout = desiredoutformat;
             provider = inputprovider;
-            sourcebuffer = new System.Byte[(System.Int64)(sourcebufferinglatencyinms * 0.001D * provider.Format.AverageBytesPerSecond)]; 
+            // TODO: Maybe find a way to express the exact latency without losing up to 9 ms (possibly by doing a rem test on provider.Format.BlockAlignment instead)
+            // Always round to a latency less than the actual and being multiple of 10 - this allows the data alignment
+            // to work correctly and avoid race conditions about data depiction on uneven sample rates (such as the 44100 kHz).
+            sourcebufferinglatencyinms -= sourcebufferinglatencyinms % 10; 
+            // The source buffer length thus is transformed with this formula: (System.Int64)(sourcebufferinglatencyinms * 0.001D * provider.Format.AverageBytesPerSecond)
+            sourcebuffer = new System.Byte[(System.Int64)((sourcebufferinglatencyinms * 0.001D) * provider.Format.AverageBytesPerSecond)]; 
             outputbuffer = new System.Byte[fmtout.AverageBytesPerSecond + fmtout.BlockAlignment]; // we will grow this buffer if needed, but try to make something big enough
             flags = MEDTRANSFORMFLAGS.None;
         }
@@ -118,14 +126,19 @@ namespace MP.AudioLibrary.MediaFoundation
             // Reposition code
             if (HasFlagFast(MEDTRANSFORMFLAGS.FireReposition))
             {
-                EndStreamAndDrain();
+                //transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_DROP_SAMPLES, 0);
+                //transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_COMMAND_FLUSH, 0);
+                //EndStreamAndDrain();
                 ClearOutputBuffer();
-                InitTransformForStreaming();
+                transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_DROP_SAMPLES, 0);
+                //transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_COMMAND_FLUSH, 0);
+                //InitTransformForStreaming();
                 flags &= ~MEDTRANSFORMFLAGS.FireReposition;
             }
 
-            // strategy will be to always read the requested time from the source, and give it to the MFT
+            // strategy will be to always read one second from the source, and give it to the MFT
             System.Int32 bytesWritten = 0;
+
 
             // read in any leftovers from last time
             if (outputbuffercount > 0)
@@ -164,6 +177,7 @@ namespace MP.AudioLibrary.MediaFoundation
                 // n.b. in theory we ought to loop here, although we'd need to be careful as the next time into ReadFromTransform there could
                 // still be some leftover bytes in outputBuffer, which would get overwritten. Only introduce this if we find a transform that 
                 // needs it. For most transforms, alternating read/write should be OK
+
                 //do
                 //{
                 // keep reading from transform
@@ -179,11 +193,8 @@ namespace MP.AudioLibrary.MediaFoundation
         {
             transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_NOTIFY_END_OF_STREAM, 0);
             transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_COMMAND_DRAIN, 0);
-            int read;
-            do
-            {
-                read = ReadFromTransform();
-            } while (read > 0);
+            int r;
+            do { r = ReadFromTransform(); } while (r > 0);
             inputposition = 0;
             outputposition = 0;
             transform.ProcessMessage(MFT_MESSAGE_TYPE.MFT_MESSAGE_NOTIFY_END_STREAMING, 0).ThrowOnFailure();
@@ -207,6 +218,7 @@ namespace MP.AudioLibrary.MediaFoundation
             var outputDataBuffer = new MFT_OUTPUT_DATA_BUFFER();
             Interop.MfPlat.MFCreateMemoryBuffer_IntPtr(outputbuffer.Length, out var tbf1).ThrowOnFailure();
             // AddBuffer can fail for a number of reasons, check error code.
+            tempsample1.DeleteAllItems();
             tempsample1.AddBuffer(tbf1.ToPointer()).ThrowOnFailure();
             tempsample1.SetSampleTime(outputposition); // hopefully this is not needed
             outputDataBuffer.pSample = Marshal.GetIUnknownForObject(tempsample1).ToPointer();
@@ -313,7 +325,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// <summary>
         /// Indicate that the source has been repositioned and completely drain out the transform's buffers
         /// </summary>
-        public void Reposition()
+        public void Invalidate()
         {
             if (HasFlagFast(MEDTRANSFORMFLAGS.InitedForStreaming))
             {

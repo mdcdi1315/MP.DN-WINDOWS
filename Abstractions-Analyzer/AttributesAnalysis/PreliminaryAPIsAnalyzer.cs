@@ -1,12 +1,9 @@
 
-
-
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 
 namespace MP.AbstractionsLib.Analyzer
 {
@@ -26,7 +23,7 @@ namespace MP.AbstractionsLib.Analyzer
                 DiagnosticIds.PreliminaryAttributedClassUsed,
                 "Preliminary-attributed class was used from stable code",
                 "Remove the usage of this class or set the MP_UNSTABLE property to True.",
-                "MDCDI1315.APIUSAGE",
+                DiagnosticIds.ApiUsageCategory,
                 DiagnosticSeverity.Error,
                 true
             ));
@@ -34,7 +31,7 @@ namespace MP.AbstractionsLib.Analyzer
                 DiagnosticIds.DeprecatedMayBeRemovedAttributedClassUsed,
                 "This code element may be removed in the future.",
                 "Remove the deprecated class usage.",
-                "MDCDI1315.APIUSAGE",
+                DiagnosticIds.ApiUsageCategory,
                 DiagnosticSeverity.Warning,
                 true
             ));
@@ -42,7 +39,7 @@ namespace MP.AbstractionsLib.Analyzer
                 DiagnosticIds.DeprecatedMayBeRemovedAttributedClassUsed,
                 "This code element will be removed by version {0} of the project {1}.",
                 "Remove the deprecated class usage.",
-                "MDCDI1315.APIUSAGE",
+                DiagnosticIds.ApiUsageCategory,
                 DiagnosticSeverity.Warning,
                 true
             ));

@@ -66,7 +66,7 @@ partial class Interop
                 CommonHResults.DISP_E_TYPEMISMATCH => new System.TypeLoadException("Type mismatch between input and output types"),
                 CommonHResults.E_OUTOFMEMORY => new System.OutOfMemoryException("The operation could not be completed due to memory depletion."),
                 CommonHResults.E_INVALIDARG => new System.ArgumentException("Invalid argument passed."),
-                _ => hr.MappingException,
+                _ => hr.CreateException(),
             };
         }
 

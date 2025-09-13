@@ -15,11 +15,11 @@ namespace MP.AudioLibrary
         public MediaFoundationReaderFromStream(AbstractPropertyStream aps)
         {
             ArgumentNullException.ThrowIfNull(aps);
-            if (aps is not IStream) {
-                throw new ArgumentException("The passed in property stream must also implement COM's IStream interface.");
+            if (aps is not IStream && aps is not IMFByteStream) {
+                throw new ArgumentException("The passed in property stream must at least implement COM's IStream interface.");
             }
-            if (aps.CanRead == false || aps.CanSeek == false) {
-                throw new ArgumentException("The passed in property stream must be both readable and seekable.");
+            if (aps.CanRead == false) {
+                throw new ArgumentException("The passed in property stream must be readable at least.");
             }
             this.aps = aps;
             fn = Microsoft.IO.Path.GetExtension(aps.GetStringAttribute("FileName"));
@@ -31,7 +31,13 @@ namespace MP.AudioLibrary
         {
             if (bytestream is null)
             {
-                bytestream = MediaFoundationInterfacesFactory.CreateFromWrappingStream(aps as IStream);
+                if (aps is IMFByteStream b) {
+                    bytestream = b;
+                } else if (aps is IStream s) {
+                    bytestream = MediaFoundationInterfacesFactory.CreateFromWrappingStream(s);
+                } else {
+                    throw new NotSupportedException("Cannot determine the byte stream mode to perform.");
+                }
                 IMFAttributes attrs = bytestream as IMFAttributes;
                 if (attrs is not null && fn is not null)
                 {
@@ -51,7 +57,7 @@ namespace MP.AudioLibrary
             HRESULT hr = Interop.MfReadWrite.MFCreateSourceReaderFromByteStream(bytestream, null, out var srcr);
             if (hr.FAILED) {
                 bytestream.Close();
-                ComMarshalling.ReleaseInteropObject(bytestream);
+                try { ComMarshalling.ReleaseInteropObject(bytestream); } catch (ArgumentException) { }
                 bytestream = null;
                 aps?.Dispose();
                 aps = null;
@@ -62,10 +68,10 @@ namespace MP.AudioLibrary
 
         protected override void DisposeSourceReaderResources()
         {
-            if (bytestream is not null)
+            if (bytestream is not null && !Object.ReferenceEquals(bytestream , aps))
             {
                 bytestream.Close();
-                ComMarshalling.ReleaseInteropObject(bytestream);
+                try { ComMarshalling.ReleaseInteropObject(bytestream); } catch (ArgumentException) { }
                 bytestream = null;
             }
         }

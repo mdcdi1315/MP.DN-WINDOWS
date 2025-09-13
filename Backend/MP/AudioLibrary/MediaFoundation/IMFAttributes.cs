@@ -98,7 +98,6 @@ namespace MP.AudioLibrary.MediaFoundation
         ///             The key exists, and comparison was made.  Check the value of
         ///             *pbResult to determine whether the values were equivalent.
         ///     </para>
-        ///     <para>
         /// </returns>
         /// <remarks>
         ///     <para>
@@ -343,7 +342,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// <param name="guidKey">
         ///     GUID specifying the value to retrieve.
         /// </param>
-        /// <param name="pwszValue">
+        /// <param name="ppwszValue">
         ///     Upon success, holds the retrieved LPWSTR value.
         /// </param>
         /// <param name="pcchLength">
@@ -374,7 +373,7 @@ namespace MP.AudioLibrary.MediaFoundation
         ///     caller to free the memory via CoTaskMemFree.
         /// </remarks>
         [PreserveSig]
-        public HRESULT GetAllocatedString(GUID* guidKey, System.Char* ppwszValue, System.UInt32* pcchLength);
+        public HRESULT GetAllocatedString(GUID* guidKey, System.Char** ppwszValue, System.UInt32* pcchLength);
 
         /// <summary>
         ///     GetBlobSize retrieves the size of a blob value corresponding to the
@@ -490,7 +489,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// <param name="guidKey">
         ///     GUID specifying the value to retrieve.
         /// </param>
-        /// <param name="riid"></param>
+        /// <param name="riid">Interface identifier (IID) of the interface to retrieve.</param>
         /// <param name="ppv">
         ///     Value of the property, in an void**.  Returned value needs to be cast
         ///     to an interface pointer of the appropriate type.

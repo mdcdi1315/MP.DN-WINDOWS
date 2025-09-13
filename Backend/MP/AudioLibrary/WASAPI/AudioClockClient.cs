@@ -37,8 +37,7 @@ namespace MP.AudioLibrary.WASAPI
         {
             get {
                 System.UInt64 freq;
-                var hr = audioClockClientInterface.GetFrequency(&freq);
-                if (hr.FAILED) { throw hr.MappingException; }
+                audioClockClientInterface.GetFrequency(&freq).ThrowOnFailure();
                 return freq;
             }
         }

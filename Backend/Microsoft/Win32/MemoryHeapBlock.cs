@@ -1,8 +1,8 @@
 ﻿
 using MP;
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Win32
 {
@@ -16,7 +16,7 @@ namespace Microsoft.Win32
         {
             None = 0,
             IsDefaultProcessHeap = 0x02,
-            IsProtectedHeap = 0x04
+            IsProtectedHeap = 0x04 // This value is unused for a weird reason? what is missing?
         }
 
         private MEMHEAPCLASSFLAGS flags;
@@ -93,7 +93,7 @@ namespace Microsoft.Win32
         /// Gets a value whether the current memory heap object has been corrupted or not. <br />
         /// If it happens this object to be the value of <see cref="ProcessHeap"/> property ,  <br />
         /// a critical <see cref="AccessViolationException"/> is thrown to the caller. <br />
-        /// For corrupted memory heaps, you can safely destroy them by using the <see cref="CriticalHandle.Dispose"/> method.
+        /// For other corrupted memory heaps, you can safely destroy them by using the <see cref="CriticalHandle.Dispose"/> method.
         /// </summary>
         public unsafe System.Boolean IsValid
         {
@@ -116,7 +116,7 @@ namespace Microsoft.Win32
 
         protected override bool ReleaseHandle()
         {
-            if (flags.HasFlag(MEMHEAPCLASSFLAGS.IsDefaultProcessHeap | MEMHEAPCLASSFLAGS.IsProtectedHeap)) {
+            if (flags.HasFlag(MEMHEAPCLASSFLAGS.IsDefaultProcessHeap) || flags.HasFlag(MEMHEAPCLASSFLAGS.IsProtectedHeap)) {
                 // Ignore memory heaps returned by non-managed locations (Such as the GetProcessHeap function)
                 return true;
             }

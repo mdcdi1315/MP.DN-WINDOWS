@@ -169,5 +169,29 @@ namespace Microsoft.IO
                 return numBytesWritten.ToInt32();
             }
         }
+    
+        public static System.Int32 ReadFileNativeUseNtDll(RedistSafeFileHandle handle, Span<System.Byte> bytes, out System.Int32 errorcode)
+        {
+            System.Diagnostics.Debug.Assert(handle is not null, "Check failed: handle != null");
+
+            Interop.NtDll.IO_STATUS_BLOCK blk;
+            fixed (System.Byte* pd = bytes)
+            {
+                errorcode = Interop.NtDll.RtlNtStatusToDosError(Interop.NtDll.NtReadFile(handle.Handle, IntPtr.Zero, pd, bytes.Length.ToUInt32(), out blk)).ToInt32();
+            }
+            return blk.Information.ToInt32();
+        }
+
+        public static System.Int32 WriteFileNativeUseNtDll(RedistSafeFileHandle handle, ReadOnlySpan<System.Byte> bytes, out System.Int32 errorcode)
+        {
+            System.Diagnostics.Debug.Assert(handle is not null, "Check failed: handle != null");
+
+            Interop.NtDll.IO_STATUS_BLOCK blk;
+            fixed (System.Byte* pd = bytes)
+            {
+                errorcode = Interop.NtDll.RtlNtStatusToDosError(Interop.NtDll.NtWriteFile(handle.Handle, IntPtr.Zero, pd, bytes.Length.ToUInt32(), out blk)).ToInt32();
+            }
+            return blk.Information.ToInt32();
+        }
     }
 }

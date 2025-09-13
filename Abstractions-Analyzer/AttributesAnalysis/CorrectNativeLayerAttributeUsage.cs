@@ -24,7 +24,7 @@ namespace MP.AbstractionsLib.Analyzer
                 DiagnosticIds.ClassExtendingAbstractPlatformLayerButDoesNotHaveNativeLayerAttribute,
                 "Platform layer class extends AbstractPlatformLayer but does not specify a NativeLayerAtttribute instance",
                 "The class '{0}' does not specify an instance of the NativeLayerAtttribute.",
-                "MDCDI1315.APIUSAGE",
+                DiagnosticIds.ApiUsageCategory,
                 DiagnosticSeverity.Warning,
                 true
             ));

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics.CodeAnalysis;
 using MP.ComInterop;
 
 namespace MP.AudioLibrary.MediaFoundation
@@ -15,7 +16,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// </summary>
         public static IMFSample CreateSample()
         {
-            Interop.MfPlat.MFCreateSample(out var ps).ThrowOnFailure();
+            CreateSample(out var ps).ThrowOnFailure();
             return ps;
         }
 
@@ -33,7 +34,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// </summary>
         public static IMFMediaType CreateMediaType()
         {
-            Interop.MfPlat.MFCreateMediaType(out var mt).ThrowOnFailure();
+            CreateMediaType(out var mt).ThrowOnFailure();
             return mt;
         }
 
@@ -54,10 +55,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="initialsize"/> was negative.</exception>
         public static IMFAttributes CreateAttributes(System.Int32 initialsize = 0)
         {
-            if (initialsize < 0) {
-                throw new ArgumentOutOfRangeException(nameof(initialsize) , "Initial attributes store size must not be negative.");
-            }
-            Interop.MfPlat.MFCreateAttributes(initialsize , out var attributes).ThrowOnFailure();
+            CreateAttributes(initialsize , out var attributes).ThrowOnFailure();
             return attributes;
         }
 
@@ -87,10 +85,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxlength"/> was zero or negative.</exception>
         public static IMFMediaBuffer CreateMediaBuffer(System.Int32 maxlength)
         {
-            if (maxlength < 1) {
-                throw new ArgumentOutOfRangeException(nameof(maxlength), "Maximum media buffer length must not be zero or negative.");
-            }
-            Interop.MfPlat.MFCreateMemoryBuffer(maxlength, out var buffer).ThrowOnFailure();
+            CreateMediaBuffer(maxlength, out var buffer).ThrowOnFailure();
             return buffer;
         }
 
@@ -121,7 +116,7 @@ namespace MP.AudioLibrary.MediaFoundation
         public static IMFByteStream CreateFromWrappingStream(IStream stream)
         {
             ArgumentNullException.ThrowIfNull(stream);
-            Interop.MfPlat.MFCreateMFByteStreamOnStream(stream , out var bsm).ThrowOnFailure();
+            CreateFromWrappingStream(stream , out var bsm).ThrowOnFailure();
             return bsm;
         }
 
@@ -142,26 +137,73 @@ namespace MP.AudioLibrary.MediaFoundation
         }
 
         /// <summary>
+        /// Creates and returns a default implementation of the <see cref="IMFAsyncResult"/> interface.
+        /// </summary>
+        /// <param name="comobject">The COM object to associate with <see cref="IMFAsyncResult.GetObject(void**)"/>.</param>
+        /// <param name="callback">The <see cref="IMFAsyncCallback"/> that this result is associated with.</param>
+        /// <param name="stateobject">A COM state object passed by the application. Optional and can be null.</param>
+        /// <param name="result">The marshalled result object of the <see cref="IMFAsyncResult"/> interface.</param>
+        /// <returns>The error code, as reported by the native P/Invoke.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="callback"/> was <see langword="null"/>.</exception>
+        public static HRESULT CreateAsyncResult([MaybeNull] System.Object comobject, IMFAsyncCallback callback, [MaybeNull] System.Object stateobject , out IMFAsyncResult result)
+        {
+            ArgumentNullException.ThrowIfNull(callback);
+            return Interop.MfPlat.MFCreateAsyncResult(comobject , callback, stateobject , out result);
+        }
+
+        /// <summary>
+        /// Creates and returns a default implementation of the <see cref="IMFAsyncResult"/> interface.
+        /// </summary>
+        /// <param name="comobject">The COM object to associate with <see cref="IMFAsyncResult.GetObject(void**)"/>.</param>
+        /// <param name="callback">The <see cref="IMFAsyncCallback"/> that this result is associated with.</param>
+        /// <param name="nativestate">A COM state object passed natively by the application. Optional and can be null.</param>
+        /// <param name="result">The marshalled result object of the <see cref="IMFAsyncResult"/> interface.</param>
+        /// <returns>The error code, as reported by the native P/Invoke.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="callback"/> was <see langword="null"/>.</exception>
+        public static unsafe HRESULT CreateAsyncResult([MaybeNull] System.Object comobject , IMFAsyncCallback callback , [MaybeNull] void* nativestate, out IMFAsyncResult result)
+        {
+            ArgumentNullException.ThrowIfNull(callback);
+            return Interop.MfPlat.MFCreateAsyncResult(comobject, callback, nativestate, out result);
+        }
+
+        /// <summary>
+        /// Creates and returns a default implementation of the <see cref="IMFAsyncResult"/> interface.
+        /// </summary>
+        /// <param name="comobject">The COM object to associate with <see cref="IMFAsyncResult.GetObject(void**)"/>.</param>
+        /// <param name="callback">The <see cref="IMFAsyncCallback"/> that this result is associated with.</param>
+        /// <param name="stateobject">A COM state object passed natively by the application. Optional and can be null.</param>
+        /// <returns>The marshalled result object of the <see cref="IMFAsyncResult"/> interface.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="callback"/> was <see langword="null"/>.</exception>
+        public static unsafe IMFAsyncResult CreateAsyncResult([MaybeNull] System.Object comobject, IMFAsyncCallback callback, [MaybeNull] void* nativestate)
+        {
+            IMFAsyncResult ret;
+            CreateAsyncResult(comobject, callback, nativestate, out ret).ThrowOnFailure();
+            return ret;
+        }
+
+        /// <summary>
+        /// Creates and returns a default implementation of the <see cref="IMFAsyncResult"/> interface.
+        /// </summary>
+        /// <param name="comobject">The COM object to associate with <see cref="IMFAsyncResult.GetObject(void**)"/>.</param>
+        /// <param name="callback">The <see cref="IMFAsyncCallback"/> that this result is associated with.</param>
+        /// <param name="stateobject">A COM state object passed by the application. Optional and can be null.</param>
+        /// <returns>The marshalled result object of the <see cref="IMFAsyncResult"/> interface.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="callback"/> was <see langword="null"/>.</exception>
+        public static IMFAsyncResult CreateAsyncResult([MaybeNull] System.Object comobject , IMFAsyncCallback callback , [MaybeNull] System.Object stateobject)
+        {
+            IMFAsyncResult ret;
+            CreateAsyncResult(comobject , callback , stateobject , out ret).ThrowOnFailure();
+            return ret;
+        }
+
+        /// <summary>
         /// Enumerates all the MFT's that can be found by Media Foundation and those registered by the current process.
         /// </summary>
         /// <param name="guidcategory">The GUID category of the MFT's to specifically enumerate.</param>
         /// <returns>An array of <see cref="IMFActivate"/> objects, representing creatable MFT's.</returns>
         public static IMFActivate[] EnumerateMFTs(Guid guidcategory)
         {
-            // Enumerate MFT's that are:
-            // -> Syncronous
-            // -> Asyncronous, async implemented with software
-            // -> Asyncronous, async implemented with hardware
-            // -> Created in-process
-            // -> All the above, but make sure that are approved by the system for use
-            Interop.MfPlat.MFT_ENUM_FLAG flags =
-                Interop.MfPlat.MFT_ENUM_FLAG.MFT_ENUM_FLAG_SYNCMFT |
-                Interop.MfPlat.MFT_ENUM_FLAG.MFT_ENUM_FLAG_ASYNCMFT |
-                Interop.MfPlat.MFT_ENUM_FLAG.MFT_ENUM_FLAG_HARDWARE |
-                Interop.MfPlat.MFT_ENUM_FLAG.MFT_ENUM_FLAG_LOCALMFT | 
-                Interop.MfPlat.MFT_ENUM_FLAG.MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY;
-
-            Interop.MfPlat.MFTEnumEx(guidcategory, flags, null, null, out var activates).ThrowOnFailure();
+            EnumerateMFTs(guidcategory , out var activates).ThrowOnFailure();
             return activates;
         }
 

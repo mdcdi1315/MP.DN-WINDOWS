@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayer.BuildTasks", "B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayer.Abstractions", "Abstractions\MusicPlayer.Abstractions.csproj", "{0193ED24-69A0-47EF-AAAB-65187286CD0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayer.Analyzer", "Abstractions-Analyzer\Analyzer.csproj", "{8C4CDF68-F072-BE3B-15A7-569F363B4415}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analyzer", "Abstractions-Analyzer\Analyzer.csproj", "{8C4CDF68-F072-BE3B-15A7-569F363B4415}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B892F6C8-DFA1-4FE7-A659-872807F9ECC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B892F6C8-DFA1-4FE7-A659-872807F9ECC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B892F6C8-DFA1-4FE7-A659-872807F9ECC5}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -89,6 +85,18 @@ Global
 		{0193ED24-69A0-47EF-AAAB-65187286CD0E}.Release|x64.Build.0 = Release|Any CPU
 		{0193ED24-69A0-47EF-AAAB-65187286CD0E}.Release|x86.ActiveCfg = Release|Any CPU
 		{0193ED24-69A0-47EF-AAAB-65187286CD0E}.Release|x86.Build.0 = Release|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|x64.Build.0 = Debug|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Debug|x86.Build.0 = Debug|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|x64.ActiveCfg = Release|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|x64.Build.0 = Release|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|x86.ActiveCfg = Release|Any CPU
+		{8C4CDF68-F072-BE3B-15A7-569F363B4415}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

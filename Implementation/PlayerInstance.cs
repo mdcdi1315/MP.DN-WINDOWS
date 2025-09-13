@@ -37,10 +37,6 @@ namespace MP
             temp = Data;
             this.eng = eng;
             System.String ext = temp.Stream.GetStringAttribute("FileName");
-            if (temp.Stream is not MusicPlayerStream)
-            {
-                throw new InvalidOperationException("The only accepted property streams are those that are objects from the MusicPlayerStream class.");
-            }
             backthread = null;
             UpdateMusicDisplay = new(UpdateMusicDisplayDummyFunction);
             flags = PlayerInstanceFlags.None;
@@ -248,8 +244,7 @@ namespace MP
             TimeSpan current = codec.AudioStream.CurrentTime , desired = current.Add(new(0 , 0, 10));
             if (desired > codec.AudioStream.TotalTime) { desired = codec.AudioStream.TotalTime; }
             PlaybackState last = outdev.State;
-            if (outdev.State == PlaybackState.Playing)
-            {
+            if (last == PlaybackState.Playing) {
                 outdev.Pause();
                 System.Threading.Thread.Sleep(60);
             }
@@ -268,7 +263,7 @@ namespace MP
             TimeSpan current = codec.AudioStream.CurrentTime, desired = current.Subtract(new(0, 0, 10));
             if (desired < new TimeSpan(0,0,0)) { desired = new TimeSpan(0,0,0); }
             PlaybackState last = outdev.State;
-            if (outdev.State == PlaybackState.Playing)
+            if (last == PlaybackState.Playing)
             {
                 outdev.Pause();
                 System.Threading.Thread.Sleep(60);
@@ -288,7 +283,7 @@ namespace MP
             TimeSpan current = codec.AudioStream.CurrentTime, desired = current.Add(new(0, 0, 1));
             if (desired > codec.AudioStream.TotalTime) { desired = codec.AudioStream.TotalTime; }
             PlaybackState last = outdev.State;
-            if (outdev.State == PlaybackState.Playing)
+            if (last == PlaybackState.Playing)
             {
                 outdev.Pause();
                 System.Threading.Thread.Sleep(60);
@@ -308,7 +303,7 @@ namespace MP
             TimeSpan current = codec.AudioStream.CurrentTime, desired = current.Subtract(new(0, 0, 1));
             if (desired < new TimeSpan(0, 0, 0)) { desired = new TimeSpan(0, 0, 0); }
             PlaybackState last = outdev.State;
-            if (outdev.State == PlaybackState.Playing)
+            if (last == PlaybackState.Playing)
             {
                 outdev.Pause();
                 System.Threading.Thread.Sleep(60);
@@ -451,11 +446,15 @@ namespace MP
                 {
                     if (closest is not null) {
                         // OK we have to provide the resampler to resample to the closest format, as it seems.
-                        providerfinal = new MediaFoundationMFTResampler(providerfinal, closest, temp.Latency);
+                        var r = new MediaFoundationMFTResampler(providerfinal, closest, temp.Latency);
+                        codec.AudioStream.SubscribeProviderOnCurrentTimeInvalidated(r);
+                        providerfinal = r;
                         DebugProvider.WriteLine("RCU: WASAPI does not exactly support the codec format, an resampler was inserted.");
                     } else if (codec.StableCodecFormat is not null) {
                         // OK we have to provide the resampler to resample to the recommended format of the codec, as it seems.
-                        providerfinal = new MediaFoundationMFTResampler(providerfinal, codec.StableCodecFormat, temp.Latency);
+                        var r = new MediaFoundationMFTResampler(providerfinal, codec.StableCodecFormat, temp.Latency);
+                        codec.AudioStream.SubscribeProviderOnCurrentTimeInvalidated(r);
+                        providerfinal = r;
                         DebugProvider.WriteLine("RCU: The provided codec outputs variable bit-rate data, an resampler was inserted.");
                         // If we still have monaural audio (somewhat impossible tho) add a mono -> stereo converter.
                         if (providerfinal.Format.ChannelLayout.IsEqualTo(CommonChannelTypes.Mono)) {

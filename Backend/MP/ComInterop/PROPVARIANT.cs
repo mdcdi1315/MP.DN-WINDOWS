@@ -198,8 +198,7 @@ namespace MP.ComInterop
             // To successfully free a PROPVARIANT we need to also free 'itself'.
             // So, use Unsafe.AsRef to get the used reference to the current PROPVARIANT,
             // then call in the optimized method.
-            HRESULT hr = Interop.Ole32.PropVariantClear(ref Unsafe.AsRef(in this));
-            if (hr.FAILED) { throw hr.MappingException; }
+            Interop.Ole32.PropVariantClear(ref Unsafe.AsRef(in this)).ThrowOnFailure();
         }
 
         /// <summary>
@@ -215,8 +214,7 @@ namespace MP.ComInterop
         /// <returns>The copy of the contents of the current <see cref="PROPVARIANT"/> instance.</returns>
         public readonly PROPVARIANT Clone()
         {
-            HRESULT hr = Interop.Ole32.PropVariantCopy(this, out var pv);
-            if (hr.FAILED) { throw hr.MappingException; }
+            Interop.Ole32.PropVariantCopy(this, out var pv).ThrowOnFailure();
             return pv;
         }
 
@@ -225,7 +223,7 @@ namespace MP.ComInterop
         /// <summary>
         /// Helper method to get blob or byte array data from a PROPVARIANT
         /// </summary>
-        private unsafe System.Byte[] GetBlob()
+        internal readonly unsafe System.Byte[] GetBlob()
         {
             var blob = new System.Byte[PPVTValue.blobVal.Length];
             if (blob.LongLength == 0) { return blob; }
@@ -254,6 +252,11 @@ namespace MP.ComInterop
         public static PROPVARIANT FromLong(System.Int64 value) => new() { Type = VARTYPE.VT_I8, PPVTValue = new() { hVal = value } };
 
         /// <summary>
+        /// Creates a new PropVariant containing an unsigned long value
+        /// </summary>
+        public static PROPVARIANT FromULong(System.UInt64 value) => new() { Type = VARTYPE.VT_UI8 , PPVTValue = new() { uhVal = value } };
+
+        /// <summary>
         /// Creates a new PropVariant containing an integer value
         /// </summary>
         public static PROPVARIANT FromInt(System.Int32 value) => new() { Type = VARTYPE.VT_I4 , PPVTValue = new() { lVal = value } };
@@ -272,6 +275,16 @@ namespace MP.ComInterop
         /// Creates a new PropVariant containing an unsigned short integer value
         /// </summary>
         public static PROPVARIANT FromUShort(System.UInt16 value) => new() { Type = VARTYPE.VT_UI2 , PPVTValue = new() { uiVal = value } };
+
+        /// <summary>
+        /// Creates a new PropVariant containing a byte value
+        /// </summary>
+        public static PROPVARIANT FromByte(System.Byte value) => new() { Type = VARTYPE.VT_UI1 , PPVTValue = new() { bVal = value } };
+
+        /// <summary>
+        /// Creates a new PropVariant containing a signed byte value
+        /// </summary>
+        public static PROPVARIANT FromSByte(System.SByte value) => new() { Type = VARTYPE.VT_I1 , PPVTValue = new() { cVal = value } };
 
         /// <summary>
         /// Creates a new PropVariant containing a double-precision floating integer value
@@ -372,7 +385,7 @@ namespace MP.ComInterop
             {
                 hr = Interop.PropSys.InitPropVariantFromBuffer(psrc, array.Length.ToUInt32() , &pout);
             }
-            if (hr.FAILED) { throw hr.MappingException; }
+            hr.ThrowOnFailure();
             return pout;
         }
 
@@ -418,7 +431,7 @@ namespace MP.ComInterop
                 if (hr == CommonHResults.E_OUTOFMEMORY) {
                     throw new OutOfMemoryException("Cannot allocate memory for the GUID!");
                 }
-                throw hr.MappingException;
+                throw hr.CreateException();
             }
             return pv;
         }

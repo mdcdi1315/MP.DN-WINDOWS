@@ -156,6 +156,7 @@ namespace MP.VorbisWrapper
                 if (seekable && (err = Interop.VorbisFile.ov_time_seek(native, value)) < 0) {
                     throw new InvalidOperationException($"The data could not be set at this time , please retry later. (Error {err})");
                 }
+                FireCurrentTimeInvalidatedEvent();
             }
         }
 

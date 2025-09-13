@@ -1,5 +1,6 @@
 ﻿
 
+using System;
 using System.Runtime.CompilerServices;
 
 namespace MP.TagReading.MP4
@@ -54,6 +55,21 @@ namespace MP.TagReading.MP4
         /// Behavioral flags of the current <see cref="MetaBox"/>.
         /// </summary>
         public AppleDataTagFlags Flags => header.Flags;
+
+        /// <summary>
+        /// Gets the string value associated with the current <see cref="MetaBox"/>. <br />
+        /// Requires the <see cref="AppleDataTagFlags.Text"/> flag to have been defined.
+        /// </summary>
+        /// <param name="enc">The encoding to use for decoding the text. Must not be null.</param>
+        /// <returns>The data as a string.</returns>
+        public System.String TextDataWithEncoding(System.Text.Encoding enc)
+        {
+            ArgumentNullException.ThrowIfNull(enc);
+            if (header.Flags.HasFlag(AppleDataTagFlags.Text) == false) {
+                throw new System.InvalidOperationException("No text data found");
+            }
+            return enc.GetString(data, 0, data.Length);
+        }
 
         /// <summary>
         /// Gets the string value associated with the current <see cref="MetaBox"/>. <br />

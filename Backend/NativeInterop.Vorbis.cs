@@ -48,20 +48,28 @@ partial class Interop
 
         // Defines the native callback functions that Vorbis will use to read from a stream.
         // Practical and it works with managed streams perfectly.
-        [StructLayout(LayoutKind.Explicit , Size = 32 , Pack = 1)]
+        [StructLayout(LayoutKind.Sequential , Pack = 1)]
         public struct OV_CALLBACKS
         {
-            [FieldOffset(0)]
             public System.IntPtr read; // Define it as IntPtr to just pass around the delegates as function pointers
 
-            [FieldOffset(8)]
             public System.IntPtr seek;
 
-            [FieldOffset(16)]
             public System.IntPtr close;
 
-            [FieldOffset(24)]
             public System.IntPtr tell;
+        }
+
+        [StructLayout(LayoutKind.Sequential , Pack = 1)]
+        public struct OV_CALLBACKS_V2
+        {
+            public delegate* unmanaged[Cdecl]<void*, System.UInt64, System.UInt64, void* , System.UInt64> Read;
+
+            public delegate* unmanaged[Cdecl]<void*, System.Int64, System.IO.SeekOrigin , System.Int32> Seek;
+
+            public delegate* unmanaged[Cdecl]<void* , System.Int32> Close;
+
+            public delegate* unmanaged[Cdecl]<void*, System.Int32> Tell;
         }
 
         // Vorbis information for the current bitstream.

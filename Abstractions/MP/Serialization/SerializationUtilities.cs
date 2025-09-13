@@ -72,7 +72,7 @@ namespace MP.Serialization
             {
                 SerializedFieldType.Object => true,
                 SerializedFieldType.Boolean => type == typeof(System.Boolean),
-                SerializedFieldType.String => type == typeof(System.String),
+                SerializedFieldType.String => type == typeof(System.String) || type.IsEnum,
                 SerializedFieldType.Single => type == typeof(System.Single)
                                         || type == typeof(System.Double),
                 SerializedFieldType.Double => type == typeof(System.Double),

@@ -65,7 +65,9 @@ namespace MP.ExtensibilitySystem
                 flags |= ExtEngineStateFlags.LoadedCleanly;
                 return; 
             }
-            DebugProvider.WriteLine($"EXTENGINE: Discovered {pkgs.Count} packages!!!");
+            DebugProvider.WriteLine($"EXTENGINE: Discovered {pkgs.Count} packages.");
+            SelectPackagesAndRemoveDuplicates();
+            DebugProvider.WriteLine($"EXTENGINE: Loading {pkgs.Count} packages.");
             foreach (var pkg in pkgs)
             {
                 DebugProvider.WriteLine($"EXTENGINE: Executing user code for package {pkg.Name}...");
@@ -282,6 +284,88 @@ namespace MP.ExtensibilitySystem
             } catch (Exception ex) { 
                 throw new UnloadableManagedAssetException(asset.Name, ex);
             }
+        }
+
+        private IList<ExtensionPackage> DiscoverDuplicatePackages()
+        {
+            var list = new List<ExtensionPackage>();
+            List<ExtensionPackage> ps = new(pkgs);
+            for (int I = 0; I < ps.Count; I++)
+            {
+                var p = ps[I];
+                for (int J = I + 1; J < ps.Count; J++)
+                {
+                    var g = ps[J];
+                    if (p.Name == g.Name) {
+                        list.Add(g);
+                        ps.RemoveAt(J);
+                        break;
+                    }
+                }
+            }
+            return list;
+        }
+
+        private void SelectPackagesAndRemoveDuplicates()
+        {
+            DebugProvider.WriteLine("EXTENGINE: Finding duplicate packages...");
+            IList<ExtensionPackage> p = DiscoverDuplicatePackages();
+            if (p.Count == 0) {
+                DebugProvider.WriteLine("EXTENGINE: No duplicate packages detected, avoiding package tree dependency patching");
+                return; 
+            }
+            ExtensionPackage pkg, other;
+            List<ExtensionPackage> packagestoreplace = new(p.Count);
+            for (int I = 0; I < p.Count; I++)
+            {
+                pkg = p[I];
+                for (int J = I + 1; J < p.Count; J++)
+                {
+                    other = p[J];
+                    if (pkg.Name == other.Name) {
+                        if (other.Version > pkg.Version)
+                        {
+                            DebugProvider.WriteLine($"EXTENGINE: Selecting package {other.Name} with version {other.Version} because it has a higher version than {pkg.Version}.");
+                            pkg = other;
+                            p.RemoveAt(J);
+                        } else if (other.Version == pkg.Version)
+                        {
+                            DebugProvider.WriteLine($"EXTENGINE: Selecting package {pkg.Name} with version {pkg.Version} only because a possible duplicate package was loaded.");
+                            p.RemoveAt(J);
+                        }
+                    }
+                }
+                packagestoreplace.Add(pkg);
+            }
+            DebugProvider.WriteLine($"EXTENGINE: Patching {packagestoreplace.Count} packages.");
+            foreach (ExtensionPackage extp in packagestoreplace)
+            {
+                System.Boolean replaced = false;
+                for (int I = 0; I < pkgs.Count; I++)
+                {
+                    pkg = pkgs[I];
+                    if (extp.Name == pkg.Name) 
+                    {
+                        var n = pkg.Name;
+                        var v = pkg.Version;
+                        try {
+                            pkg.Dispose();
+                        } catch (Exception ex) {
+                            DebugProvider.WriteLine($"EXTENGINE: [WARN] Cannot dispose package {n} due to: {ex}");
+                        }
+                        if (replaced) {
+                            DebugProvider.WriteLine($"EXTENGINE: Removing possibly duplicate package {n} with version {v}...");
+                            pkgs.RemoveAt(I);
+                            I--;
+                        } else {
+                            DebugProvider.WriteLine($"EXTENGINE: Replacing package {n} and version {v} with {extp.Name} and version {extp.Version}...");
+                            pkgs[I] = extp;
+                            replaced = true;
+                        }
+                    }
+                }
+            }
+            DebugProvider.WriteLine("EXTENGINE: Patching complete.");
         }
 
         /// <summary>

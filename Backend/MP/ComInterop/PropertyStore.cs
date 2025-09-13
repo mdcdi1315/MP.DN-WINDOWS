@@ -34,14 +34,14 @@ namespace MP.ComInterop
             // Now load the COM object
             Guid interfaceid = ComMarshalling.GetComInterfaceID<IPersistSerializedPropStorage>();
             HRESULT hr = Interop.PropSys.PSCreateMemoryPropertyStore(GUID.FromGUID(interfaceid), out void* pi);
-            if (hr.FAILED) { throw hr.MappingException; }
+            if (hr.FAILED) { throw hr.CreateException(); }
             IPersistSerializedPropStorage storage = ComMarshalling.CreateInteropObject(pi) as IPersistSerializedPropStorage;
             // Provide the data to the deserializer
             fixed (System.Byte* pdt = buftemp)
             {
                 hr = storage.SetPropertyStorage(pdt, buftemp.Length.ToUInt32());
             }
-            if (hr.FAILED) { throw hr.MappingException; }
+            if (hr.FAILED) { throw hr.CreateException(); }
             // return the property store by using QueryInterface on it
             return new(storage as IPropertyStore);
         }
@@ -53,8 +53,7 @@ namespace MP.ComInterop
         public static PropertyStore CreateMemoryStore()
         {
             Guid interfaceid = ComMarshalling.GetComInterfaceID<IPropertyStore>();
-            HRESULT hr = Interop.PropSys.PSCreateMemoryPropertyStore(GUID.FromGUID(interfaceid) , out void* pi);
-            if (hr.FAILED) { throw hr.MappingException; }
+            Interop.PropSys.PSCreateMemoryPropertyStore(GUID.FromGUID(interfaceid) , out void* pi).ThrowOnFailure();
             return new(ComMarshalling.CreateInteropObject(pi) as IPropertyStore);
         }
 
@@ -79,12 +78,8 @@ namespace MP.ComInterop
             get {
                 ObjectDisposedException.ThrowIf(store is null, this);
                 System.UInt32 nprops;
-                HRESULT hr = store.GetCount(&nprops);
-                if (hr.SUCCEEDED) {
-                    return nprops.ToInt32();
-                } else {
-                    throw hr.MappingException;
-                }
+                store.GetCount(&nprops).ThrowOnFailure();
+                return nprops.ToInt32();
             }
         }
 
@@ -102,12 +97,8 @@ namespace MP.ComInterop
                     throw new ArgumentOutOfRangeException(nameof(index) ,"The property index was out of the internal array bounds.");
                 }
                 PROPERTYKEY pret;
-                HRESULT hr = store.GetAt(index.ToUInt32(), &pret);
-                if (hr.SUCCEEDED) { 
-                    return pret;
-                } else {
-                    throw hr.MappingException;
-                }
+                store.GetAt(index.ToUInt32(), &pret).ThrowOnFailure();
+                return pret;
             }
         }
 
@@ -122,19 +113,12 @@ namespace MP.ComInterop
             get {
                 ObjectDisposedException.ThrowIf(store is null, this);
                 PROPVARIANT pvret;
-                HRESULT hr = store.GetValue(&key , &pvret);
-                if (hr.SUCCEEDED) { 
-                    return pvret;
-                } else {
-                    throw hr.MappingException;
-                }
+                store.GetValue(&key , &pvret).ThrowOnFailure();
+                return pvret;
             }
             set {
                 ObjectDisposedException.ThrowIf(store is null, this);
-                HRESULT hr = store.SetValue(&key, &value);
-                if (hr.FAILED) {
-                    throw hr.MappingException;
-                }
+                store.SetValue(&key, &value).ThrowOnFailure();
             }
         }
 
@@ -177,9 +161,7 @@ namespace MP.ComInterop
             HRESULT hr = store.Commit();
             // If the call is not implemented, just return and consider that the property store has commited the changes
             if (hr == CommonHResults.E_NOTIMPL) { return; }
-            if (hr.FAILED) {
-                throw hr.MappingException;
-            }
+            hr.ThrowOnFailure();
         }
 
         /// <summary>
@@ -204,8 +186,7 @@ namespace MP.ComInterop
             storage.SetFlags(PERSIST_SPROPSTORE_FLAGS.FPSPS_DEFAULT); // Default usage, if possible.
             System.Byte* pbuf;
             System.UInt32 datalen;
-            HRESULT hr = storage.GetPropertyStorage(&pbuf, &datalen);
-            if (hr.FAILED) { throw hr.MappingException; }
+            storage.GetPropertyStorage(&pbuf, &datalen).ThrowOnFailure();
             try {
                 System.UInt32 blks = datalen / BUFSIZE, rem = datalen % BUFSIZE;
                 System.UInt32 idx = 0;

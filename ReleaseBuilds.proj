@@ -27,13 +27,13 @@
 				 Targets="Restore" 
 				 UnloadProjectsOnCompletion="true" 
 				 RunEachTargetSeparately="true"
-				 Properties="Configuration=Release;OutputPath=$(MPReleaseBuildOutputPath);IsFullMPReleaseBuild=true;MP_OutputResFilePath=$(MPOutputResourcesFile);DebugSymbols=false;MP_OnlyDryRestoreRun=true" 
+				 Properties="Configuration=Release;OutputPath=$(MPReleaseBuildOutputPath);IsFullMPReleaseBuild=true;MP_OutputResFilePath=$(MPOutputResourcesFile);DebugSymbols=false;MP_OnlyDryRestoreRun=true;MP_ANALYZERENABLED=False" 
 				 />
 		<MSBuild Projects="$(_MPProjectDir)\Implementation\MusicPlayer.csproj" 
 				 Targets="Build"
 				 UnloadProjectsOnCompletion="true" 
 				 RunEachTargetSeparately="true"
-				 Properties="Configuration=Release;OutputPath=$(MPReleaseBuildOutputPath);IsFullMPReleaseBuild=true;MP_OutputResFilePath=$(MPOutputResourcesFile);DebugSymbols=false" 
+				 Properties="Configuration=Release;OutputPath=$(MPReleaseBuildOutputPath);IsFullMPReleaseBuild=true;MP_OutputResFilePath=$(MPOutputResourcesFile);DebugSymbols=false;MP_ANALYZERENABLED=False" 
 				 />
 		<MSBuild Projects="$(_MPProjectDir)\Loader\MusicPlayer.Loader.vcxproj"
 				 Targets="Build"
@@ -100,6 +100,7 @@
 		<RemoveDir Directories="$(_MPProjectDir)Implementation\bin;$(_MPProjectDir)Implementation\obj" />
 		<RemoveDir Directories="$(_MPProjectDir)Backend\bin;$(_MPProjectDir)Backend\obj" />
 		<RemoveDir Directories="$(_MPProjectDir)Abstractions\bin;$(_MPProjectDir)Abstractions\obj" />
+		<RemoveDir Directories="$(_MPProjectDir)Abstractions-Analyzer\bin;$(_MPProjectDir)Abstractions-Analyzer\obj" />
 		<RemoveDir Directories="$(_MPProjectDir)BuildTasks\bin;$(_MPProjectDir)BuildTasks\obj" />
 		<RemoveDir Directories="$(_MPProjectDir)NativeAssets\bin" />
 		<DeleteFilesMatchingWin32Filter InputDirectory="$(_MPProjectDir)Backend/Resources" Filter="*.Gen.cs" />

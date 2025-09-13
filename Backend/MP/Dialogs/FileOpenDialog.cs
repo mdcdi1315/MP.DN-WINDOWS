@@ -36,7 +36,7 @@ namespace MP.Dialogs
                         {
                             Marshal.ReleaseComObject(item);
                             Marshal.ReleaseComObject(array);
-                            throw hr.MappingException;
+                            throw hr.CreateException();
                         }
                         retpaths[I] = new System.String(dpname);
                         Interop.Ole32.CoTaskMemFree(dpname);
@@ -55,7 +55,7 @@ namespace MP.Dialogs
                         if (hr.FAILED)
                         {
                             Marshal.ReleaseComObject(item);
-                            throw hr.MappingException;
+                            throw hr.CreateException();
                         }
                         retpaths[0] = new System.String(dpname);
                         Interop.Ole32.CoTaskMemFree(dpname);

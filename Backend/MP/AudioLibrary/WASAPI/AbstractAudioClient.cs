@@ -120,8 +120,7 @@ namespace MP.AudioLibrary.WASAPI
         {
             get {
                 WAVEFORMATEX* ppwf;
-                var hr = audioclient.GetMixFormat(&ppwf);
-                hr.ThrowOnFailure();
+                audioclient.GetMixFormat(&ppwf).ThrowOnFailure();
                 AudioFormat af;
                 try {
                     if (ppwf->Tag == WAVEFORMATTAG.Extensible) {
@@ -137,7 +136,25 @@ namespace MP.AudioLibrary.WASAPI
             }
         }
 
-        public void Initialize(AUDCLNT_SHAREMODE sharemode , AUDCLNT_STREAMFLAGS sf , System.Int32 bufferdurationinms , System.Int32 periodicityinms , AudioFormat fmt , Guid sessionclassguid = default)
+        /// <summary>
+        /// Initializes the audio client, preparing for a new audio session.
+        /// </summary>
+        /// <param name="sharemode">The device's share mode</param>
+        /// <param name="sf">The additional audio stream flags to use</param>
+        /// <param name="bufferdurationinms">The backing buffer duration in milliseconds.</param>
+        /// <param name="periodicityinms">The periodicity of the buffer in milliseconds.</param>
+        /// <param name="fmt">The source format of the audio stream</param>
+        /// <param name="sessionclassguid">The session class GUID to use for this session</param>
+        /// <exception cref="ExceptionSystem.NativeWindowsCOMException">An unknown COM error occured.</exception>
+        /// <exception cref="AudioDeviceDisconnectedException">The selected audio device could not be found (it was possibly disconnected).</exception>
+        /// <exception cref="AudioSessionAlreadyInitializedException">An audio session has been already associated with this object</exception>
+        public void Initialize(
+            AUDCLNT_SHAREMODE sharemode , 
+            AUDCLNT_STREAMFLAGS sf ,
+            System.Int32 bufferdurationinms , 
+            System.Int32 periodicityinms , 
+            AudioFormat fmt ,
+            Guid sessionclassguid = default)
         {
             REFERENCE_TIME bufduration = REFERENCE_TIME.FromMilliseconds(bufferdurationinms);
             REFERENCE_TIME periodicity = REFERENCE_TIME.FromMilliseconds(periodicityinms);

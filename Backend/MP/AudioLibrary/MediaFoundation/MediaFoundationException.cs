@@ -9,7 +9,7 @@ namespace MP.AudioLibrary.MediaFoundation
     /// created as exceptions deriving from this central exception. <br />
     /// ONLY MEDIA FOUNDATION ERRORS MUST BE REPRESENTED WITH THIS CLASS!
     /// </summary>
-    public abstract class MediaFoundationException : BaseException
+    public abstract class MediaFoundationException : BaseException , INativeException
     {
         /// <summary>
         /// Creates a default instance of the <see cref="MediaFoundationException"/> class.

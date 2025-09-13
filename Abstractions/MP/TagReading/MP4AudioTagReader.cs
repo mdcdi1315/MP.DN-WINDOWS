@@ -157,9 +157,8 @@ namespace MP.TagReading
             }
             foreach (MetaBox mbx in d.GetMetaBoxes())
             {
-                if (mbx.ID == "data")
-                {
-                    return mbx.TextData;
+                if (mbx.ID == "data") {
+                    return mbx.TextDataWithEncoding(encoding);
                 }
             }
             return System.String.Empty;

@@ -10,22 +10,20 @@ unsafe partial class Interop
 {
     public static partial class NtDll
     {
-        [StructLayout(LayoutKind.Explicit , Size = 16 , Pack = 8)]
+        [StructLayout(LayoutKind.Sequential)]
         public struct IO_STATUS_BLOCK
         {
             /// <summary>Status data</summary>
-            [FieldOffset(0)]
             public IO_STATUS Status;
 
             /// <summary>Request dependent value.</summary>
-            [FieldOffset(8)]
             public System.IntPtr Information;
         }
 
         // This isn't an actual Windows type, it is a union within IO_STATUS_BLOCK. We *have* to separate it out as
         // the size of IntPtr varies by architecture and we can't specify the size at compile time to offset the
         // Information pointer in the status block.
-        [StructLayout(LayoutKind.Explicit , Size = 8)]
+        [StructLayout(LayoutKind.Explicit)]
         public struct IO_STATUS
         {
             /// <summary>
@@ -896,6 +894,32 @@ unsafe partial class Interop
         [DllImport(Libraries.NtDll , ExactSpelling = true , EntryPoint = "NtSetInformationFile")]
         private static extern NTSTATUS NtSetInformationFile_Native(System.IntPtr hfe , IO_STATUS_BLOCK* blk , void* fileinfo , System.UInt32 length, FILE_INFORMATION_CLASS cls);
 
+        [DllImport(Libraries.NtDll, ExactSpelling = true, EntryPoint = "NtReadFile")]
+        private static extern NTSTATUS NtReadFile_Native(
+            IntPtr filehandle,
+            IntPtr eventtofireatend, // Optional
+            IntPtr ApcRoutine, // Optional
+            void* ApcContext, // Optional
+            IO_STATUS_BLOCK* IoStatus,
+            System.Byte* Buffer,
+            System.UInt32 Length,
+            System.Int64* ByteOffset,
+            System.UInt32* Key // Unused, set this to NULL
+        );
+
+        [DllImport(Libraries.NtDll, ExactSpelling = true, EntryPoint = "NtWriteFile")]
+        private static extern NTSTATUS NtWriteFile_Native(
+            IntPtr filehandle,
+            IntPtr eventtofireatend, // Optional
+            IntPtr ApcRoutine, // Optional
+            void* ApcContext, // Optional
+            IO_STATUS_BLOCK* IoStatus,
+            System.Byte* Buffer,
+            System.UInt32 Length,
+            System.Int64* ByteOffset,
+            System.UInt32* Key // Unused, set this to NULL
+        );
+
         public static NTSTATUS NtQueryInformationFile(System.IntPtr hfe , out FILE_MODE_INFORMATION options , out IO_STATUS_BLOCK stat)
         {
             IO_STATUS_BLOCK blk;
@@ -1034,7 +1058,21 @@ unsafe partial class Interop
             return nts;
         }
 
+        public static NTSTATUS NtReadFile(System.IntPtr filehandle , System.IntPtr hevent , System.Byte* pBuffer , System.UInt32 length , out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK iosb;
+            NTSTATUS nts = NtReadFile_Native(filehandle, hevent, IntPtr.Zero, null, &iosb, pBuffer, length, null, null);
+            stat = iosb;
+            return nts;
+        }
 
+        public static NTSTATUS NtWriteFile(System.IntPtr filehandle, System.IntPtr hevent, System.Byte* pBuffer, System.UInt32 length, out IO_STATUS_BLOCK stat)
+        {
+            IO_STATUS_BLOCK iosb;
+            NTSTATUS nts = NtWriteFile_Native(filehandle, hevent, IntPtr.Zero, null, &iosb, pBuffer, length, null, null);
+            stat = iosb;
+            return nts;
+        }
     }
 }
 

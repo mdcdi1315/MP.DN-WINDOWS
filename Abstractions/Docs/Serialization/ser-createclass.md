@@ -44,6 +44,7 @@ You can serialize all the types listed below:
 | `System.Single` | [`SerializedFieldType.Single`](../../MP/Serialization/SerializedFieldType.cs#L58)   |
 | `System.Double` | [`SerializedFieldType.Double`](../../MP/Serialization/SerializedFieldType.cs#L62)   |
 | Any object implementing [`ISerializableClass`](../../MP/Serialization/ISerializableClass.cs) | [`SerializedFieldType.Object`](../../MP/Serialization/SerializedFieldType.cs#L14)  |
+| Any enumeration type deriving from `System.Enum` | This is inherently supported by the serialization manager. The enumeration value is converted to a [`SerializedFieldType.String`](../../MP/Serialization/SerializedFieldType.cs#L22) representing the constant name. Automatically is converted back to the original value during deserialization of the field.  |
 | Array of any of the above types | Flag: [`SerializedFieldType.Array`](../../MP/Serialization/SerializedFieldType.cs#L66) |
 
 > [!NOTE]
@@ -54,3 +55,5 @@ it will trigger a `SerializationException` to be thrown at deserialization.
 For string cases, you can assert the null case in serialization-time by using the 
 `StringMustNotBeNullOrEmptyAttribute` constraint.
 
+> [!NOTE]
+You cannot apply a constraint on enumeration types because they have a fixed set of values and this logic is inherently provided by the Serialization Manager. Note that the enumerations are treated as string values containing the field name of the enumeration case.

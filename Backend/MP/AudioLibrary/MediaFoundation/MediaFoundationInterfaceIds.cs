@@ -25,5 +25,9 @@ namespace MP.AudioLibrary.MediaFoundation
         public const System.String IID_IMFTransform = "BF94C121-5B05-4E6F-8000-BA598961414D";
 
         public const System.String IID_IMFMediaEvent = "DF598932-F10C-4E39-BBA2-C308F101DAA3";
+
+        public const System.String IID_IMFAsyncResult = "ac6b7889-0740-4d51-8619-905994a55cc6";
+
+        public const System.String IID_IMFAsyncCallback = "a27003cf-2354-4f2a-8d6a-ab7cff15437e";
     }
 }

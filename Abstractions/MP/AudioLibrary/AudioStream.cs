@@ -1,12 +1,15 @@
 ﻿
 using System;
+using MP.Annotations.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace MP.AudioLibrary
 {
     /// <summary>
     /// Audio Stream class definition. <br />
-    /// Audio streams are a more closer and formal definition of how a codec can read data from an audio file or source.
+    /// Audio streams are a more closer and formal definition of how a codec can read data from an audio file or source. <br />
+    /// It is also the base management engine since this is the source of the audio data, thus all audio providers do pretty much 
+    /// depend on this class layout.
     /// </summary>
     public abstract class AudioStream : IAudioProvider
     {
@@ -25,6 +28,7 @@ namespace MP.AudioLibrary
         /// </exception>
         // Ported from the original ValidateBufferArguments of the System.IO.Stream class in .NET .
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Throws(typeof(ArgumentNullException) , typeof(ArgumentOutOfRangeException))]
         protected static void ValidateBufferArguments(System.Byte[] buffer, System.Int32 offset, System.Int32 count)
         {
             ArgumentNullException.ThrowIfNull(buffer);
@@ -37,6 +41,14 @@ namespace MP.AudioLibrary
                 throw new ArgumentOutOfRangeException(nameof(count), "Attempted to read beyond the tempoary buffer bounds.");
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void EmptyCurrentTimeInvalidatedEventImpl() { }
+
+        /// <summary>
+        /// Default constructor of the class that allows it's subclassing
+        /// </summary>
+        protected AudioStream() => CurrentTimeInvalidated = new(EmptyCurrentTimeInvalidatedEventImpl);
 
         /// <summary>
         /// Forwarded from the <see cref="IAudioProvider"/> interface. <br />
@@ -72,6 +84,58 @@ namespace MP.AudioLibrary
         {
             get => TimeSpan.Zero;
         }
+
+        /// <summary>
+        /// Fires the <see cref="CurrentTimeInvalidated"/> event. <br />
+        /// Call this method in sub-classes to invoke the associated event.
+        /// </summary>
+        protected void FireCurrentTimeInvalidatedEvent() => CurrentTimeInvalidated.Invoke();
+
+        /// <summary>
+        /// Subscribes an <see cref="IInvalidatableAudioProvider"/> instance's <see cref="IInvalidatableAudioProvider.Invalidate"/> method to the <see cref="CurrentTimeInvalidated"/> event.
+        /// </summary>
+        /// <remarks>
+        /// This method is merely a shortcut for doing the following: 
+        /// <code language="csharp">
+        /// // Somewhere in your code you have an initialized AudioStream, and an IInvalidatableAudioProvider object:
+        /// AudioStream as;
+        /// IInvalidatableAudioProvider p:
+        /// as.CurrentTimeInvalidated += p.Invalidate;
+        /// </code>
+        /// </remarks>
+        /// <param name="provider">The invalidatable audio provider to subsribe it's invalidate method</param>
+        [Throws(typeof(ArgumentNullException))]
+        public void SubscribeProviderOnCurrentTimeInvalidated(IInvalidatableAudioProvider provider)
+        {
+            ArgumentNullException.ThrowIfNull(provider);
+            CurrentTimeInvalidated += provider.Invalidate;
+        }
+
+        /// <summary>
+        /// Unsubsribes an <see cref="IInvalidatableAudioProvider"/> instance's <see cref="IInvalidatableAudioProvider.Invalidate"/> method previously provided to the <see cref="CurrentTimeInvalidated"/> event.
+        /// </summary>
+        /// <remarks>
+        /// This method is merely a shortcut for doing the following: 
+        /// <code language="csharp">
+        /// // Somewhere in your code you have an initialized AudioStream, and an IInvalidatableAudioProvider object:
+        /// AudioStream as;
+        /// IInvalidatableAudioProvider p:
+        /// as.CurrentTimeInvalidated -= p.Invalidate;
+        /// </code>
+        /// </remarks>
+        /// <param name="provider">The invalidatable audio provider to unsubsribe it's invalidate method</param>
+        [Throws(typeof(ArgumentNullException))]
+        public void UnsubsribeProviderOnCurrentTimeInvalidated(IInvalidatableAudioProvider provider)
+        {
+            ArgumentNullException.ThrowIfNull(provider);
+            CurrentTimeInvalidated -= provider.Invalidate;
+        }
+
+        /// <summary>
+        /// This event must be fired by codecs every time that the <see cref="CurrentTime"/> property is set. <br />
+        /// It allows other components to invalidate their buffers too (Such as resamplers)
+        /// </summary>
+        public event Action CurrentTimeInvalidated;
 
         /// <summary>
         /// Disposes resources held by the current <see cref="AudioStream"/> instance. <br />

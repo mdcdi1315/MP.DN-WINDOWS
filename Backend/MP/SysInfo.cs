@@ -137,8 +137,7 @@ namespace MP
                 _ => null
             });
             System.String ret;
-            MP.ComInterop.HRESULT hrt = Interop.Shell32.SHGetKnownFolderPath(guid, out ret);
-            if (hrt.FAILED) { throw hrt.MappingException; }
+            Interop.Shell32.SHGetKnownFolderPath(guid, out ret).ThrowOnFailure();
             return ret;
         }
 
@@ -150,8 +149,7 @@ namespace MP
         /// <returns>The known folder path.</returns>
         public System.String GetKnownFolderFromGuid(System.Guid guid)
         {
-            MP.ComInterop.HRESULT hrt = Interop.Shell32.SHGetKnownFolderPath(Interop.GUID.FromGUID(guid), out System.String path);
-            if (hrt.FAILED) { throw hrt.MappingException; }
+            Interop.Shell32.SHGetKnownFolderPath(Interop.GUID.FromGUID(guid), out System.String path).ThrowOnFailure();
             return path;
         }
 

@@ -27,12 +27,8 @@ namespace MP.AudioLibrary.WASAPI
         {
             get {
                 System.UInt32 numberofchannels;
-                var hr = channelAudioVolume.GetChannelCount(&numberofchannels);
-                if (hr.SUCCEEDED) {
-                    return numberofchannels.ToInt32();
-                } else {
-                    throw hr.MappingException;
-                }
+                channelAudioVolume.GetChannelCount(&numberofchannels).ThrowOnFailure();
+                return numberofchannels.ToInt32();
             }
         }
 
@@ -41,10 +37,7 @@ namespace MP.AudioLibrary.WASAPI
             if (channelindex < 0) { throw new ArgumentOutOfRangeException(nameof(channelindex) , "Channel index must not be negative."); }
             if (channelindex >= ChannelCount) { throw new ArgumentOutOfRangeException(nameof(channelindex) , "Channel index must not be larger than the channel count."); }
             System.Single ret;
-            var hr = channelAudioVolume.GetChannelVolume(channelindex.ToUInt32(), &ret);
-            if (hr.FAILED) {
-                throw hr.MappingException;
-            }
+            channelAudioVolume.GetChannelVolume(channelindex.ToUInt32(), &ret).ThrowOnFailure();
             return ret;
         }
 
@@ -56,10 +49,7 @@ namespace MP.AudioLibrary.WASAPI
             if (channelindex >= ChannelCount) { throw new ArgumentOutOfRangeException(nameof(channelindex), "Channel index must not be larger than the channel count."); }
             if (volume < 0.0 && volume > 1.0) { throw new ArgumentOutOfRangeException("Volume must be in a range of 0 to 1." , nameof(volume)); }
             GUID guid = GUID.FromGUID(eventcontextguid);
-            var hr = channelAudioVolume.SetChannelVolume(channelindex.ToUInt32() , volume , &guid);
-            if (hr.FAILED) {
-                throw hr.MappingException;
-            }
+            channelAudioVolume.SetChannelVolume(channelindex.ToUInt32() , volume , &guid).ThrowOnFailure();
         }
 
         public System.Single[] GetChannelVolumes()
@@ -71,7 +61,7 @@ namespace MP.AudioLibrary.WASAPI
             {
                 hr = channelAudioVolume.GetAllVolumes(ctc, native);
             }
-            if (hr.FAILED) { throw hr.MappingException; }
+            hr.ThrowOnFailure();
             return channelvolumes;
         }
 
@@ -86,9 +76,7 @@ namespace MP.AudioLibrary.WASAPI
                 var guid = GUID.FromGUID(eventcontextguid);
                 hr = channelAudioVolume.SetAllVolumes(cc.ToUInt32(), native, &guid);
             }
-            if (hr.FAILED) {
-                throw hr.MappingException;
-            }
+            hr.ThrowOnFailure();
         }
 
         public void SetChannelVolumes(System.Single[] volumes) => SetChannelVolumes(volumes , Guid.Empty);

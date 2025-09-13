@@ -13,6 +13,11 @@ namespace MP.AudioLibrary.MediaFoundation
         public const System.Int32 MF_E_ATTRIBUTENOTFOUND = unchecked((System.Int32)0xC00D36E6);
 
         /// <summary>
+        /// Invalid type.
+        /// </summary>
+        public const System.Int32 MF_E_INVALIDTYPE = unchecked((System.Int32)0xC00D36BD);
+
+        /// <summary>
         /// The buffer was too small to carry out the requested action.
         /// </summary>
         public const System.Int32 MF_E_BUFFERTOOSMALL = unchecked((System.Int32)0xC00D36B1);
@@ -41,5 +46,15 @@ namespace MP.AudioLibrary.MediaFoundation
         /// The data specified for the media type is invalid, inconsistent, or not supported by this object.
         /// </summary>
         public const System.Int32 MF_E_INVALIDMEDIATYPE = unchecked((System.Int32)0xC00D36B4);
+
+        /// <summary>
+        /// The length of the provided bytestream is unknown.
+        /// </summary>
+        public const System.Int32 MF_E_BYTESTREAM_UNKNOWN_LENGTH = unchecked((System.Int32)0xC00D36FB);
+
+        /// <summary>
+        /// The request is invalid because Shutdown() has been called.
+        /// </summary>
+        public const System.Int32 MF_E_SHUTDOWN = unchecked((System.Int32)0xC00D3E85);
     }
 }

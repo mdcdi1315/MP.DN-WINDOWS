@@ -697,16 +697,23 @@ namespace MP
 
         private void G_Repeat(PlaybackStoppedEventInfo e)
         {
-            if (e.Reason == PlaybackStoppedReason.Exception) {
-                if (e.Exception is SpecialStopButtonAssertionException) { return; }
-                MusicPlayerHelper.ShowErrorMessage($"Cannot repeat the audio file: {e}");
-                return;
+            switch (e.Reason)
+            {
+                case PlaybackStoppedReason.UserRequest:
+                    return;
+                case PlaybackStoppedReason.Exception:
+                    if (e.Exception is SpecialStopButtonAssertionException) { return; }
+                    MusicPlayerHelper.ShowErrorMessage($"Cannot repeat the audio file: {e}");
+                    return;
             }
             trkidx++;
             if (trkidx >= current.TracksContained.Count) {
                 trkidx = 0;
             }
+            tasker.StopAndProcessAll();
+            tasker.Add(DestroyPlayerInstance);
             tasker.Add(LoadPlayer_Unsafe, trkidx, -1);
+            tasker.Run();
         }
 
         private void DestroyPlayerInstance()
@@ -833,7 +840,7 @@ namespace MP
                 if (repmode == RepeatMode.All)
                 {
                     trkidx++;
-                    tasker.Add(LoadPlayer_Unsafe, trkidx, -1);
+                    tasker.Add(LoadPlayer_Unsafe, trkidx, -1); // LoadPlayer is always called through the tasker so it will not cause contention on the semaphore
                     return;
                 }
                 RaiseMessage(System.String.Format(Global.Resources.GetStringResource("ErrCannotLoadTrack"), current?.CurrentTrack?.Name)
@@ -1769,7 +1776,7 @@ namespace MP
 
         private void PrepareShutdownInternal()
         {
-            // Instruct from now on the player UI to not listen to any new events from now on.
+            // Instruct from now on the player UI to not listen to any new events.
             DebugProvider.WriteLine("RCU: Destroying CoreMessageDispatcher instance.");
             RaiseSendCommand(CommonSendCommandTypes.IgnoreFutureRequests);
             if (current is not null)

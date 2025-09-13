@@ -43,7 +43,6 @@ namespace MP.AudioLibrary
             ThreadCC_DoRestart = 16,
             ThreadCC_ShutDownCmdRealized = 32,
             ThreadCC_FirstTime = 64,
-            RequiresResampler = 128
         }
 
         private enum AudioBufferFillState : System.Byte
@@ -354,7 +353,8 @@ namespace MP.AudioLibrary
             // Get any additional padding required - this is dynamic so it must be called multiple times.
             System.UInt32 padding;
             HRESULT hr = ac.GetCurrentPadding(out padding);
-            if (hr.FAILED) {
+            if (hr.FAILED)
+            {
                 PlaybackStopped.Invoke(new(PlaybackStoppedReason.Exception, hr.CreateException()));
                 return AudioBufferFillState.Exception;
             }
@@ -363,7 +363,7 @@ namespace MP.AudioLibrary
             if (availframes < 11)
             {
                 // Expect at least 10 frames to have been processed by the audio engine.
-                // If that stands true, just return with success, waiting to fetch to the next buffering cycle.
+                // If these are not processed yet, just return with success, waiting to fetch to the next buffering cycle.
                 // If we allowed that to happen, we could max out CPU usage without any particular reason.
                 // Additionally, this implements the Pause logic.
                 return AudioBufferFillState.Completed;
@@ -430,32 +430,17 @@ namespace MP.AudioLibrary
             {
                 // Exclusive mode initialization.
                 // The resampler here must be explicitly created, and we also need to check for IsFormatSupported here.
-                flags = 0;
-                if (ac.IsFormatSupported(sharemode, engineformat, out AudioFormat af) == false)
+                if (ac.IsFormatSupported(sharemode, engineformat, out AudioFormat af)) 
                 {
-                    // The format is not supported exactly , we might need the resampler
-                    // If the closest format presented by 'af' variable is not null, use that instead.
+                    // If the audio format returns a non-null value, the source format is not supported exactly , and we need the resampler
 
-                    if (af is not null)
-                    {
+                    if (af is not null) {
                         engineformat = af;
+                        this.provider = new MediaFoundationMFTResampler(provider, engineformat, latms);
                     }
-                    else
-                    {
-                        // We do not have the fallback format, try to peek it out
-                        engineformat = GetFallbackFormat();
-                    }
-
-                    // TODO: Create MediaFoundation's IMFTransform and use the resampler transform.
-
-                    state |= STATEFLAGS.RequiresResampler;
-
-                    // For now, just return false back to indicate that is not supported.
+                } else {
                     return false;
                 }
-                // Normally an else should be existing here,
-                // specifying explicitly that an resampler is NOT required to be intercepted into the stream.
-                // Because it became a bit flag, it is already cleared, so nothing to do here.
             }
 
             if (state.HasFlag(STATEFLAGS.EventSync))
@@ -479,16 +464,11 @@ namespace MP.AudioLibrary
                         // Get back the effective latency from AudioClient
                         latms = (System.Int32)latency.ToMilliseconds();
                     }
-                }
-                else
-                {
-                    try
-                    {
+                } else {
+                    try {
                         // With EventCallBack and Exclusive, both latencies must be equal.
                         ac.Initialize(sharemode, AUDCLNT_STREAMFLAGS.EVENTCALLBACK | flags, latms, latms, engineformat, Guid.Empty);
-                    }
-                    catch (ExceptionSystem.NativeWindowsCOMException ex)
-                    {
+                    } catch (ExceptionSystem.NativeWindowsCOMException ex) {
                         // Starting with Windows 7, Initialize can return AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED for a render device.
                         // We should initialize again.
                         if (ex.ErrorCode != WASAPIErrorCodes.AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED)
@@ -518,6 +498,7 @@ namespace MP.AudioLibrary
             playbackthread = new(ThreadCode);
             playbackthread.IsBackground = true;
             playbackthread.Name = "[MP] WASAPI Renderer Thread";
+            playbackthread.TrySetApartmentState(ApartmentState.MTA);
             playbackthread.Start();
 
             return true;
@@ -575,6 +556,27 @@ namespace MP.AudioLibrary
         {
             ObjectDisposedException.ThrowIf(ac is null, this);
             current = PlaybackState.Stopped;
+        }
+
+        /// <summary>
+        /// Gets or sets the time that WASAPI must wait until the next I/O request is performed. <br />
+        /// Cannot be modified after <see cref="Initialize(IAudioProvider)"/> has been called successfully.
+        /// </summary>
+        /// <returns>The time that WASAPI must wait until the next I/O request.</returns>
+        /// <exception cref="InvalidOperationException">Attempted to modify the latency after <see cref="Initialize(IAudioProvider)"/> was called.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">New requested latency was negative, while this is not allowed.</exception>
+        public System.Int32 Latency
+        {
+            get => latms;
+            set {
+                if (provider is not null) {
+                    throw new InvalidOperationException("Cannot change the latency after an audio provider is registered!");
+                }
+                if (value < 0) {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Latency cannot be negative.");
+                }
+                latms = value;
+            }
         }
 
         /// <summary>Gets the current playback state of the audio renderer.</summary>

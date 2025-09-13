@@ -1,5 +1,4 @@
 
-
 using System;
 using MP.Utilities;
 using System.Reflection;
@@ -128,6 +127,9 @@ namespace MP.Serialization
             {
                 sfi = EncodeInformation(f);
                 value = f.GetValue(obj);
+                if (value is Enum en) {
+                    value = en.ToString();
+                }
                 if (IsPrimitiveOrPrimitiveArray(sfi.Type))
                 {
                     if (GetAndApplyConstraints(f, sfi, value, ConstraintApplicationTime.Writing, out serexcept))
@@ -190,9 +192,10 @@ namespace MP.Serialization
                             }
                         }
                     } else {
+                        var t = ft.GetElementType();
                         for (int I = 0; I < len; I++)
                         {
-                            a2.SetValue(a.GetValue(I), I);
+                            a2.SetValue(DecodeFieldData(a.GetValue(I) , t), I);
                         }
                     }
                     // Apply the array object
@@ -219,8 +222,9 @@ namespace MP.Serialization
                 } else {
                     if (sfi.Type.WillMostLikelyMatchWith(ft) == false)
                     {
-                        throw new SerializationException($"Cannot serialize type of {ft.FullName} because it cannot correspond losslessly to {sfi.Type}.");
+                        throw new SerializationException($"Cannot deserialize type of {ft.FullName} because it cannot correspond losslessly to {sfi.Type}.");
                     }
+                    val = DecodeFieldData(val , ft);
                     fi.SetValue(obj, val);
                     // HACK: This allows correct numeric type retrieval.
                     // If I was directly using the val reference, the constraint would indefinitely fail due to type mismatch.
@@ -229,6 +233,25 @@ namespace MP.Serialization
                         throw new SerializationException("Cannot apply an constraint for the current class field.", except);
                     }
                 }
+            }
+        }
+
+        private static System.Object DecodeFieldData(System.Object actual , Type actualexpectedtype)
+        {
+            if (actualexpectedtype.IsEnum) {
+                // We have a string that represents the name of the constant of the enumeration we want to look up
+                Array a = actualexpectedtype.GetEnumValues();
+                System.Object em;
+                for (int I = 0; I < a.Length; I++)
+                {
+                    em = a.GetValue(I);
+                    if (em.ToString().Equals(actual)) {
+                        return em;
+                    }
+                }
+                throw new SerializationException($"Cannot find enum constant {actual} in enumeration type {actualexpectedtype.FullName}.");
+            } else {
+                return actual;
             }
         }
 
@@ -259,10 +282,13 @@ namespace MP.Serialization
             return sft >= SerializedFieldType.PRIMITIVE_TYPES_START && sft <= SerializedFieldType.PRIMITIVE_TYPES_END;
         }
 
-        private static SerializedFieldType EncodeFieldType(Type fieldtype)
+        private static SerializedFieldType GetSimpleType(System.Type ft)
         {
-            static SerializedFieldType GetSimpleType(System.Type ft) => ft.FullName switch
-            {
+            if (ft.IsEnum) {
+                // For enumerations, the constant's name is instead saved
+                return SerializedFieldType.String;
+            }
+            return ft.FullName switch {
                 "System.String" => SerializedFieldType.String,
                 "System.Boolean" => SerializedFieldType.Boolean,
                 "System.Byte" => SerializedFieldType.Byte,
@@ -277,6 +303,10 @@ namespace MP.Serialization
                 "System.Double" => SerializedFieldType.Double,
                 _ => 0
             };
+        }
+
+        private static SerializedFieldType EncodeFieldType(Type fieldtype)
+        {
             if (fieldtype.IsArray)
             {
                 return GetSimpleType(fieldtype.GetElementType()) | SerializedFieldType.Array;

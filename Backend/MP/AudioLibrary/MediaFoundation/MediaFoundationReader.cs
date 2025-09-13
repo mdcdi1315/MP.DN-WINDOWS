@@ -199,6 +199,7 @@ namespace MP.AudioLibrary.MediaFoundation
             reader.Flush(MF_SOURCE_READER_STREAM_SELECTION.FIRST_AUDIO_STREAM);
             decoderoutputcount = 0;
             decoderoutputoffset = 0;
+            FireCurrentTimeInvalidatedEvent();
             flags &= ~ReaderFlags.NeedsReposition; // Clear the flag
         }
 

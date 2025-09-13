@@ -17,8 +17,7 @@ namespace MP.ComInterop
         /// <param name="pvar">The <see cref="PROPVARIANT"/> to free.</param>
         public static void PropVariantClear(System.IntPtr pvar)
         {
-            var ret = Interop.Ole32.PropVariantClear((PROPVARIANT*)pvar.ToPointer());
-            if (ret.FAILED) { throw ret.MappingException; }
+            Interop.Ole32.PropVariantClear((PROPVARIANT*)pvar.ToPointer()).ThrowOnFailure();
         }
 
         /// <summary>
@@ -29,8 +28,7 @@ namespace MP.ComInterop
         public static void Dispose(this PROPVARIANT[] propvariants)
         {
             ArgumentNullException.ThrowIfNull(propvariants, nameof(propvariants));
-            HRESULT hr = Interop.Ole32.FreePropVariantArray(propvariants);
-            if (hr.FAILED) { throw hr.MappingException; }
+            Interop.Ole32.FreePropVariantArray(propvariants).ThrowOnFailure();
         }
 
         [System.Diagnostics.StackTraceHidden]
@@ -151,8 +149,7 @@ namespace MP.ComInterop
         {
             void* comobj;
             Interop.GUID g1 = Interop.GUID.FromGUID(classid), g2 = Interop.GUID.FromGUID(interfaceid);
-            var errorc = Interop.Ole32.CoCreateInstance(&g1, null, context, &g2, &comobj);
-            if (errorc.FAILED) { throw errorc.MappingException; }
+            Interop.Ole32.CoCreateInstance(&g1, null, context, &g2, &comobj).ThrowOnFailure();
             return (TINT)CreateInteropObject(comobj, -1);
         }
 
@@ -171,8 +168,7 @@ namespace MP.ComInterop
             void* comobj;
             Interop.GUID g1 = Interop.GUID.FromGUID(classid);
             Interop.GUID g2 = Interop.GUID.FromGUID(GetComInterfaceIDInternal(tinterface));
-            var errorc = Interop.Ole32.CoCreateInstance(&g1, null, context, &g2, &comobj);
-            if (errorc.FAILED) { throw errorc.MappingException; }
+            Interop.Ole32.CoCreateInstance(&g1, null, context, &g2, &comobj).ThrowOnFailure();
             return (TINT)CreateInteropObject(comobj, -1);
         }
 
@@ -192,8 +188,7 @@ namespace MP.ComInterop
             void* comobj;
             Interop.GUID g1 = Interop.GUID.FromGUID(GetDefaultCOMInterfaceObjectGuidAttributeData(tinterface));
             Interop.GUID g2 = Interop.GUID.FromGUID(GetComInterfaceIDInternal(tinterface));
-            var errorc = Interop.Ole32.CoCreateInstance(&g1, null, context, &g2, &comobj);
-            if (errorc.FAILED) { throw errorc.MappingException; }
+            Interop.Ole32.CoCreateInstance(&g1, null, context, &g2, &comobj).ThrowOnFailure();
             return (TINT)CreateInteropObject(comobj , -1);
         }
 
@@ -204,6 +199,16 @@ namespace MP.ComInterop
             void* ppvout;
             GUID guid = GUID.FromGUID(iid);
             HRESULT i = ((delegate* unmanaged<void*, GUID*, void**, HRESULT>)(*(*(void***)pci + 0 /* IUnknown.QueryInterface slot */)))(pci, &guid, &ppvout);
+            ppv = ppvout;
+            return i;
+        }
+
+        public static HRESULT QueryInterface(void* pci, GUID iid, out void* ppv)
+        {
+            ArgumentNullException.ThrowIfNull(pci);
+
+            void* ppvout;
+            HRESULT i = ((delegate* unmanaged<void*, GUID*, void**, HRESULT>)(*(*(void***)pci + 0 /* IUnknown.QueryInterface slot */)))(pci, &iid, &ppvout);
             ppv = ppvout;
             return i;
         }
@@ -304,8 +309,7 @@ namespace MP.ComInterop
         [Obsolete("Thread API's call this method implicitly. Thus, this method will always fail.")]
         public static void InitializeCOMLibraryMTAMode()
         {
-            var err = Interop.Ole32.CoInitializeEx(null, Interop.Ole32.COINIT.COINIT_MULTITHREADED);
-            if (err.FAILED) { throw err.MappingException; }
+            Interop.Ole32.CoInitializeEx(null, Interop.Ole32.COINIT.COINIT_MULTITHREADED).ThrowOnFailure();
         }
 
         /// <summary>
@@ -316,8 +320,7 @@ namespace MP.ComInterop
         [Obsolete("Thread API's call this method implicitly. Thus, this method will always fail.")]
         public static void InitializeCOMLibrarySTAMode()
         {
-            var err = Interop.Ole32.CoInitializeEx(null, Interop.Ole32.COINIT.COINIT_APARTMENTTHREADED);
-            if (err.FAILED) { throw err.MappingException; }
+            Interop.Ole32.CoInitializeEx(null, Interop.Ole32.COINIT.COINIT_APARTMENTTHREADED).ThrowOnFailure();
         }
     }
 }

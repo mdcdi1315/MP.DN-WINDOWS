@@ -37,7 +37,7 @@ namespace MP.ComInterop
             // Now load the COM object
             GUID interfaceid = GUID.FromGUID(ComMarshalling.GetComInterfaceID<IPersistSerializedPropStorage>());
             HRESULT hr = Interop.PropSys.PSCreateMemoryPropertyStore(interfaceid, out void* pi);
-            if (hr.FAILED) { throw hr.MappingException; }
+            if (hr.FAILED) { throw hr.CreateException(); }
             IPersistSerializedPropStorage storage = ComMarshalling.CreateInteropObject(pi) as IPersistSerializedPropStorage;
             if (storage is null) {
                 Marshal.Release(hr);
@@ -48,7 +48,7 @@ namespace MP.ComInterop
             {
                 hr = storage.SetPropertyStorage(pdt, buftemp.Length.ToUInt32());
             }
-            if (hr.FAILED) { throw hr.MappingException; }
+            if (hr.FAILED) { throw hr.CreateException(); }
             // return the named property store by using QueryInterface on it
             return new(storage as INamedPropertyStore);
         }
@@ -61,8 +61,7 @@ namespace MP.ComInterop
         public static NamedPropertyStore CreateMemoryStore()
         {
             Guid interfaceid = ComMarshalling.GetComInterfaceID<INamedPropertyStore>();
-            HRESULT hr = Interop.PropSys.PSCreateMemoryPropertyStore(GUID.FromGUID(interfaceid), out void* pi);
-            if (hr.FAILED) { throw hr.MappingException; }
+            Interop.PropSys.PSCreateMemoryPropertyStore(GUID.FromGUID(interfaceid), out void* pi).ThrowOnFailure();
             return new(ComMarshalling.CreateInteropObject(pi) as INamedPropertyStore);
         }
 
@@ -86,8 +85,7 @@ namespace MP.ComInterop
             get {
                 ObjectDisposedException.ThrowIf(store is null, this);
                 System.UInt32 ct;
-                HRESULT hr = store.GetNameCount(&ct);
-                if (hr.FAILED) { throw hr.MappingException; }
+                store.GetNameCount(&ct).ThrowOnFailure();
                 return ct.ToInt32();
             }
         }
@@ -117,7 +115,7 @@ namespace MP.ComInterop
                         bstr?.Dispose();
                     }
                 } else {
-                    throw hr.MappingException;
+                    throw hr.CreateException();
                 }
             }
         }
@@ -142,11 +140,8 @@ namespace MP.ComInterop
                 {
                     hr = store.GetNamedValue(pk, &pvret);
                 }
-                if (hr.SUCCEEDED) {
-                    return pvret;
-                } else {
-                    throw hr.MappingException;
-                }
+                hr.ThrowOnFailure();
+                return pvret;
             }
             set {
                 ObjectDisposedException.ThrowIf(store is null, this);
@@ -156,10 +151,7 @@ namespace MP.ComInterop
                 {
                     hr = store.SetNamedValue(pk, &value);
                 }
-                if (hr.FAILED)
-                {
-                    throw hr.MappingException;
-                }
+                hr.ThrowOnFailure();
             }
         }
 
@@ -186,8 +178,7 @@ namespace MP.ComInterop
             storage.SetFlags(PERSIST_SPROPSTORE_FLAGS.FPSPS_DEFAULT); // Default usage, if possible.
             System.Byte* pbuf;
             System.UInt32 datalen;
-            HRESULT hr = storage.GetPropertyStorage(&pbuf, &datalen);
-            if (hr.FAILED) { throw hr.MappingException; }
+            storage.GetPropertyStorage(&pbuf, &datalen).ThrowOnFailure();
             try {
                 System.UInt32 blks = datalen / BUFSIZE, rem = datalen % BUFSIZE;
                 System.UInt32 idx = 0;

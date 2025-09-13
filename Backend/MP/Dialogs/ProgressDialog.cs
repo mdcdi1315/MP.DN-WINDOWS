@@ -162,7 +162,7 @@ namespace MP.Dialogs
             pgddialog = ComMarshalling.GetClassInstanceAsInterface<IProgressDialog>(CLSCTX.CLSCTX_INPROC_SERVER);
             HRESULT hr = pgddialog.StartProgressDialog((IntPtr)obj , null , flags , null);
             if (hr.FAILED) {
-                DebugProvider.WriteLine($"PROGDLG: Progress Dialog failed: {hr.MappingException}");
+                DebugProvider.WriteLine($"PROGDLG: Progress Dialog failed: {hr.CreateException()}");
                 return;
             }
             if (title is not null)

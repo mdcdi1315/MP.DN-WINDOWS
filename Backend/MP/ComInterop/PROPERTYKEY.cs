@@ -46,24 +46,16 @@ namespace MP.ComInterop
         {
             if (pkey is null) { throw new System.ArgumentNullException(nameof(pkey)); }
             PROPERTYKEY pret;
-            HRESULT hrt = Interop.PropSys.PSPropertyKeyFromString(pkey , out pret);
-            if (hrt.SUCCEEDED) {
-                return pret;
-            } else {
-                throw hrt.MappingException;
-            }
+            Interop.PropSys.PSPropertyKeyFromString(pkey , out pret).ThrowOnFailure();
+            return pret;
         }
 
         public readonly System.String PropertyName
         {
             get {
                 System.String ret;
-                HRESULT hrt = Interop.PropSys.PSGetNameFromPropertyKey(this , out ret);
-                if (hrt.SUCCEEDED) {
-                    return ret;
-                } else {
-                    throw hrt.MappingException;
-                }
+                Interop.PropSys.PSGetNameFromPropertyKey(this, out ret).ThrowOnFailure();
+                return ret;
             }
         }
 
@@ -71,12 +63,8 @@ namespace MP.ComInterop
         {
             get {
                 System.String ret;
-                HRESULT hrt = Interop.PropSys.PSStringFromPropertyKey(this , out ret);
-                if (hrt.SUCCEEDED) {
-                    return ret;
-                } else {
-                    throw hrt.MappingException;
-                }
+                Interop.PropSys.PSStringFromPropertyKey(this , out ret).ThrowOnFailure();
+                return ret;
             }
         }
 

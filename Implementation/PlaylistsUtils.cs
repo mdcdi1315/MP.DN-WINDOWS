@@ -35,11 +35,11 @@ namespace MP
 
         public System.Boolean Exists => fi is not null && fi.Exists;
 
-        public MusicPlayerStream GetStream()
+        public MusicPlayerStreamV2 GetStream()
         {
             if (fi is null) { return null; }
-            MusicPlayerStream result = new(fi.OpenRead());
-            result.SetBooleanAttribute(MusicPlayerStream.IsStreamOwnerProperty, true);
+            MusicPlayerStreamV2 result = new(fi.OpenRead());
+            result.SetBooleanAttribute(MusicPlayerStreamV2.IsStreamOwnerProperty, true);
             result.SetStringAttribute("FileName", fi.Name);
             return result;
         }
@@ -87,7 +87,7 @@ namespace MP
 
         public bool Exists => true;
 
-        public MusicPlayerStream GetStream() => reference.GetStream(this);
+        public MusicPlayerStreamV2 GetStream() => reference.GetStream(this);
 
         AbstractPropertyStream IPlaylistFile.GetStream() => GetStream();
     }

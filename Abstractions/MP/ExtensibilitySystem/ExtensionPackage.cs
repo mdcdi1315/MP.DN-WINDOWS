@@ -39,7 +39,7 @@ namespace MP.ExtensibilitySystem
         /// Gets the asset's data returned through a <see cref="System.IO.Stream"/> object.
         /// </summary>
         /// <param name="asset">The asset to retrieve it's data.</param>
-        /// <returns>A new <see cref="System.IO.Stream"/> reprsenting the passed asset from <paramref name="asset"/> parameter.</returns>
+        /// <returns>A new <see cref="System.IO.Stream"/> reprsenting the passed asset data from <paramref name="asset"/> parameter.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="asset"/> was <see langword="null"/>.</exception>
         /// <exception cref="InvalidAssetDefinitionException">The asset provided is not part of the current package.</exception>
         public System.IO.Stream GetAssetStream(IAsset asset)

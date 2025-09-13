@@ -19,7 +19,7 @@ namespace MP.AudioLibrary.WASAPI
             if (device.DataFlow == MMDevice.EDataFlow.Capture) {
                 throw new ArgumentException("The target MMDevice must be a rendering device.");
             }
-            System.Object cobj = null;
+            System.Object cobj;
             try {
                 // Attempt first to get IAudioClient2.
                 cobj = device.Activate(new Guid(WASAPIInterfaceIds.IID_IAudioClient2));

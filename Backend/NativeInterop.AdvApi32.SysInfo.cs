@@ -117,12 +117,10 @@ partial class Interop
             if (subauthorities.Length > 8) { return BOOL.FALSE; }
             System.Byte sucount = subauthorities.Length.ToByte();
             System.UInt32[] sunative = new System.UInt32[8];
+            fixed (System.UInt32* dst = sunative)
             fixed (System.UInt32* src = subauthorities)
             {
-                fixed (System.UInt32* dst = sunative) 
-                {
-                    Unsafe.CopyBlockUnaligned(dst, src , (subauthorities.Length * sizeof(System.UInt32)).ToUInt32());
-                }
+                Unsafe.CopyBlockUnaligned(dst, src, (subauthorities.Length * sizeof(System.UInt32)).ToUInt32());
             }
             return AllocateAndInitializeSid_Native(
                 &authority, 

@@ -52,6 +52,37 @@ partial class Interop
             MFT_ENUM_FLAG_ALL = 0x0000003F, // Enumerates all MFTs including SW and HW MFTs and applies filtering
         }
 
+        public enum MFASYNC_CALLBACK_QUEUE : System.UInt32
+        {
+            /// <summary>
+            /// Bit mask to distinguish platform work queues from those created by calling <see cref="MFAllocateWorkQueueEx"/>.
+            /// For a work queue created by <see cref="MFAllocateWorkQueueEx"/>, the following value is nonzero:
+            /// <c>(identifier &amp; MFASYNC_CALLBACK_QUEUE_PRIVATE_MASK)</c>
+            /// </summary>
+            MFASYNC_CALLBACK_QUEUE_PRIVATE_MASK = 0xFFFF0000,
+            MFASYNC_CALLBACK_QUEUE_MULTITHREADED = 0x00000005,
+            /// <summary>Undefined work queue.</summary>
+            MFASYNC_CALLBACK_QUEUE_UNDEFINED = 0x00000000
+        }
+
+        public enum MFASYNC_WORKQUEUE_TYPE : System.UInt32
+        {
+            /// <summary>
+            /// Create a work queue without a message loop
+            /// </summary>
+            MF_STANDARD_WORKQUEUE = 0,
+            /// <summary>
+            /// Create a work queue with a message loop.
+            /// </summary>
+            MF_WINDOW_WORKQUEUE = 1,
+            /// <summary>
+            /// Create a multithreaded work queue. <br />
+            /// This type of work queue uses a thread pool to dispatch work items.  <br />
+            /// The caller is responsible for serializing the work items.
+            /// </summary>
+            MF_MULTITHREADED_WORKQUEUE = 2
+        }
+
         [StructLayout(LayoutKind.Explicit , Size = 32)]
         public struct MFT_REGISTER_TYPE_INFO
         {
@@ -92,7 +123,7 @@ partial class Interop
         }
 
         /// <summary>
-        /// Initializes a media type from a WAVEFORMATEX structure. 
+        /// Initializes a media type from a <see cref="WAVEFORMATEX"/> structure. 
         /// </summary>
         [DllImport(Libraries.MfPlat, ExactSpelling = true , EntryPoint = "MFInitMediaTypeFromWaveFormatEx")]
         private static extern HRESULT MFInitMediaTypeFromWaveFormatEx_Native(
@@ -108,7 +139,7 @@ partial class Interop
             => MFInitMediaTypeFromWaveFormatEx_Native(Marshal.GetIUnknownForObject(medtype).ToPointer(), (WAVEFORMATEX*)&extensible, sizeof(WAVEFORMATEXTENSIBLE));
 
         /// <summary>
-        /// Converts a Media Foundation audio media type to a WAVEFORMATEX structure.
+        /// Converts a Media Foundation audio media type to a <see cref="WAVEFORMATEX"/> structure.
         /// </summary>
         [DllImport(Libraries.MfPlat, ExactSpelling = true , EntryPoint = "MFCreateWaveFormatExFromMFMediaType")]
         private static extern HRESULT MFCreateWaveFormatExFromMFMediaType_Native(
@@ -159,6 +190,83 @@ partial class Interop
 
         [DllImport(Libraries.MfPlat , ExactSpelling = true)]
         public static extern HRESULT MFCreateMFByteStreamOnStream(IStream punkStream, out IMFByteStream ppByteStream);
+
+        [DllImport(Libraries.MfPlat , ExactSpelling = true , EntryPoint = "MFCreateAsyncResult")]
+        private static extern HRESULT MFCreateAsyncResult_Native(
+              void* punkObject,
+              [IsPointerToCOMInterfaceType(typeof(IMFAsyncCallback))] void* pCallback,
+              void* punkState,
+              [IsPointerToCOMInterfaceType(typeof(IMFAsyncResult))] void** ppAsyncResult
+        );
+
+        public static HRESULT MFCreateAsyncResult(
+            System.Object comobj,
+            IMFAsyncCallback callback,
+            System.Object comstateobj,
+            out IMFAsyncResult result)
+        {
+            ArgumentNullException.ThrowIfNull(callback);
+            void* po = comobj is null ? null : Marshal.GetIUnknownForObject(comobj).ToPointer();
+            void* so = comstateobj is null ? null : Marshal.GetIUnknownForObject(comstateobj).ToPointer();
+            void* rt;
+            HRESULT hr = MFCreateAsyncResult_Native(
+                po, 
+                Marshal.GetIUnknownForObject(callback).ToPointer(), 
+                so, 
+                &rt
+            );
+            if (hr.SUCCEEDED) {
+                // This object is under control by the callee most of the times, thus allow the Marshal API to work as .NET expects it to be
+                result = ComMarshalling.CreateInteropObject(rt , -1) as IMFAsyncResult;
+            } else {
+                result = null;
+            }
+            return hr;
+        }
+
+        public static HRESULT MFCreateAsyncResult(
+            System.Object comobj,
+            IMFAsyncCallback callback,
+            void* stateobj,
+            out IMFAsyncResult result)
+        {
+            ArgumentNullException.ThrowIfNull(callback);
+            void* po = comobj is null ? null : Marshal.GetIUnknownForObject(comobj).ToPointer();
+            void* rt;
+            HRESULT hr = MFCreateAsyncResult_Native(
+                po, 
+                Marshal.GetIUnknownForObject(callback).ToPointer(), 
+                stateobj, 
+                &rt
+             );
+            if (hr.SUCCEEDED) {
+                // This object is under control by the callee most of the times, thus allow the Marshal API to work as .NET expects it to be
+                result = ComMarshalling.CreateInteropObject(rt, -1) as IMFAsyncResult;
+            } else {
+                result = null;
+            }
+            return hr;
+        }
+
+        [DllImport(Libraries.MfPlat, ExactSpelling = true)]
+        public static extern HRESULT MFInvokeCallback([IsPointerToCOMInterfaceType(typeof(IMFAsyncResult))] void* presult);
+
+        [DllImport(Libraries.MfPlat, ExactSpelling = true)]
+        public static extern HRESULT MFPutWorkItem(MFASYNC_CALLBACK_QUEUE dwQueue, [IsPointerToCOMInterfaceType(typeof(IMFAsyncCallback))] void* pCallback, void* pState);
+
+        [DllImport(Libraries.MfPlat, ExactSpelling = true , EntryPoint = "MFAllocateWorkQueueEx")]
+        private static extern HRESULT MFAllocateWorkQueueEx_Native(MFASYNC_WORKQUEUE_TYPE type , MFASYNC_CALLBACK_QUEUE* pworkid);
+
+        public static HRESULT MFAllocateWorkQueueEx(MFASYNC_WORKQUEUE_TYPE type , out MFASYNC_CALLBACK_QUEUE q)
+        {
+            MFASYNC_CALLBACK_QUEUE qp;
+            HRESULT hr = MFAllocateWorkQueueEx_Native(type, &qp);
+            q = qp;
+            return hr;
+        }
+
+        [DllImport(Libraries.MfPlat, ExactSpelling = true)]
+        public static extern HRESULT MFUnlockWorkQueue(MFASYNC_CALLBACK_QUEUE queue);
 
         [DllImport(Libraries.MfPlat , ExactSpelling = true , EntryPoint = "MFCreateSample")]
         private static extern HRESULT MFCreateSample_Native([IsPointerToCOMInterfaceType(typeof(IMFSample))] void** ppimfsample);

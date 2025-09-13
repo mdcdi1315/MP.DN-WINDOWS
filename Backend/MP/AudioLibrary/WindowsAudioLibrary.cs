@@ -1,8 +1,8 @@
 ﻿
 using System;
+using MP.ComInterop;
 using MP.WindowsInterop;
 using System.Collections.Generic;
-using MP.ComInterop;
 
 namespace MP.AudioLibrary
 {
@@ -141,8 +141,13 @@ namespace MP.AudioLibrary
         }
 
         private static System.Boolean initialized;
+        private static Interop.MfPlat.MFASYNC_CALLBACK_QUEUE queue;
 
-        static WindowsAudioLibrary() => initialized = false;
+        static WindowsAudioLibrary()
+        {
+            initialized = false;
+            queue = Interop.MfPlat.MFASYNC_CALLBACK_QUEUE.MFASYNC_CALLBACK_QUEUE_UNDEFINED;
+        }
 
         private static SPEAKERASSIGNMENT CreateMask(ChannelType[] layout)
         {
@@ -257,6 +262,29 @@ namespace MP.AudioLibrary
             return null;
         }
 
+        internal static Interop.MfPlat.MFASYNC_CALLBACK_QUEUE ApplicationMediaFoundationWorkQueue
+        {
+            get {
+                if (initialized == false) {
+                    throw new MediaFoundation.MediaFoundationIsShutdownException();
+                }
+                if (queue == Interop.MfPlat.MFASYNC_CALLBACK_QUEUE.MFASYNC_CALLBACK_QUEUE_UNDEFINED) 
+                {
+                    HRESULT hr = Interop.MfPlat.MFAllocateWorkQueueEx(Interop.MfPlat.MFASYNC_WORKQUEUE_TYPE.MF_STANDARD_WORKQUEUE, out queue);
+                    switch (hr)
+                    {
+                        case MediaFoundation.MediaFoundationErrorCodes.MF_E_SHUTDOWN:
+                            throw new MediaFoundation.MediaFoundationIsShutdownException();
+                        case CommonHResults.E_FAIL:
+                            throw new OutOfMemoryException("Cannot allocate a new work queue.");
+                        default:
+                            hr.ThrowOnFailure();
+                            break;
+                    }
+                }
+                return queue;
+            }
+        }
 
         public static void Initialize()
         {
@@ -284,6 +312,11 @@ namespace MP.AudioLibrary
         {
             if (initialized == false) { return; }
             DebugProvider.WriteLine("WindowsAudioLibrary: Shutting down Media Foundation...");
+            if (queue != Interop.MfPlat.MFASYNC_CALLBACK_QUEUE.MFASYNC_CALLBACK_QUEUE_UNDEFINED)
+            {
+                Interop.MfPlat.MFUnlockWorkQueue(queue);
+                queue = Interop.MfPlat.MFASYNC_CALLBACK_QUEUE.MFASYNC_CALLBACK_QUEUE_UNDEFINED;
+            }
             Interop.MfPlat.MFShutdown().ThrowOnFailure();
             DebugProvider.WriteLine("WindowsAudioLibrary: Media Foundation was successfully shut down.");
             initialized = false;

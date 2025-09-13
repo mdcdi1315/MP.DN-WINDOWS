@@ -5,11 +5,12 @@ using System;
 namespace MP.Annotations.CodeAnalysis
 {
     /// <summary>
-    /// Specified to any executable code (methods, properties, constructors and events) and specifies the exception types
+    /// Specified to any executable code (methods and constructors) and specifies the exception types
     /// that are guaranteed to be thrown on known code path failures. <br />
-    /// Additional exceptions may be thrown, but this is used to know the most common ones at reflection.
+    /// Additional exceptions may be thrown, but this is used to know the most common ones at reflection. <br />
+    /// If you want to specify this attribute on a property, specify it instead to it's accessor method.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public sealed class ThrowsAttribute : Attribute
     {
         private Type[] exceptions;

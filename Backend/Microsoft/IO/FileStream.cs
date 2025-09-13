@@ -226,7 +226,7 @@ namespace Microsoft.IO
         {
             System.Int32 error;
             threadaccess.Wait();
-            System.Int32 wb = FileOperations.WriteFileNativeUseOverlapped(sfh, buffer, FileOperations.GetNativeOverlappedForSyncHandle(sfh, poscurrent), out error);
+            System.Int32 wb = FileOperations.WriteFileNativeUseNtDll(sfh , buffer , out error);
             if (error == 0) {
                 // No errors reported? check for buffer validity write and 
                 // update the position appropriately.
@@ -253,7 +253,7 @@ namespace Microsoft.IO
         {
             System.Int32 error;
             threadaccess.Wait();
-            System.Int32 rb = FileOperations.ReadFileNativeUseOverlapped(sfh, buffer, FileOperations.GetNativeOverlappedForSyncHandle(sfh, poscurrent), out error);
+            System.Int32 rb = FileOperations.ReadFileNativeUseNtDll(sfh , buffer , out error);
             if (error == 0) { poscurrent += rb; }
             threadaccess.Release();
             if (error != 0) { throw System.IO.Win32Marshal.GetExceptionForWin32Error(error); }

@@ -28,7 +28,7 @@ namespace MP
             System.Threading.Thread.Sleep(600);
             if (canceled) { Close(); return; }
             TrackPlayList tplt = null;
-            MusicPlayerStream ts2 = null;
+            MusicPlayerStreamV2 ts2 = null;
             FileInfo targetfile;
             FileStream tempstream = null;
             DirectoryInfo targetdir;

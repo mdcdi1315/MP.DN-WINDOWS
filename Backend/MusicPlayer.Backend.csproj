@@ -48,7 +48,11 @@
 	  <Compile Include="Microsoft\Diagnostics\Stopwatch.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundationMFTResampler.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundationReaderFromStream.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\FullyManagedMFAttributes.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFActivateAttributes.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAsyncCallback.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAsyncCallbackExtensions.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAsyncResult.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSampleExtensions.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSourceReaderExtensions.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFTransformAttributes.cs" />
@@ -76,6 +80,7 @@
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationIncorrectStartupVersionException.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationInterfaceIds.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationInterfacesFactory.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationIsShutdownException.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationMediaType.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationReader.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\MediaFoundationTransform.cs" />
@@ -172,6 +177,7 @@
 	  <Compile Include="MP\Imaging\BitFieldDecoder.cs" />
 	  <Compile Include="MP\Imaging\RawIconWriter.cs" />
 	  <Compile Include="MP\Imaging\AdditionalImagingExtensions.cs" />
+	  <Compile Include="MP\MusicPlayerStreamV2.cs" />
 	  <Compile Include="MP\WindowsInterop\WindowsVersions.cs" />
 	  <Compile Include="NativeInterop.Gdi32.cs" />
 	  <Compile Include="NativeInterop.Kernel32.PerformanceCounting.cs" />

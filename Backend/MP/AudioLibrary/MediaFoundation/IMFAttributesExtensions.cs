@@ -1,8 +1,7 @@
 ﻿
-
+using System;
 using MP.ComInterop;
 using MP.WindowsInterop;
-using System;
 
 namespace MP.AudioLibrary.MediaFoundation
 {
