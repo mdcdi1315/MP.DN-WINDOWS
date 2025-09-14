@@ -1,4 +1,5 @@
 ﻿
+using MP.Annotations.CodeAnalysis;
 
 namespace MP
 {
@@ -15,7 +16,8 @@ namespace MP
         /// <param name="name">The name of the attribute to retrieve.</param>
         /// <returns>The attribute's value.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="name"/> was null or empty.</exception>
-        /// <exception cref="MP.ExceptionSystem.AttributeNotFoundException"><paramref name="name"/> was not found.</exception>
+        /// <exception cref="ExceptionSystem.AttributeNotFoundException"><paramref name="name"/> was not found.</exception>
+        [Throws(typeof(System.ArgumentNullException) , typeof(ExceptionSystem.AttributeNotFoundException))]
         public System.Object GetAttribute(System.String name);
 
         /// <summary>
@@ -25,6 +27,7 @@ namespace MP
         /// <param name="name">The name of the attribute to set the <paramref name="value"/> to.</param>
         /// <param name="value">The value of the attribute with name <paramref name="name"/>.</param>
         /// <exception cref="System.ArgumentNullException"><paramref name="name"/> was null or empty.</exception>
+        [Throws(typeof(System.ArgumentNullException))]
         public void SetAttribute(System.String name, System.Object value);
     }
 
@@ -115,6 +118,29 @@ namespace MP
         {
             if (System.String.IsNullOrEmpty(name)) { throw new System.ArgumentNullException(nameof(name), "Attribute name must not be empty."); }
             attributeable.SetAttribute(name, value);
+        }
+
+        /// <summary>
+        /// Attempts to get an attribute of type <typeparamref name="T"/> from the specified class that implements the <see cref="IAttributeable"/> interface. <br />
+        /// If the attribute exists but is not the type <typeparamref name="T"/>, it returns <see langword="false"/>.
+        /// </summary>
+        /// <param name="attributeable">The class that implements the <see cref="IAttributeable"/> logic.</param>
+        /// <param name="name">The name of the attribute to get.</param>
+        /// <param name="value">The current value of the attribute, if found and the value is <typeparamref name="T"/>.</param>
+        /// <returns>The current value of the attribute.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="name"/> was null or empty.</exception>
+        public static System.Boolean TryGetCustomAttribute<T>(this IAttributeable attributeable , System.String name , out T value)
+        {
+            if (System.String.IsNullOrEmpty(name)) { throw new System.ArgumentNullException(nameof(name), "Attribute name must not be empty."); }
+            value = default;
+            try {
+                value = (T)attributeable.GetAttribute(name);
+                return true;
+            } catch (System.InvalidCastException) {
+                return false;
+            } catch (ExceptionSystem.AttributeNotFoundException) {
+                return false;
+            }
         }
     }
 

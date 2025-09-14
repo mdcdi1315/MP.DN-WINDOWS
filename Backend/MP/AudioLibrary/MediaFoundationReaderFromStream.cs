@@ -8,7 +8,7 @@ namespace MP.AudioLibrary
 {
     public sealed class MediaFoundationReaderFromStream : MediaFoundationReader
     {
-        private System.String fn;
+        private System.String filename;
         private IMFByteStream bytestream;
         private AbstractPropertyStream aps;
 
@@ -22,7 +22,8 @@ namespace MP.AudioLibrary
                 throw new ArgumentException("The passed in property stream must be readable at least.");
             }
             this.aps = aps;
-            fn = Microsoft.IO.Path.GetExtension(aps.GetStringAttribute("FileName"));
+            filename = null;
+            aps.TryGetCustomAttribute("FileName", out filename); // We do not care whether it will be set or not, otherwise default(System.String) is known to be null.
             Initialize();
         }
 
@@ -39,9 +40,9 @@ namespace MP.AudioLibrary
                     throw new NotSupportedException("Cannot determine the byte stream mode to perform.");
                 }
                 IMFAttributes attrs = bytestream as IMFAttributes;
-                if (attrs is not null && fn is not null)
+                if (attrs is not null && filename is not null)
                 {
-                    attrs.SetAttribute(IMFByteStreamAttributes.CONTENT_TYPE, fn switch {
+                    attrs.SetAttribute(IMFByteStreamAttributes.CONTENT_TYPE, Microsoft.IO.Path.GetExtension(filename) switch {
                         ".wav" => "audio/wav",
                         ".flac" => "audio/flac",
                         ".mp3" => "audio/mp3",
@@ -51,6 +52,8 @@ namespace MP.AudioLibrary
                         ".ogg" => "audio/ogg",
                         _ => ""
                     });
+                    // Since we can do it, why not also setting the ORIGIN_NAME attribute?
+                    attrs.SetAttribute(IMFByteStreamAttributes.ORIGIN_NAME , $"file:///{filename}");
                 }
             }
 
@@ -68,12 +71,12 @@ namespace MP.AudioLibrary
 
         protected override void DisposeSourceReaderResources()
         {
-            if (bytestream is not null && !Object.ReferenceEquals(bytestream , aps))
+            if (bytestream is not null)
             {
                 bytestream.Close();
                 try { ComMarshalling.ReleaseInteropObject(bytestream); } catch (ArgumentException) { }
-                bytestream = null;
             }
+            bytestream = null;
         }
 
         protected override void Dispose(bool disposing) 

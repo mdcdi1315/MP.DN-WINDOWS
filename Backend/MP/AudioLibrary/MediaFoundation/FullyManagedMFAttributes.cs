@@ -242,10 +242,10 @@ namespace MP.AudioLibrary.MediaFoundation
                 }
                 System.UInt32 u32len = s.Length.ToUInt32();
                 if (pcchLength is not null) { *pcchLength = u32len; }
-                if (cchBufSize + 1 < s.Length) { return HRESULT.FromWin32(Interop.Errors.ERROR_INSUFFICIENT_BUFFER); }
+                if (cchBufSize + 1 < u32len) { return HRESULT.FromWin32(Interop.Errors.ERROR_INSUFFICIENT_BUFFER); }
                 fixed (System.Char* pc = s)
                 {
-                    Unsafe.CopyBlockUnaligned(pwszValue , pc, u32len + 1); // +1 character is the null character added implicitly by .NET
+                    Unsafe.CopyBlockUnaligned(pwszValue , pc, (u32len + 1U) * sizeof(System.Char)); // +1 character is the null character added implicitly by .NET
                 }
                 return CommonHResults.S_OK;
             }
@@ -261,13 +261,13 @@ namespace MP.AudioLibrary.MediaFoundation
                 if (value is not System.String s) {
                     return MediaFoundationErrorCodes.MF_E_INVALIDTYPE;
                 }
-                System.UInt32 u32len = s.Length.ToUInt32();
+                System.UInt32 u32len = s.Length.ToUInt32() , bytelen = (u32len + 1U) * sizeof(System.Char);
                 if (pcchLength is not null) { *pcchLength = u32len; }
-                *ppwszValue = (System.Char*)Interop.Ole32.CoTaskMemAlloc(u32len + 1);
+                *ppwszValue = (System.Char*)Interop.Ole32.CoTaskMemAlloc(bytelen);
                 if (*ppwszValue is null) { return CommonHResults.E_OUTOFMEMORY; }
                 fixed (System.Char* pc = s)
                 {
-                    Unsafe.CopyBlockUnaligned(*ppwszValue, pc, u32len + 1);
+                    Unsafe.CopyBlockUnaligned(*ppwszValue, pc, bytelen);
                 }
                 return CommonHResults.S_OK;
             }

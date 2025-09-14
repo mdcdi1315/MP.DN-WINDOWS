@@ -1,6 +1,5 @@
 ﻿using System;
 using MP.ComInterop;
-using MP.Annotations;
 using System.Threading;
 using MP.WindowsInterop;
 using MP.AudioLibrary.MediaFoundation;
@@ -12,10 +11,10 @@ namespace MP
     /// A newer version of the <see cref="MusicPlayerStream"/> class but instead it supports <see cref="IMFByteStream"/> as it's base interface. <br />
     /// Additionally, this class can be also inherited.
     /// </summary>
-    [Preliminary]
     public unsafe class MusicPlayerStreamV2 : AbstractPropertyStream , IMFByteStream , IMFAttributes
     {
         private Func<IMFAttributes> attributescreator;
+        private readonly System.Int64 wrapperinitpos; // For IMFByteStream wrapper, see Close method
         private volatile AsyncWorkData asyncdata;
         private IMFAttributes attributes;
 
@@ -35,6 +34,8 @@ namespace MP
             }
         }
 
+        private static FullyManagedMFAttributes AttributesCreater() => new();
+
         /// <summary>
         /// Creates a new instance of the <see cref="MusicPlayerStreamV2"/> class by specifying the stream to wrap.
         /// </summary>
@@ -47,7 +48,7 @@ namespace MP
         /// </summary>
         /// <param name="wrappingstream">The stream to wrap.</param>
         /// <param name="synchronize">If true, it does then create a syncroized wrapper around <paramref name="wrappingstream"/>.</param>
-        public MusicPlayerStreamV2(System.IO.Stream wrappingstream, System.Boolean synchronize) : this(wrappingstream , synchronize , new(static () => new FullyManagedMFAttributes())) { }
+        public MusicPlayerStreamV2(System.IO.Stream wrappingstream, System.Boolean synchronize) : this(wrappingstream , synchronize , new(AttributesCreater)) { }
 
         /// <summary>
         /// Creates a new instance of the <see cref="MusicPlayerStreamV2"/> class by specifying 
@@ -64,6 +65,8 @@ namespace MP
             attributes = null;
             attributescreator = supplier; // Created lazily
             asyncdata = null; // No asyncronous data are expected at the beginning
+            wrapperinitpos = 0;
+            try { wrapperinitpos = wrappingstream.Position; } catch { }
         }
 
         /// <summary>
@@ -80,10 +83,9 @@ namespace MP
 
         #region IMFByteStream implementation
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "It is simply a flag not defined back then, it can be ignored by Media Foundation.")]
         HRESULT IMFByteStream.GetCapabilities(MFBYTESTREAM_CAPABILITIES* pdwCapabilities)
         {
-            MFBYTESTREAM_CAPABILITIES cps = MFBYTESTREAM_CAPABILITIES.DOES_NOT_USE_NETWORK;
+            MFBYTESTREAM_CAPABILITIES cps = 0;
             if (Wrapped.CanSeek) {
                 cps |= MFBYTESTREAM_CAPABILITIES.IS_SEEKABLE;
             }
@@ -340,7 +342,13 @@ namespace MP
             return CommonHResults.S_OK;
         }
 
-        HRESULT IMFByteStream.Close() => CommonHResults.S_OK;
+        HRESULT IMFByteStream.Close()
+        {
+            // Possibly this is what done by the IStream -> IMFByteStream wrapper provided by Microsoft
+            // This valid but flaky technique also allows us to double-initialize the Media Foundation reader
+            try { Position = wrapperinitpos; } catch { }
+            return CommonHResults.S_OK;
+        }
 
         #endregion
 

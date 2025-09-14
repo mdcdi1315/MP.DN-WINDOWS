@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 
 internal static class AppInfo
 {
-    public const System.String Version = "1.6.1.6";
+    public const System.String Version = "1.6.1.7";
 
     // This is the Discord Application Token. DO NOT MODIFY!!!!
     public const System.Int64 DiscordAPIToken = 1338618967371288628;

@@ -12,5 +12,7 @@ namespace MP.AudioLibrary.MediaFoundation
 
         [SupportedOSPlatform(WindowsVersions.NTDDI_WIN7)] // Windows 7
         public static Guid CONTENT_TYPE => new(0xfc358289, 0x3cb6, 0x460c, 0xa4, 0x24, 0xb6, 0x68, 0x12, 0x60, 0x37, 0x5a);
+
+
     }
 }
