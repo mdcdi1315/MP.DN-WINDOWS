@@ -72,7 +72,7 @@ namespace MP.TagReading
             while ((d = ReadAtomFromStream(stream)) is not null) { atoms.Add(d); if (d.Type == "moov") { break; } }
             // Return the stream position back to when it started to read.
             stream.Position = initpos;
-            Microsoft.IO.InternalMemoryStream mem = null;
+            IO.MemoryStream mem = null;
             try {
                 Box g = GetAtom("moov");
                 if (g is null) { goto g_fail; }
@@ -113,7 +113,7 @@ namespace MP.TagReading
 
         private void ReadMetaHeader(Box parent)
         {
-            Microsoft.IO.InternalMemoryStream mem = new(parent.Data);
+            IO.MemoryStream mem = new(parent.Data);
             mem.Position = 4;
             Box d;
             while ((d = ReadAtomFromStream(mem)) is not null) 

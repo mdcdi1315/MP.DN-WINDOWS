@@ -5,7 +5,7 @@ using System;
 namespace MP.Graphics.OpenGL
 {
     /// <summary>
-    /// Defines the buffer bits to clear with the glClear function.
+    /// Defines the buffer bits to clear with the <see cref="GL.glClear"/> function.
     /// </summary>
     [Flags]
     public enum BufferBits : System.Int32

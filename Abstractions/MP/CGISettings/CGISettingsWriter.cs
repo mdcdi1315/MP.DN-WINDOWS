@@ -250,7 +250,7 @@ namespace MP.CGISettings
             {
                 if (exts[I].RegisteredType == obj.Type)
                 {
-                    Microsoft.IO.InternalMemoryStream ms = new();
+                    IO.MemoryStream ms = new();
                     StreamProvidedCGIExtensionDataSource ds = new(ms, stringencoding, 0);
                     try {
                         exts[I].SaveObject(ds, obj.Value);

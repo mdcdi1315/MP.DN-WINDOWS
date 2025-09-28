@@ -565,6 +565,7 @@ namespace MP
             {
                 try {
                     DebugProvider.WriteLine($"PlaylistGatherer: Attempting to open playlist {Item.Name}...");
+                    RaiseMessage($"Gathering information for: {Item.Name}", CommonSendCommandTypes.ThrowWaitMessage);
                     tmpstr = Item.OpenRead();
                     temp = new(tmpstr, Item.Name);
                     // Load the image , if found and include it into the list.
@@ -613,7 +614,7 @@ namespace MP
                             ImageIndex = imgidx,
                             AdditionalData = Item.Name,
                     });
-                } catch (System.Exception e) {
+                } catch (Exception e) {
                     DebugProvider.WriteLine($"PlaylistGatherer: Playlist {Item.Name} could not be loaded. Error Data:\n{e}");
                     data.AddItem(new WindowsListViewElement() {
                         PrimaryData = $"{Item.GetNameOnly()} (Cannot load)",
@@ -1195,10 +1196,13 @@ namespace MP
                 DebugProvider.WriteLine($"PlaylistSaver: Exiting with exception: {e}");
                 RaiseMessage(System.String.Format(Global.Resources.GetStringResource("PlaylistNotSavedErrorMsg"), e));
             } finally {
-                RaiseSendCommand(CommonSendCommandTypes.ClearWaitMessage);
-                RaiseSendCommand(WindowsRCUSendCommandTypes.RemoveWaitCursor);
-                FS?.Dispose();
-                FS = null;
+                try {
+                    FS?.Dispose();
+                    FS = null;
+                } finally {
+                    RaiseSendCommand(CommonSendCommandTypes.ClearWaitMessage);
+                    RaiseSendCommand(WindowsRCUSendCommandTypes.RemoveWaitCursor);
+                }
             }
             fi = null;
             DebugProvider.WriteLine("PlaylistSaver: Exiting cleanly.");

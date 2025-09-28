@@ -33,6 +33,8 @@ namespace MP
             base.UnloadLayer();
         }
 
+        public override Platform Platform => Platform.Windows;
+
         public override MemoryHandleFactory GetMemoryHandleFactory() => fac ??= new WindowsMemHandleFactory();
 
         public override System.String UserName => Interop.Advapi32.GetUserName();

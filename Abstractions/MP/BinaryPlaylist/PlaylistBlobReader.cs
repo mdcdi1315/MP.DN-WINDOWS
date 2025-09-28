@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MP.Annotations;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace MP.BinaryPlaylist
@@ -80,6 +81,7 @@ namespace MP.BinaryPlaylist
         /// <typeparam name="T">The numeric type to directly read from the stream.</typeparam>
         /// <returns>The read numeric value from the stream.</returns>
         /// <exception cref="System.IO.IOException">Cannot read the number from the stream.</exception>
+        [DeprecatedMayBeRemoved]
         protected unsafe T ReadNumber<T>() where T : unmanaged
         {
             System.Byte[] dt = new System.Byte[sizeof(T)];
@@ -94,6 +96,7 @@ namespace MP.BinaryPlaylist
         /// <typeparam name="T">The structure to read.</typeparam>
         /// <returns></returns>
         /// <exception cref="System.IO.IOException">Cannot read the structure from the stream.</exception>
+        [DeprecatedMayBeRemoved]
         protected unsafe T ReadStructure<T>() where T : struct
         {
             System.Byte[] dt = new System.Byte[Unsafe.SizeOf<T>()];
@@ -108,6 +111,7 @@ namespace MP.BinaryPlaylist
         /// <param name="isascii">When set to <see langword="true"/>, the method reads ASCII characters; otherwise it read UTF-16LE characters.</param>
         /// <returns>The read string.</returns>
         /// <exception cref="System.IO.IOException">Could not read the string from the stream.</exception>
+        [DeprecatedMayBeRemoved]
         protected unsafe System.String ReadString(System.Int32 charlength , System.Boolean isascii)
         {
             if (isascii) {
@@ -131,6 +135,7 @@ namespace MP.BinaryPlaylist
         /// Reads a byte from the blob.
         /// </summary>
         /// <returns>The read byte or -1 indicating that the end of the blob has been reached.</returns>
+        [DeprecatedMayBeRemoved]
         protected System.Int32 ReadByte()
         {
             System.Byte[] dt = new System.Byte[1];
@@ -144,6 +149,7 @@ namespace MP.BinaryPlaylist
         /// </summary>
         /// <param name="count">The number of bytes to be fetched into a new buffer</param>
         /// <returns>The fetched buffer.</returns>
+        [DeprecatedMayBeRemoved]
         protected System.Byte[] ReadBytes(System.Int64 count)
         {
             const System.Int32 BUFSIZE = 4096;
@@ -193,6 +199,28 @@ namespace MP.BinaryPlaylist
 
         /// <summary>Gets the header information of this blob.</summary>
         public BLOBHEADER Header => header;
+
+        private System.Int64 PositionFunc() => position;
+
+        private System.Int64 LengthFunc() => length;
+
+        /// <summary>
+        /// Gets a stream adapted to the current blob suitable for reading. <br />
+        /// It is recommended for newer designs to use this stream object instead. <br />
+        /// Make sure to dispose this object once you are done using it.
+        /// </summary>
+        protected System.IO.Stream Stream
+        {
+            get {
+                ObjectDisposedException.ThrowIf(reader is null, this);
+                return new PlaylistBlobReaderAdapterStream(
+                    new(Read),
+                    new(Seek),
+                    new(PositionFunc),
+                    new(LengthFunc)
+                );
+            }
+        }
 
         /// <summary>
         /// Disposes the current blob reader. <br />

@@ -141,13 +141,30 @@ namespace MP.Random
         {
             if (minimum >= maximum) { throw new ArgumentException("minimum must always be less than maximum"); }
             System.Int32 result;
+            System.UInt64 temp;
             // The below loop executes 'until the number is in range'.
             System.Int32 bound = maximum - minimum;
-            do
+            while (true)
             {
+                temp = rng.Next();
+                // The below extracts two random 32-bit signed integers from the generator
+                result = unchecked((System.Int32)((temp & 0x7FFFFFFF00000000UL) >> 32));
+                if (result > bound) {
+                    result = unchecked((System.Int32)(temp & 0x000000007FFFFFFFUL));
+                    if (result <= bound) {
+                        return result + minimum;
+                    } else {
+                        continue;
+                    }
+                }
+                return result + minimum;
+            }
+            /*
+            do {
                 result = NextInt32(rng);
             } while (result > bound);
             return result + minimum;
+            */
         }
 
         /// <summary>
@@ -162,12 +179,37 @@ namespace MP.Random
         {
             if (minimum >= maximum) { throw new ArgumentException("minimum must always be less than maximum"); }
             System.Int16 result;
+            System.UInt64 temp;
             // The below loop executes 'until the number is in range'.
             System.Int32 bound = maximum - minimum;
+            while (true)
+            {
+                temp = rng.Next();
+                result = unchecked((System.Int16)((temp & 0x7FFF000000000000UL) >> 48));
+                if (result > bound) {
+                    result = unchecked((System.Int16)((temp & 0x00007FFF00000000UL) >> 32));
+                    if (result > bound) {
+                        result = unchecked((System.Int16)((temp & 0x000000007FFF0000UL) >> 16));
+                        if (result > bound) {
+                            result = unchecked((System.Int16)(temp & 0x0000000000007FFFUL));
+                            if (result <= bound) {
+                                return (result + minimum).ToInt16();
+                            } else {
+                                continue;
+                            }
+                        }
+                        return (result + minimum).ToInt16();
+                    }
+                    return (result + minimum).ToInt16();
+                }
+                return (result + minimum).ToInt16();
+            }
+            /*
             do {
                 result = NextInt16(rng);
             } while (result > bound);
             return (result + minimum).ToInt16();
+            */
         }
 
         /// <summary>

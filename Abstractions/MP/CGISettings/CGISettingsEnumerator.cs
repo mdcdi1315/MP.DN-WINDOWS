@@ -62,7 +62,7 @@ namespace MP.CGISettings
             if (ext is not null)
             {
                 // Extension found, use that instead
-                Microsoft.IO.InternalMemoryStream ms = new(temp);
+                IO.MemoryStream ms = new(temp);
                 StreamProvidedCGIExtensionDataSource ds = new(ms, rdr.stringenc, temp.LongLength);
                 temp = null;
                 try {

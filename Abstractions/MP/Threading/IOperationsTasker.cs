@@ -17,7 +17,7 @@ namespace MP.Threading
         public void Add(OperationsTaskerWorkItem methoditem);
 
         /// <summary>
-        /// Causes the tasker to start dequeing cached operations. <br />
+        /// Causes the tasker to start dequeueing cached operations. <br />
         /// After all the operations have been completed , the tasker does not stop running , but it waits for new ones once they occur.
         /// </summary>
         public void Run();

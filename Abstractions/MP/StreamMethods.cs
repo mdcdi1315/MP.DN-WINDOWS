@@ -183,6 +183,22 @@ namespace MP
             }
         }
 
+        /// <summary>
+        /// Reads an UTF16-encoded string with little endianess from the stream. 
+        /// </summary>
+        /// <param name="stream">The stream to read from.</param>
+        /// <param name="length">The length, in bytes , of the string to be read.</param>
+        public static System.String ReadUTF16LEString(this System.IO.Stream stream, System.UInt32 length)
+        {
+            if (length < 0) { return null; }
+            System.Byte[] data = new System.Byte[length];
+            System.Int32 rb = stream.Read(data, 0, data.Length);
+            fixed (System.Byte* src = data)
+            {
+                return new((System.Char*)src, 0, rb / sizeof(System.Char));
+            }
+        }
+
         // Code portions of below method belong from BinaryReader from .NET Foundation: 
         // Licensed to the .NET Foundation under one or more agreements.
         // The .NET Foundation licenses this file to you under the MIT license.

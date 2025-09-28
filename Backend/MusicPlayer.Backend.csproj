@@ -307,7 +307,6 @@
 	  <Compile Include="MP\Dialogs\FileOperationDialog.cs" />
 	  <Compile Include="MP\Dialogs\NativeMessageBox.cs" />
 	  <Compile Include="MP\Dialogs\NewGenMessageBox.cs" />
-	  <Compile Include="MP\Dialogs\WaitDialog.cs" />
 	  <Compile Include="MP\DiscordRichPresenseContent.cs" />
 	  <Compile Include="MP\DiscordSdk\ActivityManager.cs" />
 	  <Compile Include="MP\DiscordSdk\Core.cs" />

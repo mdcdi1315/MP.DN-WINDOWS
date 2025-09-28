@@ -49,7 +49,8 @@ namespace MP.AudioLibrary.MediaFoundation
             if (hr.FAILED) {
                 ppBuffer = null;
             } else {
-                ppBuffer = ComMarshalling.CreateInteropObject(pb) as IMFMediaBuffer;
+                // Do not fixup the returned object, is managed by IMFSample
+                ppBuffer = ComMarshalling.CreateInteropObject(pb , -1) as IMFMediaBuffer;
             }
             return hr;
         }

@@ -20,8 +20,9 @@ namespace MP.Serialization
         where T : notnull, ISerializableClass
     {
         private System.Type typeinfo;
-        private ISerializedClassReader reader;
         private ISerializedClassWriter writer;
+        private ISerializedClassReader reader;
+        private List<ITypeTranscoder> typetranscoders;
         private Dictionary<System.String, FieldInfo> fieldinfocache;
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace MP.Serialization
             reader = null;
             writer = null;
             fieldinfocache = null;
+            typetranscoders = null;
         }
 
         /// <summary>
@@ -72,6 +74,17 @@ namespace MP.Serialization
         }
 
         /// <summary>
+        /// Binds a type transcoder to this <see cref="SerializationManager{T}"/> instance.
+        /// </summary>
+        /// <param name="transcoder">The <see cref="ITypeTranscoder"/> instance to associate with this serialization manager.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="transcoder"/> was <see langword="null"/>.</exception>
+        public void AddTranscoder(ITypeTranscoder transcoder)
+        {
+            ArgumentNullException.ThrowIfNull(transcoder);
+            (typetranscoders ??= new(10)).Add(transcoder);
+        }
+
+        /// <summary>
         /// Serializes an object with the current serialized class writer to the specified destination stream.
         /// </summary>
         /// <param name="obj">The object to be written in serialized form in <paramref name="destination"/>.</param>
@@ -89,7 +102,7 @@ namespace MP.Serialization
             }
             writer.Initialize(destination);
             try {
-                EncodeClass(obj, writer, typeinfo);
+                EncodeClass(obj, null, null);
             } finally {
                 writer.FinalizeWriteOp();
             }
@@ -113,25 +126,42 @@ namespace MP.Serialization
             }
             BuildFieldInfoCache();
             reader.Initialize(source);
-            DecodeClass(obj, reader, fieldinfocache);
+            DecodeClass(obj , null , null);
         }
 
         #region Private implementation details
 
-        private static void EncodeClass(System.Object obj, ISerializedClassWriter writer, Type typeinfo)
+        private void EncodeClass(System.Object obj, ISerializedClassWriter writer, Type typeinfo)
         {
-            SerializedFieldInformation sfi;
+            writer ??= this.writer;
+            typeinfo ??= this.typeinfo;
+
             System.Object value;
+            ITypeTranscoder tt;
+            FieldNameAttribute fna;
+            SerializedFieldInformation sfi;
             SerializationException serexcept;
+
             foreach (var f in typeinfo.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
-                sfi = EncodeInformation(f);
                 value = f.GetValue(obj);
-                if (value is Enum en) {
-                    value = en.ToString();
-                }
-                if (IsPrimitiveOrPrimitiveArray(sfi.Type))
-                {
+                tt = GetTranscoder(f.FieldType);
+                fna = f.GetCustomAttribute<FieldNameAttribute>();
+                sfi = new(
+                        (fna is not null) ? fna.FieldName : f.Name,
+                        tt is null ? EncodeFieldType(f.FieldType) : tt.SerializedType
+                    );
+                fna = null;
+                if (tt is not null) {
+                    if (
+                        tt.SerializedType == SerializedFieldType.Object ||
+                        tt.SerializedType.HasFlag(SerializedFieldType.Array) ||
+                        tt.SerializedType.HasFlag(SerializedFieldType.StrictStringDictionary)
+                    ) {
+                        throw new InvalidTypeTranscoderConfigurationException("The type transcoder must only accept primitive types." , tt);
+                    }
+                    writer.AddField(sfi, tt.Encode(value));
+                } else if (IsPrimitiveOrPrimitiveArray(sfi.Type)) {
                     if (GetAndApplyConstraints(f, sfi, value, ConstraintApplicationTime.Writing, out serexcept))
                     {
                         writer.AddField(sfi, value);
@@ -140,9 +170,7 @@ namespace MP.Serialization
                     {
                         throw new SerializationException("Specified class instance cannot be serialized because one of the constraints were failed.", serexcept);
                     }
-                }
-                else
-                {
+                } else {
                     var wr = writer.GetEmptyWriter();
                     EncodeClass(value, wr, f.FieldType);
                     writer.AddField(sfi, wr);
@@ -150,10 +178,12 @@ namespace MP.Serialization
             }
         }
 
-        private static void DecodeClass(System.Object obj, ISerializedClassReader reader, Dictionary<System.String, FieldInfo> fieldinfocache)
+        private void DecodeClass(System.Object obj , ISerializedClassReader reader , IDictionary<String , FieldInfo> fieldinfocache)
         {
             SerializationException except;
             SerializedFieldInformation sfi;
+            reader ??= this.reader;
+            fieldinfocache ??= this.fieldinfocache;
             while (reader.MoveNext())
             {
                 sfi = reader.GetFieldInformation();
@@ -195,7 +225,7 @@ namespace MP.Serialization
                         var t = ft.GetElementType();
                         for (int I = 0; I < len; I++)
                         {
-                            a2.SetValue(DecodeFieldData(a.GetValue(I) , t), I);
+                            a2.SetValue(DecodeFieldData(sfi.Type, a.GetValue(I) , t), I);
                         }
                     }
                     // Apply the array object
@@ -220,11 +250,7 @@ namespace MP.Serialization
                         throw new InvalidSerializationReaderLayoutException("Expected to return a new ISerializedClassReader instance, but no such instance was found.");
                     }
                 } else {
-                    if (sfi.Type.WillMostLikelyMatchWith(ft) == false)
-                    {
-                        throw new SerializationException($"Cannot deserialize type of {ft.FullName} because it cannot correspond losslessly to {sfi.Type}.");
-                    }
-                    val = DecodeFieldData(val , ft);
+                    val = DecodeFieldData(sfi.Type, val , ft);
                     fi.SetValue(obj, val);
                     // HACK: This allows correct numeric type retrieval.
                     // If I was directly using the val reference, the constraint would indefinitely fail due to type mismatch.
@@ -236,23 +262,72 @@ namespace MP.Serialization
             }
         }
 
-        private static System.Object DecodeFieldData(System.Object actual , Type actualexpectedtype)
+        private System.Object DecodeFieldData(SerializedFieldType sft, System.Object actual , Type actualexpectedtype)
         {
-            if (actualexpectedtype.IsEnum) {
-                // We have a string that represents the name of the constant of the enumeration we want to look up
-                Array a = actualexpectedtype.GetEnumValues();
-                System.Object em;
-                for (int I = 0; I < a.Length; I++)
+            ITypeTranscoder t = GetTranscoder(sft, actualexpectedtype);
+            if (t is null) {
+                if (sft.WillMostLikelyMatchWith(actualexpectedtype) == false) {
+                    throw new SerializationException($"Cannot deserialize type of {actualexpectedtype.FullName} because it cannot correspond losslessly to {sft}.");
+                }
+                return actual;
+            } else {
+                return t.Decode(actual , actualexpectedtype);
+            }
+        }
+
+        private ITypeTranscoder GetTranscoder(SerializedFieldType serfieldtype, Type actualtype)
+        {
+            if (typetranscoders is null) { return null; }
+            foreach (var transcoder in typetranscoders)
+            {
+                if (transcoder.SerializedType == serfieldtype)
                 {
-                    em = a.GetValue(I);
-                    if (em.ToString().Equals(actual)) {
-                        return em;
+                    var t = transcoder.ActualType;
+                    if (transcoder.StrictTypeMatch)
+                    {
+                        if (t == actualtype)
+                        {
+                            return transcoder;
+                        }
+                    }
+                    else
+                    {
+                        if (t.IsInterface) {
+                            if (actualtype.IsClass && !actualtype.IsAbstract && actualtype.ImplementsInterface(t)) { 
+                                return transcoder; 
+                            }
+                        } else if (actualtype.IsTypeOrDerivesFrom(t)) {
+                            return transcoder;
+                        }
                     }
                 }
-                throw new SerializationException($"Cannot find enum constant {actual} in enumeration type {actualexpectedtype.FullName}.");
-            } else {
-                return actual;
             }
+            return null;
+        }
+
+        private ITypeTranscoder GetTranscoder(Type actualtype)
+        {
+            if (typetranscoders is null) { return null; }
+            foreach (var transcoder in typetranscoders)
+            {
+                var t = transcoder.ActualType;
+                if (transcoder.StrictTypeMatch) {
+                    if (t == actualtype)
+                    {
+                        return transcoder;
+                    }
+                } else {
+                    if (t.IsInterface) {
+                        if (actualtype.IsClass && !actualtype.IsAbstract && actualtype.ImplementsInterface(t))
+                        {
+                            return transcoder;
+                        }
+                    } else if (actualtype.IsTypeOrDerivesFrom(t)) {
+                        return transcoder;
+                    }
+                }
+            }
+            return null;
         }
 
         private void BuildFieldInfoCache()
@@ -319,15 +394,6 @@ namespace MP.Serialization
             {
                 return GetSimpleType(fieldtype);
             }
-        }
-
-        private static SerializedFieldInformation EncodeInformation(FieldInfo f)
-        {
-            FieldNameAttribute fnifexist = f.GetCustomAttribute<FieldNameAttribute>();
-            return new(
-                    (fnifexist is not null) ? fnifexist.FieldName : f.Name,
-                    EncodeFieldType(f.FieldType)
-                );
         }
 
         private static IEnumerable<SerializationConstraintAttribute> GetConstraints(FieldInfo f)
@@ -424,6 +490,8 @@ namespace MP.Serialization
             reader = null;
             writer?.Dispose();
             writer = null;
+            typetranscoders?.Clear();
+            typetranscoders = null;
         }
     }
 }

@@ -79,6 +79,24 @@ namespace MP
         /// <inheritdoc />
         public override uint PageSize => Environment.SystemPageSize.ToUInt32();
 
+        /// <inheritdoc />
+        public override Platform Platform
+        {
+            get {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                    return Platform.Windows;
+                } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+                    return Platform.Unix;
+                } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                    return Platform.OSX;
+                } else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)) {
+                    return Platform.BSD;
+                }
+                // Possibly it will be a unix system
+                return Platform.Unix;
+            }
+        }
+
         /// <summary>This call is not supported and will always throw <see cref="NotSupportedException"/>.</summary>
         public override ProcessorArchitecture ProcessorArchitecture
         {

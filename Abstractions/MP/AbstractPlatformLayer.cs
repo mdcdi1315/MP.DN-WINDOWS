@@ -115,6 +115,11 @@ namespace MP
         public abstract System.Boolean HasAdminPriviledges { get; }
 
         /// <summary>
+        /// Gets the platform that this app is running to.
+        /// </summary>
+        public abstract Platform Platform { get; }
+
+        /// <summary>
         /// Gets an environment variable from the current app instance and returns it's value.
         /// </summary>
         /// <param name="name">The name of the environment variable to retrieve.</param>

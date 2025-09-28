@@ -1,6 +1,7 @@
 ﻿
 using System;
 using MP.Graphics.Imaging;
+using MP.Annotations.CodeAnalysis;
 
 namespace MP.Graphics.Windowing
 {
@@ -9,16 +10,20 @@ namespace MP.Graphics.Windowing
     /// Different contexts and OS'es may need a different window implementation; 
     /// that's why this is an abstract class.
     /// </summary>
-    public abstract class Window : IDisposable
+    public abstract class Window : INativeWindow, IDisposable
     {
+        private INativeWindow parent;
         private WindowDispatcher dispatcher;
+        private volatile bool shouldcloseexternalevent;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public Window()
         {
+            parent = null;
             dispatcher = new();
+            shouldcloseexternalevent = false;
         }
 
         /// <summary>
@@ -33,22 +38,32 @@ namespace MP.Graphics.Windowing
         public void Run()
         {
             Create();
-            while (ShouldClose() == false)
-            {
-                OnBeforeDispatching();
-                dispatcher.RunDispatches();
-                OnAfterDispatching();
+            // At least one of two cases must occur
+            try {
+                while ((ShouldClose() | shouldcloseexternalevent) == false)
+                {
+                    OnBeforeDispatching();
+                    dispatcher.RunDispatches();
+                    OnAfterDispatching();
+                }
+            } finally {
+                // Make sure that the state of the object is not corrupted, even on hard failures.
+                shouldcloseexternalevent = false;
             }
         }
 
         /// <summary>
-        /// This method runs every time before the dispatcher starts dispatching the queued methods.
+        /// This method runs every time before the dispatcher starts dispatching the queued methods. <br />
+        /// This method must not throw any exceptions. If it does, the rendering loop will be broken.
         /// </summary>
+        [MustNotReportException]
         protected virtual void OnBeforeDispatching() { }
 
         /// <summary>
-        /// This method runs every time after the dispatcher has dispatched the queued methods.
+        /// This method runs every time after the dispatcher has dispatched the queued methods. <br />
+        /// This method must not throw any exceptions. If it does, the rendering loop will be broken.
         /// </summary>
+        [MustNotReportException]
         protected virtual void OnAfterDispatching() { }
 
         /// <summary>
@@ -76,7 +91,50 @@ namespace MP.Graphics.Windowing
         /// Gets the <see cref="WindowDispatcher"/> instance for this <see cref="Window"/>.
         /// </summary>
         public WindowDispatcher Dispatcher => dispatcher;
-        
+
+        /// <summary>
+        /// Gets the native window descriptor assigned to this window instance.
+        /// </summary>
+        public abstract IntPtr Handle { get; }
+
+        /// <summary>
+        /// Gets or sets the window where this one will be parented to. <br />
+        /// Not having a specific parent window is also valid.
+        /// </summary>
+        public INativeWindow Parent
+        {
+            get => parent;
+            set {
+                ArgumentNullException.ThrowIfNull(parent);
+                parent = value;
+            }
+        }
+
+        /// <summary>
+        /// Hides this <see cref="Window"/> instance from the OS.
+        /// </summary>
+        public abstract void Hide();
+
+        /// <summary>
+        /// Makes a previously hidden <see cref="Window"/> to be visible again.
+        /// </summary>
+        public abstract void Show();
+
+        /// <summary>
+        /// Closes this <see cref="Window"/>, terminating the rendering loop. <br />
+        /// Thread-safe.
+        /// </summary>
+        /// <remarks>
+        /// The responsibility of <see cref="Close"/> is just to terminate the rendering loop, not to dispose the window. <br />
+        /// You must still call the <see cref="Dispose()"/> method to release native resources. <br /> <br />
+        /// 
+        /// When overriding this method, extra care must be taken to ensure that this method invocation is thread-safe. <br />
+        /// It is recommended instead to call the base implementation of this method which does provide a thread-safe way to terminate the rendering loop.
+        /// </remarks>
+        public virtual void Close() {
+            shouldcloseexternalevent = true;
+        }
+
         /// <summary>
         /// Must be provided by extending classes to dispose native resources.
         /// </summary>
@@ -89,6 +147,7 @@ namespace MP.Graphics.Windowing
         public void Dispose()
         {
             try {
+                shouldcloseexternalevent = true;
                 Dispose(true);
             } finally {
                 GC.SuppressFinalize(this);

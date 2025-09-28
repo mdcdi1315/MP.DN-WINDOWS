@@ -13,8 +13,8 @@ namespace MP
     public partial class PlayerWindow : Window
     {
         private ListView lvw;
+        private WaitDialogForm wdf;
         private ListViewMode lastmode;
-        private Dialogs.WaitDialog waitdlg;
         private ContextMenuStrip lvwcms;
         private PlayerWindowUIState state;
         private WindowsRCUEngine backend;
@@ -27,7 +27,6 @@ namespace MP
             state = new();
             backend = new();
             token = null;
-            waitdlg = null;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -54,7 +53,7 @@ namespace MP
             lvw.BeginUpdate();
             lvw.BackColor = Global.ExplorationViewBackColor;
             lvw.ForeColor = Global.ExplorationViewForeColor;
-            lvw.View = System.Windows.Forms.View.Details;
+            lvw.View = View.Details;
             lvw.TileSize = new(15, 15);
             lvw.FullRowSelect = true;
             lvw.MultiSelect = true;
@@ -133,8 +132,8 @@ namespace MP
             backend = null;
             // Exit
             g_26: // Note that resource disposal must be done after all calls to resources have been finished!
-                waitdlg?.Dispose();
-                waitdlg = null;
+                wdf?.Dispose();
+                wdf = null;
                 Global.Resources.Dispose();
                 Global.Resources = null;
         }
@@ -671,14 +670,12 @@ namespace MP
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            RecieveCmd(null, new(CommonSendCommandTypes.ThrowWaitMessage) { MessageData = "Loading settings tree..." });
             SettingsTree.SettingsTreeBuilder stb = null;
             SettingsEditorNew editor = null;
             try {
                 stb = new(Global);
                 stb.Build();
                 editor = new(stb, backend.ExtensionEngineInstance);
-                RecieveCmd(null, new(CommonSendCommandTypes.ClearWaitMessage));
                 editor.ShowDialog();
                 if (editor.ShouldUpdateDevice)
                 {
@@ -689,7 +686,6 @@ namespace MP
                 lvwcms.BackColor = Global.ExplorationViewBackColor;
                 lvwcms.ForeColor = Global.ExplorationViewForeColor;
             } catch (Exception ex) {
-                RecieveCmd(null, new(CommonSendCommandTypes.ClearWaitMessage));
                 MusicPlayerHelper.ShowErrorMessage(
                     "A fatal error occured during Settings window lifecycle. The settings window cannot continue execution."
 #if DEBUG
@@ -1211,7 +1207,7 @@ namespace MP
 
         private void RecieveCmd(System.Object send , SendCommandDataEventArgs eventargs)
         {
-            // Note that the send represents the backend that caused the event to trigger.
+            // Note that the send parameter represents the backend that caused the event to trigger.
             var dispatch = Dispatcher; // Keep the main dispatcher.
             switch (eventargs.CommandType) // Switch through the commands.
             {
@@ -1376,17 +1372,35 @@ namespace MP
                     ModifyContextMenuStrip_LVWCMS();
                     break;
                 case CommonSendCommandTypes.ThrowWaitMessage:
-                    if (waitdlg is null) {
-                        waitdlg = new(eventargs.MessageData, MusicPlayerHelper.WinFormsHandle);
-                        waitdlg.Show();
-                    } else {
-                        waitdlg.Show();
-                        waitdlg.Text = eventargs.MessageData;
-                    }
+                    dispatch.Invoke(new Action<System.String>(CreateWaitDialog) , eventargs.MessageData);
                     break;
                 case CommonSendCommandTypes.ClearWaitMessage:
-                    waitdlg?.Hide();
+                    dispatch.Invoke(new(DestroyWaitDialog));
                     break;
+            }
+        }
+
+        private void CreateWaitDialog(System.String text)
+        {
+            Size se = RenderSize;
+            System.Drawing.Point newlocation = new((int)(Left + se.Width / 2.6), (int)(Top + 100));
+            if (wdf is null) {
+                wdf = new() {
+                    Text = text,
+                    Location = newlocation
+                };
+                wdf.Show(MusicPlayerHelper.WinFormsHandle);
+            } else {
+                wdf.Text = text;
+                wdf.Location = newlocation;
+                wdf.Show();
+            }
+        }
+
+        private void DestroyWaitDialog()
+        {
+            if (wdf is not null) {
+                wdf.Invoke(wdf.Hide);
             }
         }
     }

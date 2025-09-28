@@ -30,6 +30,6 @@ namespace MP.SettingsTree
         /// Gets a function that can be used for appropriately formatting values. <br />
         /// By default, it is set to the ToString method of the object.
         /// </summary>
-        public Func<T, System.String> Formatter => item => item?.ToString();
+        public Func<T, System.String> Formatter => new(SettingsTreeBuilderExtensions.IDynamicValueListProvider_Formatter);
     }
 }

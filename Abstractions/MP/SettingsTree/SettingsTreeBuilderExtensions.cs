@@ -11,6 +11,8 @@ namespace MP.SettingsTree
     /// </summary>
     public static class SettingsTreeBuilderExtensions
     {
+        internal static System.String IDynamicValueListProvider_Formatter<T>(T item) => item?.ToString();
+
         /// <summary>
         /// Gets the actual description string for the specified setting in the settings tree.
         /// </summary>
