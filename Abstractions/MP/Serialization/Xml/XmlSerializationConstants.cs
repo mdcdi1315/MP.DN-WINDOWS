@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+
 namespace MP.Serialization.Xml
 {
     internal static class XmlSerializationConstants
@@ -55,6 +57,48 @@ namespace MP.Serialization.Xml
             SerializedFieldType.Double => "double",
             _ => throw new SerializationException($"This serialized field type is not supported: {sft}")
         };
+
+        /// <summary>
+        /// Gets the corresponding .NET type of the specified serialized field type, returning it or when it is an array it's corresponding array type.
+        /// </summary>
+        /// <param name="sft">The serialized field type to obtain it's corresponding .NET type.</param>
+        /// <returns>The .NET type, corresponding to the specified <see cref="SerializedFieldType"/> value.</returns>
+        public static System.Type GetDotNetType(SerializedFieldType sft)
+        {
+            System.Boolean isarray, isstringdict;
+            SerializedFieldType simple;
+            simple = (isarray = sft.HasFlag(SerializedFieldType.Array)) ? sft & ~SerializedFieldType.Array : sft;
+            simple = (isstringdict = sft.HasFlag(SerializedFieldType.StrictStringDictionary)) ? sft & ~SerializedFieldType.StrictStringDictionary : sft;
+            System.Type build = simple switch
+            {
+                SerializedFieldType.Boolean => typeof(System.Boolean),
+                SerializedFieldType.String => typeof(System.String),
+                SerializedFieldType.Byte => typeof(System.Byte),
+                SerializedFieldType.SByte => typeof(System.SByte),
+                SerializedFieldType.Int16 => typeof(System.Int16),
+                SerializedFieldType.UInt16 => typeof(System.UInt16),
+                SerializedFieldType.Int32 => typeof(System.Int32),
+                SerializedFieldType.UInt32 => typeof(System.UInt32),
+                SerializedFieldType.Int64 => typeof(System.Int64),
+                SerializedFieldType.UInt64 => typeof(System.UInt64),
+                SerializedFieldType.Single => typeof(System.Single),
+                SerializedFieldType.Double => typeof(System.Double),
+                SerializedFieldType.Object => typeof(UninitializedRecord),
+                _ => null,
+            };
+            if (isarray)
+            {
+                return build.MakeArrayType();
+            }
+            else if (isstringdict)
+            {
+                return typeof(IDictionary<,>).MakeGenericType(typeof(System.String), build);
+            }
+            else
+            {
+                return build;
+            }
+        }
 
     }
 }

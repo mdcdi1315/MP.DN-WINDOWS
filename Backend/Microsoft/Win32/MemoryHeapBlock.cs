@@ -80,12 +80,11 @@ namespace Microsoft.Win32
         /// </summary>
         /// <param name="size">The number of bytes to allocate.</param>
         /// <returns>The allocated memory block , returned as a memory block handle.</returns>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="size"/> was not a positive or a zero value.</exception>
-        /// <exception cref="MP.ExceptionSystem.NativeWindowsException">A native error occured.</exception>
         /// <exception cref="OutOfMemoryException">Allocation failed.</exception>
-        public SafeHandles.SafeLibcMemoryHandle Allocate(System.Int32 size)
+        /// <exception cref="MP.ExceptionSystem.NativeWindowsException">A native error occured.</exception>
+        public SafeHandles.SafeLibcMemoryHandle Allocate(System.UInt64 size)
         {
-            if (IsInvalid) { throw new ObjectDisposedException(nameof(MemoryHeap)); }
+            ObjectDisposedException.ThrowIf(IsInvalid, this);
             return new(handle, size);
         }
 
@@ -98,7 +97,7 @@ namespace Microsoft.Win32
         public unsafe System.Boolean IsValid
         {
             get {
-                if (IsInvalid) { throw new ObjectDisposedException(nameof(MemoryHeap)); }
+                ObjectDisposedException.ThrowIf(IsInvalid, this);
                 System.Boolean ret = Interop.Kernel32.HeapValidate(handle, Interop.Kernel32.HeapValidateFlags.None) != Interop.BOOL.FALSE;
                 if (ret == false && flags.HasFlag(MEMHEAPCLASSFLAGS.IsDefaultProcessHeap)) {
                     throw new AccessViolationException("Default process heap corrupted!");

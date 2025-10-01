@@ -59,7 +59,7 @@ namespace System.Buffers
             public unsafe NativeMemoryPoolBlock(NativeMemoryPool pool , System.Int32 size)
             {
                 Occupied = false;
-                Handle = pool.nativeheap.Allocate(size);
+                Handle = pool.nativeheap.Allocate(size.ToUInt32());
                 PointerAddress = new System.IntPtr(Handle.MemoryPointer).ToInt64();
             }
         }

@@ -9,6 +9,10 @@ namespace MP.Serialization
     public enum SerializedFieldType : System.UInt16
     {
         /// <summary>
+        /// The field has an empty value (or <see langword="null"/>).
+        /// </summary>
+        Empty,
+        /// <summary>
         /// The type of the field is another class implementing the <see cref="ISerializableClass"/> interface.
         /// </summary>
         Object,
@@ -61,13 +65,22 @@ namespace MP.Serialization
         /// </summary>
         Double,
         /// <summary>
+        /// Only used when the <see cref="Array"/> flag is defined. <br />
+        /// There are cases that readers cannot find the original numeric type so they return an arbitrary primitive type. Thus, a simple upcast is done by the serialization manager inherently to adapt to the field type. <br />
+        /// However, there are also even rarer cases that it happens to define an array of primitives. <br />
+        /// Thus, if the array does contain for example some shorts and some doubles, this will allow the serialization manager to work as it is expected. <br />
+        /// Note that, for such cases, you have to pass an <see cref="System.Array"/> that is <see cref="System.Object"/> so that to accomondate all the defined primitives. <br />
+        /// The serialization manager will elsewise take care of it and will appropriately transform the array as it is required.
+        /// </summary>
+        MixedPrimitives = 255,
+        /// <summary>
         /// Flag indicating that the field is an array of the specified type.
         /// </summary>
-        Array = 1 << 8,
+        Array = 1 << 9,
         /// <summary>
         /// Flag indicating that the field is a dictionary whose keys are strings and their values are exclusively the one defined in the first 255 values.
         /// </summary>
-        StrictStringDictionary = 1 << 9,
+        StrictStringDictionary = 1 << 10,
         /// <summary>
         /// Defines a constant for the lower bound of the primitive types range. Only used for the API internals.
         /// </summary>

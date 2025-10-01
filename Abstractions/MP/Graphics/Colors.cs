@@ -45,6 +45,13 @@ namespace MP.Graphics
         public static HSLColor FromHsl(this int hsl) => Unsafe.As<int, HSLColor>(ref hsl);
 
         /// <summary>
+        /// Converts any <see cref="IColor"/> instance to a <see cref="FloatColor"/> instance.
+        /// </summary>
+        /// <param name="color">The color to convert.</param>
+        /// <returns>The converted color in floating point format.</returns>
+        public static FloatColor ToFloat(this IColor color) => new(color);
+
+        /// <summary>
         /// Gets a system-defined color that has an ARGB value of #FF66CDAA.
         /// </summary>
         /// <returns>A <see cref="IColor"/> representing a system-defined color.</returns>

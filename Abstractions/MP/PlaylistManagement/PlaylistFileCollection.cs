@@ -149,7 +149,12 @@ namespace MP.PlaylistManagement
         {
             ArgumentNullException.ThrowIfNull(item);
             if (item.Equals(current)) { return false; } // Removing the currently selected playlist item is invalid operation.
-            return list.Remove(item);
+            if (list.Remove(item)) {
+                OnRemove(item);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         /// <summary>
@@ -160,7 +165,9 @@ namespace MP.PlaylistManagement
         public void RemoveAtIndex(int index)
         {
             if (current is not null && current.Index == index) { Interlocked.Exchange(ref current, null); }
+            PlaylistFile pf = list[index];
             list.RemoveAt(index);
+            OnRemove(pf);
         }
 
         /// <summary>
@@ -228,6 +235,13 @@ namespace MP.PlaylistManagement
             old = (cpfd = Interlocked.Exchange(ref current, new(index, list[index]))) is not null ? cpfd.File : null;
             return current.File;
         }
+
+        /// <summary>
+        /// This method is called if any of the Remove methods are called. <br />
+        /// This should be overriden by your implementing class if you need additional behavior to be performed just after the file is removed.
+        /// </summary>
+        /// <param name="file">The file that was removed.</param>
+        protected virtual void OnRemove([DisallowNull] PlaylistFile file) { }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

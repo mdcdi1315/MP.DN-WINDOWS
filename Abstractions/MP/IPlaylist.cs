@@ -1,5 +1,6 @@
 ﻿
 using System;
+using MP.Annotations;
 using System.Collections.Generic;
 
 namespace MP
@@ -7,6 +8,7 @@ namespace MP
     /// <summary>
     /// Defines a Music Player playlist.
     /// </summary>
+    [DeprecatedMayBeRemoved("2.0.0.0")]
     public interface IPlaylist : IDisposable
     {
         /// <summary>

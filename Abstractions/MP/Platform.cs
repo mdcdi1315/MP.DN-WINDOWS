@@ -5,7 +5,7 @@ namespace MP
 {
     /// <summary>
     /// Defines common platform names. <br />
-    /// This is to be used by the <see cref="SystemInfo"/> class so that users of it can identify the OS 
+    /// This is to be used by the <see cref="SystemInfo"/> class so that users of it can identify the OS they are running into.
     /// </summary>
     public enum Platform : System.Byte
     {

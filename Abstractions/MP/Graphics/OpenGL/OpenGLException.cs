@@ -15,8 +15,8 @@ namespace MP.Graphics.OpenGL
         public OpenGLException() : base() { }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="OpenGLException"/> class and with the specified 
-        /// detailed error message.
+        /// Creates a new instance of the <see cref="OpenGLException"/> 
+        /// class with the specified detailed error message that is the cause of this exception.
         /// </summary>
         /// <param name="message">The error message to show.</param>
         public OpenGLException(System.String message) : base(message) { }

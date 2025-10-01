@@ -211,5 +211,13 @@ namespace MP
         /// <returns>The memory block of the size requested in the <paramref name="size"/> parameter.</returns>
         /// <exception cref="System.OutOfMemoryException">Not enough memory to create the memory handle.</exception>
         public static IMemoryHandle CreateNativeMemory(System.UInt64 size) => GetMemoryHandleFactory().CreateMemoryHandle(size);
+
+        /// <summary>
+        /// Creates a new native memory handle of the specified size, and returns it.
+        /// </summary>
+        /// <param name="size">The size of the newly created memory handle.</param>
+        /// <returns>The memory block of the size requested in the <paramref name="size"/> parameter.</returns>
+        /// <exception cref="System.OutOfMemoryException">Not enough memory to create the memory handle.</exception>
+        public static IMemoryHandle CreateNativeMemory(System.Int32 size) => GetMemoryHandleFactory().CreateMemoryHandle(size.ToUInt64());
     }
 }

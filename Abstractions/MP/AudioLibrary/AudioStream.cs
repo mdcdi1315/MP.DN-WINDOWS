@@ -103,7 +103,7 @@ namespace MP.AudioLibrary
         /// as.CurrentTimeInvalidated += p.Invalidate;
         /// </code>
         /// </remarks>
-        /// <param name="provider">The invalidatable audio provider to subsribe it's invalidate method</param>
+        /// <param name="provider">The invalidatable audio provider to subscribe it's invalidate method</param>
         [Throws(typeof(ArgumentNullException))]
         public void SubscribeProviderOnCurrentTimeInvalidated(IInvalidatableAudioProvider provider)
         {
@@ -123,7 +123,7 @@ namespace MP.AudioLibrary
         /// as.CurrentTimeInvalidated -= p.Invalidate;
         /// </code>
         /// </remarks>
-        /// <param name="provider">The invalidatable audio provider to unsubsribe it's invalidate method</param>
+        /// <param name="provider">The invalidatable audio provider to unsubscribe it's invalidate method</param>
         [Throws(typeof(ArgumentNullException))]
         public void UnsubsribeProviderOnCurrentTimeInvalidated(IInvalidatableAudioProvider provider)
         {

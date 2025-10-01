@@ -15,21 +15,23 @@ namespace MP
     // I will not mark this with NativeLayer attribute, since it uses API's defined by .NET itself.
     public sealed class DefaultPlatformLayer : AbstractPlatformLayer
     {
+        private Platform currentplatform;
         private InteropServicesMemoryFactory mf;
+        private ProcessorArchitecture architecture;
 
         private sealed class InteropServicesMemoryFactory : MemoryHandleFactory
         {
             private sealed unsafe class DefaultMemoryHandle : SafeBaseMemoryHandle
             {
-                private int size;
+                private ulong size;
 
                 public DefaultMemoryHandle(System.UIntPtr size)
                 {
-                    this.size = size.ToUInt32().ToInt32();
+                    this.size = size;
                     handle = new(NativeMemory.Alloc(size));
                 }
 
-                public override int MemoryLength => size;
+                public override int MemoryLength => size.ToInt32();
 
                 protected override bool ReleaseHandle()
                 {
@@ -47,6 +49,32 @@ namespace MP
         /// Destroys internal state used by the platform layer.
         /// </summary>
         protected internal override void UnloadLayer() => mf = null;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultPlatformLayer"/> class.
+        /// </summary>
+        public DefaultPlatformLayer() {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                currentplatform = Platform.Windows;
+            } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+                currentplatform = Platform.Unix;
+            } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                currentplatform = Platform.OSX;
+            } else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)) {
+                currentplatform = Platform.BSD;
+            } else {
+                // Possibly it will be a unix system
+                currentplatform = Platform.Unix;
+            }
+            architecture = RuntimeInformation.OSArchitecture switch {
+                Architecture.X86 => ProcessorArchitecture.X86,
+                Architecture.X64 => ProcessorArchitecture.AMD64,
+                Architecture.Arm => ProcessorArchitecture.ARM32,
+                Architecture.Arm64 => ProcessorArchitecture.ARM64,
+                Architecture.Armv6 => ProcessorArchitecture.ARM32,
+                _ => throw new NotImplementedException($"NOT IMPLEMENTED FOR THIS CASE: {RuntimeInformation.OSArchitecture}")
+            };
+        }
 
         /// <inheritdoc />
         public override MemoryHandleFactory GetMemoryHandleFactory() => mf ??= new InteropServicesMemoryFactory();
@@ -80,35 +108,10 @@ namespace MP
         public override uint PageSize => Environment.SystemPageSize.ToUInt32();
 
         /// <inheritdoc />
-        public override Platform Platform
-        {
-            get {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-                    return Platform.Windows;
-                } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
-                    return Platform.Unix;
-                } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-                    return Platform.OSX;
-                } else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)) {
-                    return Platform.BSD;
-                }
-                // Possibly it will be a unix system
-                return Platform.Unix;
-            }
-        }
+        public override Platform Platform => currentplatform;
 
         /// <summary>This call is not supported and will always throw <see cref="NotSupportedException"/>.</summary>
-        public override ProcessorArchitecture ProcessorArchitecture
-        {
-            get => RuntimeInformation.OSArchitecture switch {
-                Architecture.X86 => ProcessorArchitecture.X86,
-                Architecture.X64 => ProcessorArchitecture.AMD64,
-                Architecture.Arm => ProcessorArchitecture.ARM32,
-                Architecture.Arm64 => ProcessorArchitecture.ARM64,
-                Architecture.Armv6 => ProcessorArchitecture.ARM32,
-                _ => throw new NotSupportedException($"Processor architecture type {RuntimeInformation.OSArchitecture} is not supported.")
-            };
-        }
+        public override ProcessorArchitecture ProcessorArchitecture => architecture;
 
         /// <summary>This call is not supported and will always return <see langword="false"/>.</summary>
         public override bool HasAdminPriviledges => false;

@@ -1,10 +1,12 @@
 ﻿
+using MP.Annotations;
 
 namespace MP
 {
     /// <summary>
     /// Defines a single string property as it is saved in a <see cref="SavedDataTag"/> instance.
     /// </summary>
+    [DeprecatedMayBeRemoved("2.0.0.0")]
     public sealed class SavedDataTagProperty
     {
         private System.String name, value;

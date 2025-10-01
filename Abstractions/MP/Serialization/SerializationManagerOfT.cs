@@ -1,10 +1,10 @@
-
+﻿
 using System;
 using MP.Utilities;
-using System.Reflection;
+using System.Threading;
 using System.Collections.Generic;
+using MP.Annotations.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace MP.Serialization
 {
@@ -19,33 +19,39 @@ namespace MP.Serialization
     public sealed class SerializationManager<T> : IDisposable
         where T : notnull, ISerializableClass
     {
-        private System.Type typeinfo;
-        private ISerializedClassWriter writer;
-        private ISerializedClassReader reader;
+        private IRecordWriter writer;
+        private IRecordReader reader;
         private List<ITypeTranscoder> typetranscoders;
-        private Dictionary<System.String, FieldInfo> fieldinfocache;
+        private Dictionary<Type, IList<SerializationManagerUtilities.SerializationManagerFieldInformation>> typecache;
 
         /// <summary>
-        /// Creates a new empty instance of the <see cref="SerializationManager{T}"/> class.
+        /// Creates a new empty instance of the <see cref="SerializationManager{T}"/> class. <br />
+        /// The constructor does also initialize the serialization cache so be prepared for premature <see cref="SerializationException"/>s.
         /// </summary>
+        /// <exception cref="SerializationException">The serialization cache could not be initialized.</exception>
+        [Throws(typeof(SerializationException))]
         public SerializationManager()
         {
-            typeinfo = typeof(T);
             reader = null;
             writer = null;
-            fieldinfocache = null;
             typetranscoders = null;
+            typecache = new(15); // Assume that many different class fields are used - specify a capacity of 15 so.
+            // Generate the record information cache
+            SerializationManagerUtilities.GenerateRecordInformation(typeof(T), typecache);
+            // Optimize cache size after the cache has been successfully determined.
+            // It will not be changed again throughout the lifetime of the manager.
+            typecache.TrimExcess(); 
         }
 
         /// <summary>
-        /// Gets or sets the serialized class reader to use throughout the entire life of this <see cref="SerializationManager{T}"/> class instance.
+        /// Gets or sets the record reader to use throughout the entire life of this <see cref="SerializationManager{T}"/> class instance.
         /// </summary>
-        public ISerializedClassReader Reader
+        /// <exception cref="InvalidOperationException">Attempted to set a new record reader but a record reader was already provided to the instance.</exception>
+        public IRecordReader Reader
         {
             [return: MaybeNull]
             get => reader;
-            set
-            {
+            set {
                 ArgumentNullException.ThrowIfNull(value);
                 if (reader is not null)
                 {
@@ -56,9 +62,10 @@ namespace MP.Serialization
         }
 
         /// <summary>
-        /// Gets or sets the serialized class writer to use throughout the entire life of this <see cref="SerializationManager{T}"/> class instance.
+        /// Gets or sets the record writer to use throughout the entire life of this <see cref="SerializationManager{T}"/> class instance.
         /// </summary>
-        public ISerializedClassWriter Writer
+        /// <exception cref="InvalidOperationException">Attempted to set a new record writer but a record writer was already provided to the instance.</exception>
+        public IRecordWriter Writer
         {
             [return: MaybeNull]
             get => writer;
@@ -100,12 +107,7 @@ namespace MP.Serialization
             {
                 throw new InvalidOperationException("A serialized class writer is required, but such a writer is not provided yet.");
             }
-            writer.Initialize(destination);
-            try {
-                EncodeClass(obj, null, null);
-            } finally {
-                writer.FinalizeWriteOp();
-            }
+            writer.WriteNew(destination, EncodeRecord(obj));
         }
 
         /// <summary>
@@ -124,374 +126,255 @@ namespace MP.Serialization
             {
                 throw new InvalidOperationException("A serialized class reader is required, but such a reader is not provided yet.");
             }
-            BuildFieldInfoCache();
-            reader.Initialize(source);
-            DecodeClass(obj , null , null);
+            reader.InitializeForNewPayload(source);
+            try {
+                DecodeRecord(obj, reader.Payload);
+            } finally {
+                reader.EndPayloadDecoding();
+            }
         }
 
         #region Private implementation details
 
-        private void EncodeClass(System.Object obj, ISerializedClassWriter writer, Type typeinfo)
+        private Record EncodeRecord(System.Object objectref)
         {
-            writer ??= this.writer;
-            typeinfo ??= this.typeinfo;
+            var fielddata = LookupCache(objectref.GetType());
+            Record.Builder builder = new(fielddata.Count);
 
             System.Object value;
-            ITypeTranscoder tt;
-            FieldNameAttribute fna;
-            SerializedFieldInformation sfi;
-            SerializationException serexcept;
+            System.Boolean isarray;
+            Type inspecting , temp;
+            SerializedField sf;
 
-            foreach (var f in typeinfo.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var fieldi in fielddata)
             {
-                value = f.GetValue(obj);
-                tt = GetTranscoder(f.FieldType);
-                fna = f.GetCustomAttribute<FieldNameAttribute>();
-                sfi = new(
-                        (fna is not null) ? fna.FieldName : f.Name,
-                        tt is null ? EncodeFieldType(f.FieldType) : tt.SerializedType
-                    );
-                fna = null;
-                if (tt is not null) {
-                    if (
-                        tt.SerializedType == SerializedFieldType.Object ||
-                        tt.SerializedType.HasFlag(SerializedFieldType.Array) ||
-                        tt.SerializedType.HasFlag(SerializedFieldType.StrictStringDictionary)
-                    ) {
-                        throw new InvalidTypeTranscoderConfigurationException("The type transcoder must only accept primitive types." , tt);
-                    }
-                    writer.AddField(sfi, tt.Encode(value));
-                } else if (IsPrimitiveOrPrimitiveArray(sfi.Type)) {
-                    if (GetAndApplyConstraints(f, sfi, value, ConstraintApplicationTime.Writing, out serexcept))
-                    {
-                        writer.AddField(sfi, value);
-                    }
-                    else
-                    {
-                        throw new SerializationException("Specified class instance cannot be serialized because one of the constraints were failed.", serexcept);
+                if (SerializationManagerUtilities.IsPrimitiveOrPrimitiveArray(fieldi.FieldType))
+                {
+                    ITypeTranscoder tt = SerializationManagerUtilities.GetTranscoder(fieldi.FieldType, typetranscoders);
+                    if (tt is not null) {
+                        if (tt.SerializedType == SerializedFieldType.Object ||
+                            (tt.SerializedType & SerializedFieldType.Array) == SerializedFieldType.Object) {
+                            throw new InvalidTypeTranscoderConfigurationException("The type transcoder must only accept primitive types, or arrays of them.", tt);
+                        }
+                        value = tt.Encode(fieldi.GetValue(objectref));
+                    } else {
+                        value = fieldi.GetValue(objectref);
                     }
                 } else {
-                    var wr = writer.GetEmptyWriter();
-                    EncodeClass(value, wr, f.FieldType);
-                    writer.AddField(sfi, wr);
+                    value = fieldi.GetValue(objectref);
+                }
+
+                if (value is null)
+                {
+                    builder.Add(new SerializedField(fieldi.Name, null));
+                    continue;
+                }
+
+                temp = value.GetType();
+
+                if (isarray = temp.IsArray) {
+                    inspecting = temp.GetElementType();
+                } else {
+                    inspecting = temp;
+                }
+
+                if (inspecting.ImplementsInterface(typeof(ISerializableClass)))
+                {
+                    if (isarray) {
+                        Array arr = fieldi.GetValue(objectref) as Array;
+                        Record[] records = new Record[arr.LongLength];
+                        for (long I = 0; I < arr.LongLength; I++)
+                        {
+                            records[I] = EncodeRecord(arr.GetValue(I));
+                        }
+                        sf = new(fieldi.Name, records);
+                        fieldi.ApplyConstraints(arr, sf.Type, ConstraintApplicationTime.Writing);
+                        builder.Add(sf);
+                    } else {
+                        System.Object v = fieldi.GetValue(objectref);
+                        sf = new SerializedField(fieldi.Name, EncodeRecord(v));
+                        fieldi.ApplyConstraints(v, sf.Type, ConstraintApplicationTime.Writing);
+                        builder.Add(sf);
+                    }
+                } else {
+                    sf = new SerializedField(fieldi.Name, value);
+                    fieldi.ApplyConstraints(sf.Value, sf.Type, ConstraintApplicationTime.Writing);
+                    builder.Add(sf);
                 }
             }
+
+            return builder.Build();
         }
 
-        private void DecodeClass(System.Object obj , ISerializedClassReader reader , IDictionary<String , FieldInfo> fieldinfocache)
+        private void DecodeRecord(System.Object objectref , Record retrieved)
         {
-            SerializationException except;
-            SerializedFieldInformation sfi;
-            reader ??= this.reader;
-            fieldinfocache ??= this.fieldinfocache;
-            while (reader.MoveNext())
+            foreach (var fieldi in LookupCache(objectref.GetType()))
             {
-                sfi = reader.GetFieldInformation();
-                if (fieldinfocache.TryGetValue(sfi.Name, out var fi) == false)
+                var fieldname = fieldi.Name;
+                foreach (var r in retrieved)
                 {
-                    throw new SerializationException($"Cannot find an associated field in the field table of the class.\nField Name: {sfi.Name}");
-                }
-                var ft = fi.FieldType;
-                System.Object val = reader.DecodeField();
-                if (sfi.Type.HasFlag(SerializedFieldType.StrictStringDictionary)) {
-                    throw new NotSupportedException("This bit flag is not currently supported.");
-                } else if (sfi.Type.HasFlag(SerializedFieldType.Array)) {
-                    if (val is not Array a) {
-                        throw new InvalidSerializationReaderLayoutException("Expected an ISerializedClassReader array, but no such array was provided.");
-                    }
-                    int len = a.GetLength(0);
-                    Array a2 = Array.CreateInstance(ft.GetElementType(), len);
-                    if ((sfi.Type & ~SerializedFieldType.Array) == SerializedFieldType.Object) {
-                        System.Object el;
-                        for (int I = 0; I < len; I++)
+                    if (fieldname == r.Name) 
+                    {  
+                        SerializedFieldType sft = r.Type;
+                        System.Boolean isarray = sft.HasFlag(SerializedFieldType.Array);
+                        if (SerializationManagerUtilities.IsPrimitiveOrPrimitiveArray(sft))
                         {
-                            el = a.GetValue(I);
-                            if (el is ISerializedClassReader anotherreader) {
-                                try {
-                                    System.Object reference = Activator.CreateInstance(ft, true);
-                                    // Apply recursive references
-                                    DecodeClass(reference, anotherreader, GetFieldInfoCacheFor(ft));
-                                    a2.SetValue(reference, I);
-                                } catch (TargetInvocationException tie) {
-                                    throw new SerializationException($"Cannot apply an object for the field named as {sfi.Name} because the object of type {fi.FieldType.FullName} cannot be created due to an error in it's internal constructor.", tie.InnerException);
-                                } catch (MemberAccessException mae) {
-                                    throw new SerializationException($"Cannot apply an object for the field named as {sfi.Name} because the object of type {fi.FieldType.FullName} cannot be created because of a constructor access exception.", mae);
+                            System.Object value = r.Value;
+
+                            if (isarray && (sft & ~SerializedFieldType.Array) == SerializedFieldType.MixedPrimitives)
+                            {
+                                // An array of primitive numbers of unknown types. We need to translate each one as being of the underlying type.
+                                Array original = value as Array;
+                                var ft = fieldi.FieldType.GetElementType();
+                                Array finalarray = Array.CreateInstance(ft, original.LongLength);
+                                for (long I = 0; I < original.LongLength; I++)
+                                {
+                                    finalarray.SetValue(SerializationManagerUtilities.SetAndGet(ft, original.GetValue(I)), I);
                                 }
+                                fieldi.SetValue(objectref, finalarray);
                             } else {
-                                throw new InvalidSerializationReaderLayoutException("Expected to return a new ISerializedClassReader instance, but no such instance was found.");
+                                // A primitive or array of known primitives. Thus, we can directly set to the underlying field.
+                                fieldi.SetValue(objectref, value);
                             }
-                        }
-                    } else {
-                        var t = ft.GetElementType();
-                        for (int I = 0; I < len; I++)
-                        {
-                            a2.SetValue(DecodeFieldData(sfi.Type, a.GetValue(I) , t), I);
-                        }
-                    }
-                    // Apply the array object
-                    fi.SetValue(obj, a2);
-                } else if (sfi.Type == SerializedFieldType.Object) {
-                    if (val is ISerializedClassReader anotherreader) {
-                        if (ft.ImplementsInterface(typeof(ISerializableClass)) == false)
-                        {
-                            throw new SerializationException($"The type named as {ft.FullName} does not implement the ISerializableClass interface.");
-                        }
-                        try {
-                            System.Object reference = Activator.CreateInstance(ft, true);
-                            // Apply recursive references
-                            DecodeClass(reference, anotherreader, GetFieldInfoCacheFor(ft));
-                            fi.SetValue(obj, reference);
-                        } catch (TargetInvocationException tie) {
-                            throw new SerializationException($"Cannot apply an object for the field named as {sfi.Name} because the object of type {fi.FieldType.FullName} cannot be created due to an error in it's internal constructor.", tie.InnerException);
-                        } catch (MemberAccessException mae) {
-                            throw new SerializationException($"Cannot apply an object for the field named as {sfi.Name} because the object of type {fi.FieldType.FullName} cannot be created because of a constructor access exception.", mae);
-                        }
-                    } else {
-                        throw new InvalidSerializationReaderLayoutException("Expected to return a new ISerializedClassReader instance, but no such instance was found.");
-                    }
-                } else {
-                    val = DecodeFieldData(sfi.Type, val , ft);
-                    fi.SetValue(obj, val);
-                    // HACK: This allows correct numeric type retrieval.
-                    // If I was directly using the val reference, the constraint would indefinitely fail due to type mismatch.
-                    if (GetAndApplyConstraints(fi, sfi, fi.GetValue(obj), ConstraintApplicationTime.Reading, out except) == false)
-                    {
-                        throw new SerializationException("Cannot apply an constraint for the current class field.", except);
-                    }
-                }
-            }
-        }
+                            value = fieldi.GetValue(objectref); // HACK: I am doing this so that widening conversions can appropriately work.
 
-        private System.Object DecodeFieldData(SerializedFieldType sft, System.Object actual , Type actualexpectedtype)
-        {
-            ITypeTranscoder t = GetTranscoder(sft, actualexpectedtype);
-            if (t is null) {
-                if (sft.WillMostLikelyMatchWith(actualexpectedtype) == false) {
-                    throw new SerializationException($"Cannot deserialize type of {actualexpectedtype.FullName} because it cannot correspond losslessly to {sft}.");
-                }
-                return actual;
-            } else {
-                return t.Decode(actual , actualexpectedtype);
-            }
-        }
-
-        private ITypeTranscoder GetTranscoder(SerializedFieldType serfieldtype, Type actualtype)
-        {
-            if (typetranscoders is null) { return null; }
-            foreach (var transcoder in typetranscoders)
-            {
-                if (transcoder.SerializedType == serfieldtype)
-                {
-                    var t = transcoder.ActualType;
-                    if (transcoder.StrictTypeMatch)
-                    {
-                        if (t == actualtype)
-                        {
-                            return transcoder;
-                        }
-                    }
-                    else
-                    {
-                        if (t.IsInterface) {
-                            if (actualtype.IsClass && !actualtype.IsAbstract && actualtype.ImplementsInterface(t)) { 
-                                return transcoder; 
+                            // Type transcoding works only on top of the primitive types and their arrays
+                            ITypeTranscoder tt = SerializationManagerUtilities.GetTranscoder(sft, fieldi.FieldType, typetranscoders);
+                            if (tt is not null) {
+                                // A type transcoder was found for this field, use it
+                                fieldi.SetValue(objectref , value = tt.Decode(value, fieldi.FieldType));
+                                sft = tt.SerializedType;
+                                // Update the value, see below why
+                                isarray = sft.HasFlag(SerializedFieldType.Array);
                             }
-                        } else if (actualtype.IsTypeOrDerivesFrom(t)) {
-                            return transcoder;
-                        }
-                    }
-                }
-            }
-            return null;
-        }
 
-        private ITypeTranscoder GetTranscoder(Type actualtype)
-        {
-            if (typetranscoders is null) { return null; }
-            foreach (var transcoder in typetranscoders)
-            {
-                var t = transcoder.ActualType;
-                if (transcoder.StrictTypeMatch) {
-                    if (t == actualtype)
-                    {
-                        return transcoder;
-                    }
-                } else {
-                    if (t.IsInterface) {
-                        if (actualtype.IsClass && !actualtype.IsAbstract && actualtype.ImplementsInterface(t))
+                            // Apply the constraints now.
+                            fieldi.ApplyConstraints(value, sft, ConstraintApplicationTime.Reading);
+                        } else if (sft == SerializedFieldType.Object || (sft & ~SerializedFieldType.Array) == SerializedFieldType.Object) 
                         {
-                            return transcoder;
+                            // We have another Record to decode.
+                            // We have two seperate cases, one being an array of records, or it is just another record.
+                            if (isarray) {
+                                Record[] records = r.RecordArrayValue;
+                                Array arr = Array.CreateInstance(fieldi.FieldType, records.LongLength);
+                                for (long I = 0; I < records.LongLength; I++)
+                                {
+                                    // We must apply DecodeInnerRecord to each one record.
+                                    arr.SetValue(DecodeInnerRecord(records[I], fieldi , true) , I);
+                                }
+                                fieldi.ApplyConstraints(arr , sft, ConstraintApplicationTime.Reading);
+                                fieldi.SetValue(objectref, arr);
+                            } else {
+                                System.Object dc = DecodeInnerRecord(r.RecordValue, fieldi);
+                                fieldi.ApplyConstraints(dc , sft, ConstraintApplicationTime.Reading);
+                                fieldi.SetValue(objectref, dc);
+                            }
+                        } else {
+                            // If reached this, it means that the serialization reader has somehow returned invalid
+                            // data and does not implement correctly the serialization model. We should throw.
+
+                            throw new InvalidSerializationReaderLayoutException($"Cannot determine what to do for field {r.Name} (Actual: {fieldi.ActualName}) with value {r.Value}. Do you have coded correctly your reader implementation?");
                         }
-                    } else if (actualtype.IsTypeOrDerivesFrom(t)) {
-                        return transcoder;
-                    }
-                }
-            }
-            return null;
-        }
 
-        private void BuildFieldInfoCache()
-        {
-            if (fieldinfocache is not null) { return; }
-            fieldinfocache = GetFieldInfoCacheFor(typeinfo);
-        }
-
-        private static Dictionary<System.String, FieldInfo> GetFieldInfoCacheFor(Type type)
-        {
-            FieldNameAttribute fnifexist;
-            Dictionary<System.String, FieldInfo> dict = new(4);
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                fnifexist = field.GetCustomAttribute<FieldNameAttribute>();
-                dict.Add((fnifexist is not null) ? fnifexist.FieldName : field.Name, field);
-            }
-            return dict;
-        }
-
-        private static System.Boolean IsPrimitiveOrPrimitiveArray(SerializedFieldType sft)
-        {
-            if (sft.HasFlag(SerializedFieldType.Array))
-            {
-                sft &= ~SerializedFieldType.Array;
-            }
-            return sft >= SerializedFieldType.PRIMITIVE_TYPES_START && sft <= SerializedFieldType.PRIMITIVE_TYPES_END;
-        }
-
-        private static SerializedFieldType GetSimpleType(System.Type ft)
-        {
-            if (ft.IsEnum) {
-                // For enumerations, the constant's name is instead saved
-                return SerializedFieldType.String;
-            }
-            return ft.FullName switch {
-                "System.String" => SerializedFieldType.String,
-                "System.Boolean" => SerializedFieldType.Boolean,
-                "System.Byte" => SerializedFieldType.Byte,
-                "System.SByte" => SerializedFieldType.SByte,
-                "System.Int16" => SerializedFieldType.Int16,
-                "System.UInt16" => SerializedFieldType.UInt16,
-                "System.Int32" => SerializedFieldType.Int32,
-                "System.UInt32" => SerializedFieldType.UInt32,
-                "System.Int64" => SerializedFieldType.Int64,
-                "System.UInt64" => SerializedFieldType.UInt64,
-                "System.Single" => SerializedFieldType.Single,
-                "System.Double" => SerializedFieldType.Double,
-                _ => 0
-            };
-        }
-
-        private static SerializedFieldType EncodeFieldType(Type fieldtype)
-        {
-            if (fieldtype.IsArray)
-            {
-                return GetSimpleType(fieldtype.GetElementType()) | SerializedFieldType.Array;
-            }
-            else if (fieldtype.ImplementsInterface(typeof(ISerializableClass)))
-            {
-                return SerializedFieldType.Object;
-            }
-            else
-            {
-                return GetSimpleType(fieldtype);
-            }
-        }
-
-        private static IEnumerable<SerializationConstraintAttribute> GetConstraints(FieldInfo f)
-        {
-            foreach (var attr in f.GetCustomAttributes())
-            {
-                if (attr is SerializationConstraintAttribute sa) { yield return sa; }
-            }
-        }
-
-        private delegate System.Boolean IsSatisfiedConstraintDelegate(SerializationConstraintAttribute attr, System.Object val, out SerializationException except);
-
-        private static System.Boolean EnumerateConstraints(
-            FieldInfo f,
-            System.Object value,
-            SerializedFieldType sft,
-            ConstraintApplicationTime apptime,
-            IsSatisfiedConstraintDelegate @delegate,
-            out SerializationException except)
-        {
-            except = null;
-            System.Boolean cannotbeappliedstop;
-            foreach (var constraint in GetConstraints(f))
-            {
-                if (constraint.AppliesDuring == apptime || constraint.AppliesDuring == ConstraintApplicationTime.Both) { continue; }
-                cannotbeappliedstop = true;
-                foreach (var applied in constraint.AppliesTo)
-                {
-                    if (applied == sft)
-                    {
-                        cannotbeappliedstop = false;
+                        fieldname = null; // Indicating that field set was succeeded. See below why.
                         break;
                     }
                 }
-                if (cannotbeappliedstop) { continue; }
-                if (@delegate(constraint, value, out except) == false)
-                {
-                    except ??= new SerializationException($"Constraint of type {constraint.GetType().Name} failed for object with value {value}.");
-                    return false;
+                if (fieldname is not null) {
+                    // If the field was not set successfully and we have an optional value for it, set it.
+                    // Otherwise fail.
+                    if (fieldi.DefaultValue is not null) {
+                        fieldi.SetValue(objectref, fieldi.DefaultValue); // Notice that on optional setting , the constraints do not apply for various reasons.
+                    } else {
+                        throw new SerializationException($"The field with name {fieldname} is required and cannot be found in the serialized record.");
+                    }
                 }
             }
-            return true;
         }
 
-        private static System.Boolean ArrayConstraintTest(SerializationConstraintAttribute attr, System.Object value, out SerializationException except)
+        private Object DecodeInnerRecord(Record value , SerializationManagerUtilities.SerializationManagerFieldInformation originalfieldinfo , System.Boolean arraymode = false)
         {
-            except = null;
-            SerializationException e;
-            Array arr = value as Array;
-            int len = arr.GetLength(0);
-            for (int I = 0; I < len; I++)
-            {
-                if (attr.IsSatisfied(arr.GetValue(I), out e) == false)
+            System.Object o;
+            Type fieldtype = arraymode ? originalfieldinfo.FieldType.GetElementType() : originalfieldinfo.FieldType;
+            Type[] bindings = originalfieldinfo.FieldDerivedTypeBindings;
+            if (bindings.Length == 0) {
+                o = SerializationManagerUtilities.CreateObjectOfType(fieldtype);
+                DecodeRecord(o, value); // No bindings found or detected thus directly decode.
+                return o;
+            } else { // We must do type binding checks
+                // For this to work we must select a candidate that has the most fields as 'defined'.
+                // That's why we will select that class type that defines the most fields.
+
+                // A 'max' variable indicating the best candidate
+                // By default, it is set to the count of the base type (so that the derived entries can actually make a match).
+                int bestcandidatefieldcount = LookupCache(fieldtype).Count; 
+                int bestcandidatepos = -1; // The exact position of the candidate in the 'bindings' array. -1 indicates that no such candidate was found.
+                
+                for (int I = 0; I < bindings.Length; I++)
                 {
-                    except = new($"Serialization constraint failed for the array element at zero-based index {I}.", e);
-                    return false;
+                    int fc = 0; // Field count
+                    var fi = LookupCache(bindings[I]);
+                    foreach (var recfield in value)
+                    {
+                        foreach (var fieldinf in fi)
+                        {
+                            if (recfield.Name == fieldinf.Name) {
+                                fc++;
+                                break; // Found the field in the record, continue to see other fields as well.
+                            }
+                        }
+                    }
+                    // Check, is this a better candidate than the previous one defined?
+                    if (fc > bestcandidatefieldcount) {
+                        bestcandidatefieldcount = fc;
+                        bestcandidatepos = I;
+                    }
                 }
+                
+                if (bestcandidatepos > -1) {
+                    // We have a best candidate, use that instead to decode the record.
+                    o = SerializationManagerUtilities.CreateObjectOfType(bindings[bestcandidatepos]);
+                } else {
+                    // We do not have such , it is possibly the pre-defined object type of the field.
+                    o = SerializationManagerUtilities.CreateObjectOfType(fieldtype);
+                }
+
+                // Now, with all these information , we can decode the record.
+                DecodeRecord(o, value);
+                
+                return o;
             }
-            return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static System.Boolean ElementConstraintTest(SerializationConstraintAttribute attr, System.Object value, out SerializationException except) => attr.IsSatisfied(value, out except);
-
-        private static System.Boolean GetAndApplyConstraints(FieldInfo f,
-            SerializedFieldInformation sfi, System.Object value,
-            ConstraintApplicationTime apptime,
-            out SerializationException except)
+        private IList<SerializationManagerUtilities.SerializationManagerFieldInformation> LookupCache(Type type)
         {
-            System.Boolean isarray;
-            SerializedFieldType sft;
-            except = null;
-            if (isarray = sfi.Type.HasFlag(SerializedFieldType.Array))
-            {
-                sft = sfi.Type & ~SerializedFieldType.Array;
+            if (typecache.TryGetValue(type, out var list)) {
+                return list;
             }
-            else
-            {
-                sft = sfi.Type;
-            }
-            return EnumerateConstraints(f, value, sft, apptime, isarray ? new(ArrayConstraintTest) : new(ElementConstraintTest), out except);
+            throw new SerializationException($"Cache NOT COMPLETE!!!! The type {type.FullName} was not found in the serialization cache.");
         }
 
         #endregion
 
         /// <summary>
-        /// Disposes this <see cref="SerializationManager{T}"/> instance, destroying any reader and writer instances used. <br />
-        /// Must be called after all threads involving serialization operations have been completed.
+        /// Disposes this <see cref="SerializationManager{T}"/>. <br />
+        /// Thread-safe.
         /// </summary>
         public void Dispose()
         {
-            typeinfo = null;
-            reader?.Dispose();
-            reader = null;
-            writer?.Dispose();
-            writer = null;
-            typetranscoders?.Clear();
-            typetranscoders = null;
+            try {
+                Monitor.Enter(this);
+                writer?.Dispose();
+                writer = null;
+                reader?.Dispose();
+                reader = null;
+                typecache?.Clear();
+                typecache = null;
+                typetranscoders?.Clear();
+                typetranscoders = null;
+            } finally {
+                Monitor.Exit(this);
+            }
         }
     }
 }

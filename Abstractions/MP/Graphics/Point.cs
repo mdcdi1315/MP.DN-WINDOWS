@@ -49,11 +49,26 @@ namespace MP.Graphics
         public readonly Point Offset(int dx, int dy) => new(X + dx, Y + dy);
 
         /// <summary>
+        /// Offsets a point diagnonally. <br />
+        /// This is like calling <see cref="Offset(int, int)"/> passing to both arguments the <paramref name="offset"/> parameter.
+        /// </summary>
+        /// <param name="offset">The displacement offset to use.</param>
+        /// <returns>A new <see cref="Point"/> instance representing the diagonally offseted point.</returns>
+        public readonly Point OffsetDiagonally(int offset) => new(X + offset, Y + offset);
+
+        /// <summary>
         /// Offsets a point by another <see cref="Point"/> instance.
         /// </summary>
         /// <param name="other">The other <see cref="Point"/> instance that the current <see cref="Point"/> will be offseted by.</param>
         /// <returns>A new <see cref="Point"/> instance representing the offseted point.</returns>
         public readonly Point Offset(Point other) => new(X + other.X, Y + other.Y);
+
+        /// <summary>
+        /// Offsets a point by a <see cref="Size"/> instance.
+        /// </summary>
+        /// <param name="other">The <see cref="Size"/> instance to offset this point by.</param>
+        /// <returns>A new <see cref="Point"/> structure representing the offseted point by adding the specified size.</returns>
+        public readonly Point Offset(Size other) => new(X + other.Width, Y + other.Height);
 
         /// <summary>
         /// Calculates the distance of the current and another point and returns their distance as a <see cref="Size"/> structure.

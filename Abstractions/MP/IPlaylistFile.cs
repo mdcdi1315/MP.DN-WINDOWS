@@ -1,10 +1,12 @@
 ﻿
+using MP.Annotations;
 
 namespace MP
 {
     /// <summary>
     /// Defines an abstraction for an audio file contained in a playlist.
     /// </summary>
+    [DeprecatedMayBeRemoved("2.0.0.0")]
     public interface IPlaylistFile
     {
         /// <summary>

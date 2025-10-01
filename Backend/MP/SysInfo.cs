@@ -10,7 +10,7 @@ namespace MP
         {
             private MemoryHeap hp;
 
-            public IMemoryHandle CreateMemoryHandle(ulong size) => (hp ??= MemoryHeap.Create()).Allocate(size.ToInt32());
+            public IMemoryHandle CreateMemoryHandle(ulong size) => (hp ??= MemoryHeap.Create()).Allocate(size);
 
             [return: MaybeNull]
             public IAttributeable GetStatistics()

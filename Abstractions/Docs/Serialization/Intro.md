@@ -7,7 +7,7 @@ which is an abstracted API for getting .NET object graphs and transforming them 
 
 Unlike the `BinaryFormatter` API, this does not make use of private reflection except when creating nested class objects.
 
-This was created due to the fact that there wer created many JSON parsers doing almost the same things,
+This was created due to the fact that there were created many JSON parsers doing almost the same things,
 so abstracting this does make that a bit easier and there is only the need to define the data themselves.
 
 Most of the de/serialization process is done into a class 

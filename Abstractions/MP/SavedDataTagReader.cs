@@ -1,4 +1,5 @@
 ﻿
+using MP.Annotations;
 using System.Collections.Generic;
 
 namespace MP
@@ -6,6 +7,7 @@ namespace MP
     /// <summary>
     /// Represents a tag reader for playlist abstractions, whose backing store is the memory.
     /// </summary>
+    [DeprecatedMayBeRemoved("2.0.0.0")]
     public sealed class SavedDataTag : ITagReader2
     {
         private Dictionary<System.String, System.String> strings;

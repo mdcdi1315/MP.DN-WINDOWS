@@ -20,7 +20,7 @@ namespace MP.TagReading.Flac
             if (data.Length < SharedConstants.MetadataHeaderBytes) { return block; }
             // The data in the first byte do contain the Type and IsLast members...
             int I = SharedConstants.TypeMemberBits;
-            block.Type = (MetadataType)data.ReadBitLevelNumber(0, 7);
+            block.Type = (MetadataType)data.ReadBitLevelNumber(0, SharedConstants.TypeMemberBits);
             block.IsLast = data[0].GetBit(7);
             I += SharedConstants.IsLastMemberBits;
             bool bit;

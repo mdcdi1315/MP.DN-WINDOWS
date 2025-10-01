@@ -6,13 +6,17 @@ as any file format and in the same time being loaded as a .NET object.
 
 This implementation takes that and pushes further this concept by adding:
 
--> Abstractions around the file format barriers - that is, you can save the serialized data in any format you wish, if you just implement correctly both the `ISerializedClassReader` and `ISerializedClassWriter` interfaces.
+-> Abstractions around the file format barriers - that is, you can save the serialized data in any format you wish, if you just implement correctly both the `IRecordReader` and `IRecordWriter` interfaces.
 
 -> An extensible constraint logic to serialize objects only when their fields do have correct values, based on the constraints applied.
 
 -> Perform concurrent read and write operations on the same object type at the same instance, at the same time.
 
 -> The ability to deserialize from one format and serialize into another
+
+-> Data transcoding - the ability to disguise additional types as primitive objects.
+
+-> Supports specific derived types of fields having as a backing type another extendable serializable class
 
 -> And all these, into a single instance of a `SerializationManager` class.
 
@@ -61,8 +65,8 @@ public class Packet : ISerializableClass
 var stream = new System.IO.FileStream("/file.json" , System.IO.FileMode.Open);
 
 var sermgr = new SerializationManager<SerClass>();
-sermgr.Reader = new JsonSerializedClassReader();
-sermgr.Writer = new JsonSerializedClassWriter();
+sermgr.Reader = new JsonRecordReader();
+sermgr.Writer = new JsonRecordWriter();
 
 SerClass sc = new();
 sermgr.Deserialize(sc , stream);

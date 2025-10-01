@@ -2,7 +2,7 @@
 namespace MP.Serialization
 {
     /// <summary>
-    /// Thrown when an invalid state (bug) in an <see cref="ISerializedClassReader"/> implementation is found.
+    /// Thrown when an invalid state (bug) in an <see cref="IRecordReader"/> implementation is found.
     /// </summary>
     public sealed class InvalidSerializationReaderLayoutException : SerializationException
     {

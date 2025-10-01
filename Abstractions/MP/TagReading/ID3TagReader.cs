@@ -5,6 +5,15 @@ using System.Collections.Generic;
 
 namespace MP.TagReading
 {
+    /*
+     * Useful insight and links:
+     * 
+     * https://www.id3.org/
+     * 
+     * https://github.com/larsbs/id3v2lib
+     * 
+     */
+
     /// <summary>
     /// Gets raw data from an ID3V2 stream. <br />
     /// Pass it a valid stream that is the tag data. <br />
