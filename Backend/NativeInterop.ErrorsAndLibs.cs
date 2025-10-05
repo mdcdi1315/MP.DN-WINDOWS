@@ -121,5 +121,6 @@ partial class Interop
         public const System.String WinInet = "wininet.dll";
         public const System.String PropSys = "propsys.dll";
         public const System.String Gdi32 = "gdi32.dll";
+        public const System.String GLFW = "glfw.dll";
     }
 }

@@ -10,6 +10,12 @@ namespace MP.Graphics.OpenGL
     [StructLayout(LayoutKind.Explicit , Size = 4 , Pack = 4)]
     public readonly struct BufferObject : IOpenGLObject
     {
+        /// <summary>
+        /// Defines the 'empty' buffer object. <br />
+        /// Use this to unbind properly your GL buffers!!!
+        /// </summary>
+        public static readonly BufferObject Empty = new(0);
+
         [FieldOffset(0)]
         private readonly System.UInt32 handle;
 

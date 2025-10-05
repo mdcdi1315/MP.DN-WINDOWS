@@ -9,10 +9,16 @@ namespace MP.Graphics
     /// </summary>
     public readonly struct PointF :
         IEqualityOperators<PointF, PointF, System.Boolean>,
+        IEqualityOperators<PointF , Point , System.Boolean>,
         IAdditionOperators<PointF, PointF, PointF>,
+        IAdditionOperators<PointF , Point , PointF>,
         ISubtractionOperators<PointF, PointF, PointF>,
+        ISubtractionOperators<PointF , Point , PointF>,
         IUnaryNegationOperators<PointF, PointF>,
-        ICloneable, IEquatable<PointF> , IEquatable<Point>
+        ITruncatable<Point>,
+        IEquatable<PointF>, 
+        IEquatable<Point>,
+        ICloneable
     {
         /// <summary>The X-coordinate of the point.</summary>
         public readonly float X;
@@ -61,9 +67,7 @@ namespace MP.Graphics
         /// <returns>The cloned <see cref="Point"/> instance.</returns>
         public readonly PointF Clone() => new(X, Y);
 
-        /// <summary>
-        /// Offsets a point by the specified values.
-        /// </summary>
+        /// <summary>Offsets a point by the specified values.</summary>
         /// <param name="dx">The times to offset the current X value.</param>
         /// <param name="dy">The times to offset the current Y value.</param>
         /// <returns>A new <see cref="Point"/> instance representing the offseted point.</returns>
@@ -77,9 +81,7 @@ namespace MP.Graphics
         /// <returns>A new <see cref="PointF"/> instance representing the diagonally offseted point.</returns>
         public readonly PointF OffsetDiagonally(int offset) => new(X + offset, Y + offset);
 
-        /// <summary>
-        /// Offsets a point by the specified values.
-        /// </summary>
+        /// <summary>Offsets a point by the specified values.</summary>
         /// <param name="dx">The times to offset the current X value.</param>
         /// <param name="dy">The times to offset the current Y value.</param>
         /// <returns>A new <see cref="PointF"/> instance representing the offseted point.</returns>
@@ -93,30 +95,22 @@ namespace MP.Graphics
         /// <returns>A new <see cref="PointF"/> instance representing the diagonally offseted point.</returns>
         public readonly PointF OffsetDiagonally(float offset) => new(X + offset, Y + offset);
 
-        /// <summary>
-        /// Offsets a point by another <see cref="Point"/> instance.
-        /// </summary>
+        /// <summary>Offsets a point by another <see cref="Point"/> instance.</summary>
         /// <param name="other">The other <see cref="Point"/> instance that the current <see cref="PointF"/> will be offseted by.</param>
         /// <returns>A new <see cref="PointF"/> instance representing the offseted point.</returns>
         public readonly PointF Offset(Point other) => new(X + other.X, Y + other.Y);
 
-        /// <summary>
-        /// Offsets a point by another <see cref="PointF"/> instance.
-        /// </summary>
+        /// <summary>Offsets a point by another <see cref="PointF"/> instance.</summary>
         /// <param name="other">The other <see cref="PointF"/> instance that the current <see cref="PointF"/> will be offseted by.</param>
         /// <returns>A new <see cref="Point"/> instance representing the offseted point.</returns>
         public readonly PointF Offset(PointF other) => new(X + other.X, Y + other.Y);
 
-        /// <summary>
-        /// Offsets a point by a <see cref="Size"/> instance.
-        /// </summary>
+        /// <summary>Offsets a point by a <see cref="Size"/> instance.</summary>
         /// <param name="other">The <see cref="Size"/> instance to offset this point by.</param>
         /// <returns>A new <see cref="PointF"/> structure representing the offseted point by adding the specified size.</returns>
         public readonly PointF Offset(Size other) => new(X + other.Width , Y + other.Height);
 
-        /// <summary>
-        /// Offsets a point by a <see cref="SizeF"/> instance.
-        /// </summary>
+        /// <summary>Offsets a point by a <see cref="SizeF"/> instance.</summary>
         /// <param name="other">The <see cref="SizeF"/> instance to offset this point by.</param>
         /// <returns>A new <see cref="PointF"/> structure representing the offseted point by adding the specified size.</returns>
         public readonly PointF Offset(SizeF other) => new(X + other.Width, Y + other.Height);
@@ -163,18 +157,28 @@ namespace MP.Graphics
         /// <returns>The computed hash code for this instance.</returns>
         public readonly override int GetHashCode() => (System.Int32)(X + Y);
 
+        /// <inheritdoc />
+        public Point Truncate() => new((System.Int32)X, (System.Int32)Y);
+
         /// <summary>
-        /// Performs the addition of two <see cref="Point"/> structures.
+        /// Performs the addition of two <see cref="PointF"/> structures.
         /// </summary>
-        /// <param name="left">The first <see cref="Point"/> of the sum operation.</param>
-        /// <param name="right">The second <see cref="Point"/> of the sum operation.</param>
+        /// <param name="left">The first <see cref="PointF"/> of the sum operation.</param>
+        /// <param name="right">The second <see cref="PointF"/> of the sum operation.</param>
         /// <returns>The addition result of adding <paramref name="left"/> and <paramref name="right"/>.</returns>
         public static PointF operator +(PointF left, PointF right) => left.Offset(right);
 
         /// <summary>
-        /// Performs unary negation on the specified <see cref="PointF"/>.
+        /// Performs the addition of a <see cref="PointF"/> and <see cref="Point"/> 
+        /// structure, returning the result as a <see cref="PointF"/> structure.
         /// </summary>
-        /// <param name="point">The <see cref="Point"/> instance to perform unary negation on.</param>
+        /// <param name="left">The first <see cref="PointF"/> of the sum operation.</param>
+        /// <param name="right">The second <see cref="Point"/> of the sum operation.</param>
+        /// <returns>The addition result of adding <paramref name="left"/> and <paramref name="right"/>.</returns>
+        public static PointF operator +(PointF left, Point right) => new(left.X + right.X, left.Y + right.Y);
+
+        /// <summary>Performs unary negation on the specified <see cref="PointF"/>.</summary>
+        /// <param name="point">The <see cref="PointF"/> instance to perform unary negation on.</param>
         /// <returns>The unary negation result of <paramref name="point"/>.</returns>
         public static PointF operator -(PointF point) => new(-point.X, -point.Y);
 
@@ -185,6 +189,15 @@ namespace MP.Graphics
         /// <param name="right">The second <see cref="PointF"/> of the sub operation.</param>
         /// <returns>The subtraction result of removing <paramref name="left"/> by <paramref name="right"/>.</returns>
         public static PointF operator -(PointF left, PointF right) => left.Offset(-right);
+
+        /// <summary>
+        /// Performs the subtraction of a <see cref="PointF"/> and <see cref="Point"/> 
+        /// structure, returning the result as a <see cref="PointF"/> structure.
+        /// </summary>
+        /// <param name="left">The first <see cref="PointF"/> of the sum operation.</param>
+        /// <param name="right">The second <see cref="Point"/> of the sum operation.</param>
+        /// <returns>The subtraction result of removing <paramref name="left"/> and <paramref name="right"/>.</returns>
+        public static PointF operator -(PointF left, Point right) => new(left.X - right.X , left.Y - right.Y);
 
         /// <summary>
         /// Determines whether two <see cref="PointF"/>s are equal.
@@ -207,5 +220,21 @@ namespace MP.Graphics
         /// </summary>
         /// <param name="point">The <see cref="Point"/> to convert as a <see cref="PointF"/> instance.</param>
         public static implicit operator PointF(Point point) => new(point);
+
+        /// <summary>
+        /// Determines whether a <see cref="PointF"/> and a <see cref="Point"/> are equal.
+        /// </summary>
+        /// <param name="left">The first <see cref="PointF"/> to compare.</param>
+        /// <param name="right">The second <see cref="Point"/> to compare.</param>
+        /// <returns>A value determining equality of <paramref name="left"/> and <paramref name="right"/>.</returns>
+        public static bool operator ==(PointF left, Point right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether a <see cref="PointF"/> and a <see cref="Point"/> are inequal.
+        /// </summary>
+        /// <param name="left">The first <see cref="PointF"/> to compare.</param>
+        /// <param name="right">The second <see cref="Point"/> to compare.</param>
+        /// <returns>A value determining equality of <paramref name="left"/> and <paramref name="right"/>.</returns>
+        public static bool operator !=(PointF left, Point right) => !left.Equals(right);
     }
 }

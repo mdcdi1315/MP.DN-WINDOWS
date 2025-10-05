@@ -14,12 +14,12 @@ namespace MP.Serialization.Constraints
         public sealed override SerializedFieldType[] AppliesTo => new[] { SerializedFieldType.String };
 
         /// <inheritdoc />
-        public override ConstraintApplicationTime AppliesDuring => ConstraintApplicationTime.Writing;
+        public override ConstraintApplicationTime AppliesDuring => ConstraintApplicationTime.Both;
 
         /// <inheritdoc />
         public override bool IsSatisfied(object value, out SerializationException exception)
         {
-            if (value is System.String str && System.String.IsNullOrEmpty(str))
+            if (value is null || (value is System.String str && str == System.String.Empty))
             {
                 exception = new("Specified string field was null or empty while this is not allowed.");
                 return false;

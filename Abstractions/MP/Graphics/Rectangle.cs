@@ -1,17 +1,28 @@
 
-
-
 using System;
+using System.Numerics;
 
 namespace MP.Graphics
 {
     /// <summary>
     /// Defines a new rectangle in a 2-dimensional space.
     /// </summary>
-    public struct Rectangle : ICloneable, IEquatable<Rectangle>
+    public readonly struct Rectangle : 
+        IEqualityOperators<Rectangle , Rectangle , System.Boolean>,
+        IEquatable<Rectangle>,
+        ICloneable
     {
-        private Point topleft, topright;
-        private Point bottomleft, bottomright;
+        private readonly Point topleft, topright;
+        private readonly Point bottomleft, bottomright;
+
+        // Constructor allowing for cloning
+        private Rectangle(Rectangle rect)
+        {
+            topleft = rect.topleft;
+            topright = rect.topright;
+            bottomleft = rect.bottomleft;
+            bottomright = rect.bottomright;
+        }
 
         /// <summary>
         /// Creates a new rectangle by just specifying the bottom-left and top-right corner points of the rectangle.
@@ -74,19 +85,18 @@ namespace MP.Graphics
             _ => false
         };
 
-        System.Object ICloneable.Clone() => Clone();
-
         /// <summary>
-        /// Clones this rectangle into a new instance.
+        /// Gets a value whether the specified point is in the rectangle's bounds.
         /// </summary>
+        /// <param name="point">The point to see whether is in the rectangle's bounds.</param>
+        /// <returns>A value whether the <paramref name="point"/> passed is in the rectangle's bounds.</returns>
+        public System.Boolean PointIsInBounds(Point point) => point.X >= topleft.X && point.Y <= topleft.Y && point.X <= bottomright.X && point.Y >= bottomright.Y;
+
+        readonly System.Object ICloneable.Clone() => Clone();
+
+        /// <summary>Clones this rectangle into a new instance.</summary>
         /// <returns>The cloned instance of the current rectangle.</returns>
-        public Rectangle Clone() => new()
-        {
-            bottomleft = bottomleft,
-            bottomright = bottomright,
-            topleft = topleft,
-            topright = topright
-        };
+        public readonly Rectangle Clone() => new(this);
 
         /// <inheritdoc />
         public readonly override int GetHashCode() => bottomleft.GetHashCode() + bottomright.GetHashCode() + topleft.GetHashCode() + topright.GetHashCode();

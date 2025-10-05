@@ -11,6 +11,12 @@ namespace MP.Graphics.OpenGL
     [StructLayout(LayoutKind.Explicit , Size = 4 , Pack = 1)]
     public readonly struct VertexArrayObject : IOpenGLObject
     {
+        /// <summary>
+        /// Gets the empty vertex array object. 
+        /// You use this to unbind your vertex array objects.
+        /// </summary>
+        public static readonly VertexArrayObject Empty = new(0);
+
         [FieldOffset(0)]
         private readonly System.UInt32 handle;
 

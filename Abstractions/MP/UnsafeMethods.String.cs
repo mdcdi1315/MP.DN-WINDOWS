@@ -14,6 +14,7 @@ namespace MP
         /// <returns>The decoded string.</returns>
         public static System.String CreateUtf8NullTerminated(System.Byte* p)
         {
+            if (p is null) { return null; }
             int length = 0;
             byte* pcopy = p;
             while (*pcopy != 0)
@@ -30,7 +31,7 @@ namespace MP
         /// <param name="p">The memory pointer to read.</param>
         /// <returns>The decoded string.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static System.String CreateASCIINullTerminated(System.Byte* p) => new((System.SByte*)p);
+        public static System.String CreateASCIINullTerminated(System.Byte* p) => p is null ? null : new((System.SByte*)p);
 
         /// <summary>
         /// Creates a new <see cref="System.String"/> from a null-terminated UTF-16 memory pointer.
@@ -38,7 +39,7 @@ namespace MP
         /// <param name="p">The memory pointer to read.</param>
         /// <returns>The decoded string.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static System.String CreateUtf16NullTerminated(System.Char* p) => new(p);
+        public static System.String CreateUtf16NullTerminated(System.Char* p) => p is null ? null : new(p);
 
         /// <summary>Copies the specified UTF-8 string to another location.</summary>
         /// <param name="psrc">The source location to copy UTF-8 characters from</param>

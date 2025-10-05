@@ -1,5 +1,5 @@
 ﻿
-using MP.Imaging;
+using MP.Graphics.Imaging;
 using System.Runtime.InteropServices;
 
 partial class Interop

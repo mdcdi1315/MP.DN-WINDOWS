@@ -12,7 +12,10 @@ namespace MP.Graphics
         IAdditionOperators<SizeF, SizeF, SizeF>,
         ISubtractionOperators<SizeF, SizeF, SizeF>,
         IUnaryNegationOperators<SizeF, SizeF>,
-        ICloneable, IEquatable<SizeF> , IEquatable<Size>
+        ITruncatable<Size>,
+        IEquatable<SizeF>, 
+        IEquatable<Size>,
+        ICloneable
     {
         /// <summary>
         /// The width or the displacement starting from X = 0 to the current value.
@@ -99,6 +102,9 @@ namespace MP.Graphics
         /// </summary>
         /// <returns>The computed hash code for this instance.</returns>
         public readonly override int GetHashCode() => (System.Int32)(Width + Height);
+
+        /// <inheritdoc />
+        public Size Truncate() => new((System.Int32)Width , (System.Int32)Height);
 
         /// <summary>
         /// Performs unary negation on the specified <see cref="SizeF"/>.

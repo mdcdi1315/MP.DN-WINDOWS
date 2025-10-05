@@ -23,24 +23,32 @@ namespace MP.Graphics.OpenGL
         /// <summary>
         /// Loads all the currently defined OpenGL functions, by using the specified function loader.
         /// </summary>
-        /// <remarks>
-        /// While it is not required by the interface itself, this function tests after every function is loaded or failure whether the loader also implements the <see cref="IDisposable"/> interface.
-        /// If it does so, it calls that <see cref="IDisposable.Dispose"/> method implementation.
-        /// </remarks>
         /// <param name="loader">The function loader to use.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="loader"/> was <see langword="null"/>.</exception>
         [Throws(typeof(ArgumentNullException))]
         public static void LoadFunctions(IOpenGLFunctionLoader loader)
         {
-            var voidpointertype = typeof(void*);
             ArgumentNullException.ThrowIfNull(loader);
-            try {
-                foreach (var dgf in typeof(GL).GetFields(BindingFlags.Static | BindingFlags.Public))
-                {
-                    dgf.SetValue(null, Pointer.Box(loader.GetFunction(dgf.Name) , voidpointertype));
+            var voidpointertype = typeof(void*);
+#if DEBUG
+            var fields = typeof(GL).GetFields(BindingFlags.Public | BindingFlags.Static);
+            DebugProvider.WriteLine($"OPENGLFUNCLOADER: Attempting to load {fields.LongLength} function pointers");
+            foreach (var dgf in fields)
+            {
+                try {
+                    dgf.SetValue(null, Pointer.Box(loader.GetFunction(dgf.Name), voidpointertype));
+                } catch (Exception) {
+                    DebugProvider.WriteLine($"OPENGLFUNCLOADER: Preparing LOADEXCEPTION report. Function {dgf.Name} failed to be loaded.");
+                    throw;
                 }
-            } finally {
-                if (loader is IDisposable d) { d.Dispose(); }
             }
+            DebugProvider.WriteLine("OPENGLFUNCLOADER: Loading complete!");
+#else
+            foreach (var dgf in typeof(GL).GetFields(BindingFlags.Static | BindingFlags.Public))
+            {
+                dgf.SetValue(null, Pointer.Box(loader.GetFunction(dgf.Name), voidpointertype));
+            }
+#endif
         }
 
         /// <summary>
@@ -149,7 +157,7 @@ namespace MP.Graphics.OpenGL
         public static delegate* unmanaged[Cdecl]<int, TextureObject*, void> glGenTextures;
 
         /// <summary>Gets the <c>glBufferSubData</c> delegate.</summary>
-        /// <remarks><c>void glBufferSubData(GLenum target​, GLintptr size​, GLsizeiptr size​, const GLvoid *data​)</c></remarks>
+        /// <remarks><c>void glBufferSubData(GLenum target​, GLintptr offset​, GLsizeiptr size​, const GLvoid *data​)</c></remarks>
         public static delegate* unmanaged[Cdecl]<BufferObjectType, int , int , void* , void> glBufferSubData;
 
         /// <summary>Gets the <c>glDeleteTextures</c> delegate.</summary>
@@ -528,6 +536,14 @@ namespace MP.Graphics.OpenGL
         /// <remarks><c>void glDeleteBuffers(GLsizei n, const GLuint* buffers)</c></remarks>
         public static delegate* unmanaged[Cdecl]<int, BufferObject*, void> glDeleteBuffers;
 
+        /// <summary>Gets the <c>glBlendFunc</c> delegate.</summary>
+        /// <remarks><c>void glBlendFunc(GLenum sfactor, GLenum dfactor)</c></remarks>
+        public static delegate* unmanaged[Cdecl]<BlendFunctionFactor, BlendFunctionFactor, void> glBlendFunc;
+
+        /// <summary>Gets the <c>glBlendColor</c> delegate.</summary>
+        /// <remarks><c>void glBlendColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)</c></remarks>
+        public static delegate* unmanaged[Cdecl]<float, float, float, float, void> glBlendColor;
+
         /// <summary>Gets the <c>glGetError</c> delegate.</summary>
         /// <remarks><c>GLenum glGetError(void)</c></remarks>
         public static delegate* unmanaged[Cdecl]<ErrorCode> glGetError;
@@ -723,6 +739,18 @@ namespace MP.Graphics.OpenGL
             glGetProgramiv(program, pname, &v);
             return v;
         }
+
+        /// <summary>
+        /// Equivalent to the <see cref="glVertexAttribPointer"/> function, but it is defined in safe code.
+        /// </summary>
+        /// <param name="index">The index of the attribute to be defined.</param>
+        /// <param name="size">The number of elements this attribute describes.</param>
+        /// <param name="datatype">The underlying data type of the elements.</param>
+        /// <param name="normalized">A value whether floating-point data should be normalized.</param>
+        /// <param name="stride">The exact size, in bytes, of the attribute data payload.</param>
+        /// <param name="offset">The additional byte offset to apply from the beginning.</param>
+        public static void GLVertexAttribPointer(System.UInt32 index, System.Int32 size, VertexAttributePointerDataType datatype, System.Boolean normalized , int stride , int offset)
+            => glVertexAttribPointer(index, size, datatype, normalized ? GLConstants.GL_TRUE : GLConstants.GL_FALSE, offset, (void*)stride);
 
         #endregion
 

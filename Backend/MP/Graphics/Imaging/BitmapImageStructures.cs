@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-namespace MP.Imaging
+namespace MP.Graphics.Imaging
 {
     internal enum ImageType : System.UInt32
     {
@@ -190,87 +190,6 @@ namespace MP.Imaging
             Masks = new();
             Endpoints = new();
         }
-    }
-
-    // This structure is not used in any native operation , it is just used to create or read typed bitmaps.
-    [StructLayout(LayoutKind.Explicit, Size = 14 , Pack = 1)]
-    internal unsafe struct BITMAPFILEHEADER
-    {
-        public const System.UInt16 BMTYPE = 0x4d42;
-
-        private static System.Byte[] CreateHeaderData(System.Byte[] withoutheader, System.Int32 startindex, BITMAPFILEHEADER header)
-        {
-            System.UInt32 filehdrsize = sizeof(BITMAPFILEHEADER).ToUInt32();
-            // Combine the data and return them.
-            System.Byte[] result = new System.Byte[filehdrsize + (withoutheader.Length - startindex)];
-            // The below unsafe calls avoid to create a new byte array ,
-            // and improve performance.
-            fixed (System.Byte* dst = result)
-            {
-                fixed (System.Byte* hdrptr = &Unsafe.AsRef(in header.pin))
-                {
-                    Unsafe.CopyBlockUnaligned(dst, hdrptr, filehdrsize);
-                }
-                fixed (System.Byte* src = &withoutheader[startindex])
-                {
-                    Unsafe.CopyBlockUnaligned(Unsafe.Add<System.Byte>(dst, filehdrsize.ToInt32()),
-                        src, (withoutheader.Length - startindex).ToUInt32());
-                }
-            }
-            return result;
-        }
-
-        public static System.Byte[] CreateBitmap(System.Byte[] withoutheader)
-        {
-            // The below variable is constant but keep it this way for compat.
-            System.UInt32 filehdrsize = sizeof(BITMAPFILEHEADER).ToUInt32();
-            BITMAPINFOHEADER data = withoutheader.ReadStructure<BITMAPINFOHEADER>(0);
-            BITMAPFILEHEADER header = new();
-            header.Type = 0x4d42; // Is the 'BM' string in ASCII.
-            // Because the final size of the entire bitmap data is known due to the array ,
-            // it is possible to just add the header size plus the raw data length themselves.
-            header.Size = (filehdrsize + withoutheader.Length).ToUInt32();
-            // The below field is set based on this article: https://learn.microsoft.com/en-us/windows/win32/gdi/storing-an-image
-            header.Offset = filehdrsize + data.Size + data.ColorTablesSize;
-            // Set reserved fields to zero (although that setting to them other values would not be a problem)
-            header.RSVD1 = 0; header.RSVD2 = 0;
-            return CreateHeaderData(withoutheader, 0, header);
-        }
-
-        [FieldOffset(0)]
-        private System.Byte pin;
-
-        [FieldOffset(0)]
-        public System.UInt16 Type;
-
-        [FieldOffset(2)]
-        public System.UInt32 Size;
-
-        [FieldOffset(6)]
-        public System.UInt16 RSVD1;
-
-        [FieldOffset(8)]
-        public System.UInt16 RSVD2;
-
-        [FieldOffset(10)]
-        public System.UInt32 Offset;
-    }
-
-    // Usually this represents a color table quad.
-    [StructLayout(LayoutKind.Explicit , Size = 4 , Pack = 1)]
-    internal struct RGBQUAD
-    {
-        [FieldOffset(0)]
-        public System.Byte B;
-
-        [FieldOffset(1)]
-        public System.Byte G;
-
-        [FieldOffset(2)]
-        public System.Byte R;
-
-        [FieldOffset(3)]
-        public System.Byte RSVD;
     }
 
     // A custom structure for when we have to decode a BI_BITFIELDS image

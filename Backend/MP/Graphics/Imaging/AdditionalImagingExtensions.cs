@@ -5,7 +5,7 @@ using MP.Graphics.Imaging;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 
-namespace MP.Imaging
+namespace MP.Graphics.Imaging
 {
     public static unsafe class AdditionalImagingExtensions
     {

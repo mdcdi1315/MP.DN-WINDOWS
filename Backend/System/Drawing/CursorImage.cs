@@ -1,7 +1,5 @@
 ﻿
 using MP;
-using MP.Imaging;
-using MP.Graphics;
 using MP.Graphics.Imaging;
 
 namespace System.Drawing

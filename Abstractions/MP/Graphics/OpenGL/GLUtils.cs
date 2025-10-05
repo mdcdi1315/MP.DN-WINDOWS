@@ -166,5 +166,185 @@ namespace MP.Graphics.OpenGL
                 return GL.glGetUniformLocation(program, pdata);
             }
         }
+
+        /// <summary>
+        /// Passes buffer data by binding the buffer to <see cref="BufferObjectType.GL_ARRAY_BUFFER"/> and then passing them. <br />
+        /// After the call returns, the buffer object is still bound.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="dsu">The buffer usage.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferData<T>(BufferObject buffer, DataStoreUsagePattern dsu, T[] data)
+            where T : unmanaged 
+            => GLBufferData(buffer, BufferObjectType.GL_ARRAY_BUFFER , dsu, data);
+
+        /// <summary>
+        /// Passes buffer data by binding the buffer to the type specified by the <paramref name="type"/> parameter and then passing them. <br />
+        /// After the call returns, the buffer object is still bound.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="dsu">The buffer usage.</param>
+        /// <param name="type">The type of the buffer to create and bind to.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferData<T>(BufferObject buffer, BufferObjectType type, DataStoreUsagePattern dsu, T[] data)
+            where T : unmanaged
+        {
+            GL.glBindBuffer(type, buffer);
+            fixed (T* pdata = data) {
+                GL.glBufferData(type, data.Length * sizeof(T), pdata, dsu);
+            }
+        }
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to <see cref="BufferObjectType.GL_ARRAY_BUFFER"/> and then passing them. <br />
+        /// After the call returns, the buffer object is still bound.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferSubData<T>(BufferObject buffer, T[] data)
+            where T : unmanaged
+            => GLBufferSubData(buffer , BufferObjectType.GL_ARRAY_BUFFER , data);
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to the type specified by the <paramref name="type"/> parameter and then passing them. <br />
+        /// After the call returns, the buffer object is still bound.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="type">The type of the buffer that <paramref name="buffer"/> is so as binding can succeed.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferSubData<T>(BufferObject buffer, BufferObjectType type, T[] data)
+            where T : unmanaged
+        {
+            GL.glBindBuffer(type, buffer);
+            fixed (T* pdata = data) {
+                GL.glBufferSubData(type, 0, data.Length, pdata);
+            }
+        }
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to <see cref="BufferObjectType.GL_ARRAY_BUFFER"/> and then passing them. <br />
+        /// After the call returns, the buffer object is still bound.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="byteoffset">The byte offset in the existing buffer data to start overwriting from.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferSubData<T>(BufferObject buffer, int byteoffset, T[] data)
+            where T : unmanaged
+            => GLBufferSubData(buffer, BufferObjectType.GL_ARRAY_BUFFER , byteoffset , data);
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to the type specified by the <paramref name="type"/> parameter and then passing them. <br />
+        /// After the call returns, the buffer object is still bound.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="type">The type of the buffer that <paramref name="buffer"/> is so as binding can succeed.</param>
+        /// <param name="byteoffset">The byte offset in the existing buffer data to start overwriting from.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferSubData<T>(BufferObject buffer, BufferObjectType type, int byteoffset, T[] data)
+            where T : unmanaged
+        {
+            GL.glBindBuffer(type, buffer);
+            fixed (T* pdata = data) {
+                GL.glBufferSubData(type, byteoffset, data.Length, pdata);
+            }
+        }
+
+        /// <summary>
+        /// Passes buffer data by binding the buffer to <see cref="BufferObjectType.GL_ARRAY_BUFFER"/> and then passing them. <br />
+        /// Before the call returns, the buffer object unbinds from OpenGL.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="dsu">The buffer usage.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferDataUnbindAtEnd<T>(BufferObject buffer, DataStoreUsagePattern dsu, T[] data)
+            where T : unmanaged
+            => GLBufferDataUnbindAtEnd(buffer, BufferObjectType.GL_ARRAY_BUFFER, dsu, data);
+
+        /// <summary>
+        /// Passes buffer data by binding the buffer to the type specified by the <paramref name="type"/> parameter and then passing them. <br />
+        /// Before the call returns, the buffer object unbinds from OpenGL.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="dsu">The buffer usage.</param>
+        /// <param name="type">The type of the buffer to create and bind to.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferDataUnbindAtEnd<T>(BufferObject buffer, BufferObjectType type, DataStoreUsagePattern dsu, T[] data)
+            where T : unmanaged
+        {
+            GL.glBindBuffer(type, buffer);
+            fixed (T* pdata = data) {
+                GL.glBufferData(type, data.Length * sizeof(T), pdata, dsu);
+            }
+            GL.glBindBuffer(type, new(0)); // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
+        }
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to <see cref="BufferObjectType.GL_ARRAY_BUFFER"/> and then passing them. <br />
+        /// Before the call returns, the buffer object unbinds from OpenGL.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferSubDataUnbindAtEnd<T>(BufferObject buffer, T[] data)
+            where T : unmanaged => GLBufferSubDataUnbindAtEnd(buffer, BufferObjectType.GL_ARRAY_BUFFER, data);
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to the type specified by the <paramref name="type"/> parameter and then passing them. <br />
+        /// Before the call returns, the buffer object unbinds from OpenGL.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        /// <param name="type">The type of the buffer that <paramref name="buffer"/> is so as binding can succeed.</param>
+        public static void GLBufferSubDataUnbindAtEnd<T>(BufferObject buffer, BufferObjectType type, T[] data)
+            where T : unmanaged
+        {
+            GL.glBindBuffer(type, buffer);
+            fixed (T* pdata = data) {
+                GL.glBufferSubData(type, 0, data.Length * sizeof(T), pdata);
+            }
+            GL.glBindBuffer(type, new(0)); // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
+        }
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to <see cref="BufferObjectType.GL_ARRAY_BUFFER"/> and then passing them. <br />
+        /// Before the call returns, the buffer object unbinds from OpenGL.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="byteoffset">The byte offset in the existing buffer data to start overwriting from.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        public static void GLBufferSubDataUnbindAtEnd<T>(BufferObject buffer, int byteoffset, T[] data)
+            where T : unmanaged
+            => GLBufferSubDataUnbindAtEnd(buffer, BufferObjectType.GL_ARRAY_BUFFER, byteoffset , data);
+
+        /// <summary>
+        /// Updates buffer data by binding the buffer to the type specified by the <paramref name="type"/> parameter and then passing them. <br />
+        /// Before the call returns, the buffer object unbinds from OpenGL.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements to pass.</typeparam>
+        /// <param name="buffer">The named buffer object.</param>
+        /// <param name="byteoffset">The byte offset in the existing buffer data to start overwriting from.</param>
+        /// <param name="data">The actual data to pass to OpenGL.</param>
+        /// <param name="type">The type of the buffer that <paramref name="buffer"/> is so as binding can succeed.</param>
+        public static void GLBufferSubDataUnbindAtEnd<T>(BufferObject buffer, BufferObjectType type, int byteoffset, T[] data)
+            where T : unmanaged
+        {
+            GL.glBindBuffer(type, buffer);
+            fixed (T* pdata = data)
+            {
+                GL.glBufferSubData(type, byteoffset, data.Length * sizeof(T), pdata);
+            }
+            GL.glBindBuffer(type, new(0));  // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
+        }
+
     }
 }

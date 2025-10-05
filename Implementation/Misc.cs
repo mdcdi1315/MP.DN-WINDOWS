@@ -1,10 +1,11 @@
 ﻿using System;
-using MP.Imaging;
 using System.Drawing;
+using MP.Graphics.Imaging;
 using MP.GamepadBackend;
 using MP.AudioLibrary.MMDevice;
 using System.Collections.Generic;
 using DotNetResourcesExtensions;
+using MP.Graphics.Imaging.WindowsBitmap;
 
 namespace MP
 {

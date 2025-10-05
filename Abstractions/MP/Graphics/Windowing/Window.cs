@@ -1,6 +1,7 @@
 ﻿
 using System;
 using MP.Graphics.Imaging;
+using MP.Graphics.Windowing.Input;
 using MP.Annotations.CodeAnalysis;
 
 namespace MP.Graphics.Windowing
@@ -27,7 +28,8 @@ namespace MP.Graphics.Windowing
         }
 
         /// <summary>
-        /// A method providing a value whether the window should close.
+        /// A method providing a value whether the window should close. <br />
+        /// Usually this calls in some native method that checks whether the rendering loop should still run.
         /// </summary>
         /// <returns>A value whether the window should close.</returns>
         protected abstract bool ShouldClose();
@@ -104,10 +106,7 @@ namespace MP.Graphics.Windowing
         public INativeWindow Parent
         {
             get => parent;
-            set {
-                ArgumentNullException.ThrowIfNull(parent);
-                parent = value;
-            }
+            set => parent = value; // TODO: improve this API to throw once Run has been called.
         }
 
         /// <summary>

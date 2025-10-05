@@ -174,12 +174,11 @@
 	  <Compile Include="MP\Dialogs\ProgressDialog.cs" />
 	  <Compile Include="MP\Dialogs\StartupLoadingDialogBase.cs" />
 	  <Compile Include="MP\ExceptionSystem\NativeWindowsCOMException.cs" />
-	  <Compile Include="MP\Imaging\BitFieldDecoder.cs" />
-	  <Compile Include="MP\Imaging\RawIconWriter.cs" />
-	  <Compile Include="MP\Imaging\AdditionalImagingExtensions.cs" />
+	  <Compile Include="MP\Graphics\Imaging\AdditionalImagingExtensions.cs" />
 	  <Compile Include="MP\MusicPlayerStreamV2.cs" />
 	  <Compile Include="MP\WindowsInterop\WindowsVersions.cs" />
 	  <Compile Include="NativeInterop.Gdi32.cs" />
+	  <Compile Include="NativeInterop.GLFW.cs" />
 	  <Compile Include="NativeInterop.Kernel32.PerformanceCounting.cs" />
 	  <Compile Include="NativeInterop.OleAut32.cs" />
 	  <Compile Include="NativeInterop.PropSys.cs" />
@@ -332,11 +331,7 @@
 	  <Compile Include="MP\GenericInterop\CStringMarshaller.cs" />
 	  <Compile Include="MP\GenericInterop\NativeMemoryManager.cs" />
 	  <Compile Include="MP\GenericInterop\UnicodeStringMarshaller.cs" />
-	  <Compile Include="MP\Imaging\BitmapImageStructures.cs" />
-	  <Compile Include="MP\Imaging\IconPackageStructures.cs" />
-	  <Compile Include="MP\Imaging\RawBitmapReader.cs" />
-	  <Compile Include="MP\Imaging\RawBitmapWriter.cs" />
-	  <Compile Include="MP\Imaging\RawIconReader.cs" />
+	  <Compile Include="MP\Graphics\Imaging\BitmapImageStructures.cs" />
 	  <Compile Include="MP\NativeLibraryLoader.cs" />
 	  <Compile Include="MP\Networking\GenericNetworkConnection.cs" />
 	  <Compile Include="MP\Networking\GenericNetworkConnectionParameters.cs" />

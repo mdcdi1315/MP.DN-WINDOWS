@@ -165,6 +165,7 @@
 		<Compile Include="MP\Graphics\Imaging\WindowsBitmap\RawIconWriter.cs" />
 		<Compile Include="MP\Graphics\OpenGL\ActiveTextureOrdinal.cs" />
 		<Compile Include="MP\Graphics\OpenGL\BaseTextureFormat.cs" />
+		<Compile Include="MP\Graphics\OpenGL\BlendFunctionFactor.cs" />
 		<Compile Include="MP\Graphics\OpenGL\BufferBits.cs" />
 		<Compile Include="MP\Graphics\OpenGL\BufferObject.cs" />
 		<Compile Include="MP\Graphics\OpenGL\BufferObjectType.cs" />
@@ -186,6 +187,10 @@
 		<Compile Include="MP\Graphics\OpenGL\OpenGLShaderCompilationException.cs" />
 		<Compile Include="MP\Graphics\OpenGL\PixelDataType.cs" />
 		<Compile Include="MP\Graphics\OpenGL\PixelStoreCommandType.cs" />
+		<Compile Include="MP\Graphics\OpenGL\Primitives\BaseOpenGLPrimitiveShape.cs" />
+		<Compile Include="MP\Graphics\OpenGL\Primitives\IOpenGLPrimitiveShape.cs" />
+		<Compile Include="MP\Graphics\OpenGL\Primitives\Rectangle.cs" />
+		<Compile Include="MP\Graphics\OpenGL\Primitives\Triangle.cs" />
 		<Compile Include="MP\Graphics\OpenGL\ProgramObject.cs" />
 		<Compile Include="MP\Graphics\OpenGL\ProgramParameter.cs" />
 		<Compile Include="MP\Graphics\OpenGL\ShaderObject.cs" />
@@ -197,8 +202,13 @@
 		<Compile Include="MP\Graphics\OpenGL\UnloadableOpenGLFunctionException.cs" />
 		<Compile Include="MP\Graphics\OpenGL\VertexArrayObject.cs" />
 		<Compile Include="MP\Graphics\OpenGL\VertexAttributePointerDataType.cs" />
-		<Compile Include="MP\Graphics\Windowing\Cursor.cs" />
+		<Compile Include="MP\Graphics\Windowing\Input\Cursor.cs" />
 		<Compile Include="MP\Graphics\Windowing\INativeWindow.cs" />
+		<Compile Include="MP\Graphics\Windowing\Input\KeyboardKeyCode.cs" />
+		<Compile Include="MP\Graphics\Windowing\Input\KeyHitEventCallback.cs" />
+		<Compile Include="MP\Graphics\Windowing\Input\KeyHitType.cs" />
+		<Compile Include="MP\Graphics\Windowing\Input\MouseButtonCode.cs" />
+		<Compile Include="MP\Graphics\Windowing\Input\MouseButtonHitCallback.cs" />
 		<Compile Include="MP\Graphics\Windowing\Window.cs" />
 		<Compile Include="MP\Graphics\Windowing\WindowDispatcher.cs" />
 		<Compile Include="MP\IAttributeable.cs" />
@@ -226,6 +236,7 @@
 		<Compile Include="MP\ITagReader.cs" />
 		<Compile Include="MP\ITagReader2.cs" />
 		<Compile Include="Microsoft\Win32\SafeHandles\SafeBaseMemoryHandle.cs" />
+		<Compile Include="MP\ITruncatableOfT.cs" />
 		<Compile Include="MP\Platform.cs" />
 		<Compile Include="MP\PlaylistManagement\AudioTagSerialization\PLAYLISTTRACKTAGENTRY.cs" />
 		<Compile Include="MP\PlaylistManagement\AudioTagSerialization\PLAYLISTTRACKTAGHEADER.cs" />

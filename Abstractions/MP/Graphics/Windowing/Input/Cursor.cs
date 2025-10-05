@@ -1,7 +1,7 @@
 ﻿using MP.Graphics.Imaging;
 using System;
 
-namespace MP.Graphics.Windowing
+namespace MP.Graphics.Windowing.Input
 {
     /// <summary>
     /// A <see cref="Cursor"/> class is a special sub-class of the <see cref="IImage"/> interface that allows images to be passed as cursors in a window.
@@ -62,7 +62,9 @@ namespace MP.Graphics.Windowing
         /// </summary>
         public abstract Point Hotspot { get; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Destroys this <see cref="Cursor"/> instance.
+        /// </summary>
         public abstract void Dispose();
     }
 }

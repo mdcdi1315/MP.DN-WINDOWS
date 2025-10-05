@@ -45,11 +45,11 @@ namespace MP.Graphics.OpenGL
             try {
                 sr = new(stream, System.Text.Encoding.UTF8, true, 2048, true);
                 while ((temp = sr.ReadLine()) is not null) { strings.Add(temp); }
-                strings.TrimExcess();
-                GLUtils.GLShaderSource(shader, strings);
             } finally {
                 sr?.Dispose();
             }
+            strings.TrimExcess();
+            GLUtils.GLShaderSource(shader, strings);
         }
 
         /// <summary>

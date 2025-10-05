@@ -12,12 +12,12 @@ namespace MP.Graphics.OpenGL
         /// </summary>
         GL_FRAGMENT_SHADER = 0x8B30,
         /// <summary>
+        /// Defines the vertex shader.
+        /// </summary>
+        GL_VERTEX_SHADER = 0x8B31,
+        /// <summary>
         /// Defines the geometry shader.
         /// </summary>
         GL_GEOMETRY_SHADER = 0x8DD9,
-        /// <summary>
-        /// Defines the vertex shader.
-        /// </summary>
-        GL_VERTEX_SHADER = 0x8B31
     }
 }
