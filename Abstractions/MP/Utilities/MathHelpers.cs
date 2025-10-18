@@ -46,6 +46,58 @@ namespace MP.Utilities
         public static float Clamp(float value, float min, float max) => value > max ? max : Math.Max(value, min);
 
         /// <summary>
+        /// Returns the smallest integral value that is greater than or equal to <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">A single-precision floating-point number.</param>
+        /// <returns>The smallest integral value greater than or equal to <paramref name="value"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Ceiling(float value)
+        {
+            int v = (int)value;
+            int p1 = v + 1;
+            return (p1 > value) ? p1 : v; 
+        }
+
+        /// <summary>
+        /// Returns the smallest integral value that is greater than or equal to <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">A double-precision floating-point number.</param>
+        /// <returns>The smallest integral value greater than or equal to <paramref name="value"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long Ceiling(double value)
+        {
+            long v = (long)value;
+            long p1 = v + 1L;
+            return (p1 > value) ? p1 : v;
+        }
+
+        /// <summary>
+        /// Returns the largest integral value that is less than or equal to <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">A double-precision floating-point number.</param>
+        /// <returns>The largest integral value less than or equal to <paramref name="value"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Floor(float value)
+        {
+            int v = (int)value;
+            int m1 = v - 1;
+            return (m1 > value) ? m1 : v;
+        }
+
+        /// <summary>
+        /// Returns the largest integral value that is less than or equal to <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">A single-precision floating-point number.</param>
+        /// <returns>The largest integral value less than or equal to <paramref name="value"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long Floor(double value)
+        {
+            long v = (long)value;
+            long m1 = v - 1L;
+            return (m1 > value) ? m1 : v;
+        }
+
+        /// <summary>
         /// Maps a value from the range [<paramref name="inputlowerbound"/>..<paramref name="inputupperbound"/>] to the range [<paramref name="outputlowerbound"/>..<paramref name="outputupperbound"/>].
         /// The value is clamped, if necessary.
         /// </summary>

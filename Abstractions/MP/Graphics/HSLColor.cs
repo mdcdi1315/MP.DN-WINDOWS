@@ -9,7 +9,7 @@ namespace MP.Graphics
     /// Represents a color that is instead reproduced by Hue, Luminance and Saturation. <br />
     /// Both conversions to RGB are provided.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
+    [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 4)]
     public readonly struct HSLColor
     {
         [FieldOffset(0)]
@@ -59,11 +59,7 @@ namespace MP.Graphics
                 h1 = (4.0f + (rgbratio[0] - rgbratio[1]) / (max - min));
             }
             h1 *= 60f;
-            if (h1 < 0f)
-            {
-                h1 += 360f;
-            }
-            hue = (System.Byte)Math.Round(h1, 0);
+            hue = (System.Byte)Math.Round(h1 < 0f ? h1 + 360f : h1, 0);
         }
 
         /// <summary>

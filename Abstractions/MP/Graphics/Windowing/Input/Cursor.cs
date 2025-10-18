@@ -29,7 +29,7 @@ namespace MP.Graphics.Windowing.Input
 
             public override ImagePixelFormat PixelFormat => image.PixelFormat;
 
-            public override void Dispose() => image.Dispose();
+            protected override void Dispose(bool disposing) => image.Dispose();
         }
 
         /// <summary>
@@ -62,9 +62,22 @@ namespace MP.Graphics.Windowing.Input
         /// </summary>
         public abstract Point Hotspot { get; }
 
+        /// <summary>Provides the actual object disposal code.</summary>
+        /// <param name="disposing">A value whether the managed resources held by the instance should be freed as well.</param>
+        protected abstract void Dispose(bool disposing);
+
         /// <summary>
-        /// Destroys this <see cref="Cursor"/> instance.
+        /// Default finalizer for disposing <see cref="Cursor"/> objects.
         /// </summary>
-        public abstract void Dispose();
+        ~Cursor() => Dispose(disposing: false);
+
+        /// <summary>
+        /// Destroys this <see cref="Cursor"/> instance, freeing any associated native resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

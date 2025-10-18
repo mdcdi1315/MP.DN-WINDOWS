@@ -22,7 +22,7 @@ namespace MP.TagReading.Ogg
         /// <summary>
         /// Gets a value whether this entry is invalid.
         /// </summary>
-        public System.Boolean IsNull => Key is null;
+        public readonly System.Boolean IsNull => Key is null;
     }
 
 }

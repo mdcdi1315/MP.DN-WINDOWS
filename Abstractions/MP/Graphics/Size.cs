@@ -2,12 +2,14 @@
 
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace MP.Graphics
 {
     /// <summary>
     /// Defines a two-dimensional size offsetting from point (0 , 0)
     /// </summary>
+    [StructLayout(LayoutKind.Explicit , Pack = sizeof(int) , Size = sizeof(int) * 4)]
     public readonly struct Size :
         IEqualityOperators<Size, Size, System.Boolean>,
         IAdditionOperators<Size , Size , Size>,
@@ -18,11 +20,13 @@ namespace MP.Graphics
         /// <summary>
         /// The width or the displacement starting from X = 0 to the current value.
         /// </summary>
+        [FieldOffset(0)]
         public readonly int Width;
 
         /// <summary>
         /// The height or the displacement starting from Y = 0 to the current value.
         /// </summary>
+        [FieldOffset(sizeof(int))]
         public readonly int Height;
 
         /// <summary>

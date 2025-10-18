@@ -283,7 +283,7 @@ namespace MP.Graphics.OpenGL
             fixed (T* pdata = data) {
                 GL.glBufferData(type, data.Length * sizeof(T), pdata, dsu);
             }
-            GL.glBindBuffer(type, new(0)); // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
+            GL.glBindBuffer(type, BufferObject.Empty); // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace MP.Graphics.OpenGL
             fixed (T* pdata = data) {
                 GL.glBufferSubData(type, 0, data.Length * sizeof(T), pdata);
             }
-            GL.glBindBuffer(type, new(0)); // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
+            GL.glBindBuffer(type, BufferObject.Empty); // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
         }
 
         /// <summary>
@@ -343,7 +343,7 @@ namespace MP.Graphics.OpenGL
             {
                 GL.glBufferSubData(type, byteoffset, data.Length * sizeof(T), pdata);
             }
-            GL.glBindBuffer(type, new(0));  // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
+            GL.glBindBuffer(type, BufferObject.Empty);  // Unbinds the buffer. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml for more information.
         }
 
     }

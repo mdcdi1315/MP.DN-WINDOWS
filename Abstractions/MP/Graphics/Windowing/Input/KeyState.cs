@@ -4,9 +4,9 @@
 namespace MP.Graphics.Windowing.Input
 {
     /// <summary>
-    /// Provides the reason why an event based on the <see cref="KeyHitEventCallback"/> class was fired.
+    /// Provides the different states that a keyboard key might be into.
     /// </summary>
-    public enum KeyHitType : System.Byte
+    public enum KeyState : System.Byte
     {
         /// <summary>A key was pressed in the keyboard.</summary>
         Pressed,

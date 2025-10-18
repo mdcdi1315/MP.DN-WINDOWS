@@ -19,12 +19,15 @@ namespace MP.Graphics.Windowing
         private Queue<DelegateData> delegates;
         private List<DelegateData> delegatesineverytick;
 
+        private static bool ErrorHandler_DummyTarget(Exception ex) => false;
+
         /// <summary>
         /// Creates an empty instance of the <see cref="WindowDispatcher"/> class.
         /// </summary>
         public WindowDispatcher() { 
             delegates = new Queue<DelegateData>();
             delegatesineverytick = new List<DelegateData>();
+            ErrorHandler = new(ErrorHandler_DummyTarget);
         }
 
         /// <summary>
@@ -119,14 +122,6 @@ namespace MP.Graphics.Windowing
         /// <summary>
         /// Through this event the caller can register an error handler (and thus avoiding to throw the exception)
         /// </summary>
-        public event WindowDispatcherErrorHandlerDelegate ErrorHandler; 
+        public event WindowDispatcherErrorHandlerCallback ErrorHandler; 
     }
-
-    /// <summary>
-    /// Represents the default error handler method signature.
-    /// </summary>
-    /// <param name="ex">The exception that the error handler must handle</param>
-    /// <returns>A value whether the exception was handled, or not.</returns>
-
-    public delegate System.Boolean WindowDispatcherErrorHandlerDelegate(Exception ex);
 }

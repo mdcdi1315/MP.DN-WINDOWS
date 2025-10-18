@@ -1,13 +1,14 @@
 
-
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace MP.Graphics
 {
     /// <summary>
     /// Defines a two-dimensional integer point.
     /// </summary>
+    [StructLayout(LayoutKind.Explicit, Pack = sizeof(int) , Size = sizeof(int) * 2)]
     public readonly struct Point :
         IEqualityOperators<Point, Point, System.Boolean>,
         IAdditionOperators<Point , Point , Point>,
@@ -16,9 +17,11 @@ namespace MP.Graphics
         ICloneable, IEquatable<Point>
     {
         /// <summary>The X-coordinate of the point.</summary>
+        [FieldOffset(0)]
         public readonly int X;
 
         /// <summary>The Y-coordinate of the point.</summary>
+        [FieldOffset(sizeof(int))]
         public readonly int Y;
 
         /// <summary>

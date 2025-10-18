@@ -6,11 +6,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MP.Collections
 {
-    /// <summary>
-    /// Specifies a single node in a tree collection.
-    /// </summary>
+    /// <summary>Specifies a single node in a tree collection.</summary>
     /// <typeparam name="T">The backing type of the value of the new node.</typeparam>
-    public sealed class TreeNode<T>
+    public sealed class TreeNode<T> : ITreeNodeGetter<TreeNode<T>>
     {
         private T value;
         private List<TreeNode<T>> children;
@@ -54,6 +52,10 @@ namespace MP.Collections
         /// </summary>
         public IEnumerable<TreeNode<T>> Children => children ?? new List<TreeNode<T>>();
 
+        ITreeNodeGetterAccessor ITreeNodeGetterAccessor.Parent => Parent;
+
+        IEnumerable<ITreeNodeGetterAccessor> ITreeNodeGetterAccessor.Children => Children;
+
         /// <summary>
         /// Creates a new child node with the specified initial value and appends it to the children nodes of the current node. 
         /// That means that the current node is it's parent.
@@ -65,6 +67,28 @@ namespace MP.Collections
             var t = new TreeNode<T>(this, value);
             (children ??= new(2)).Add(t);
             return t;
+        }
+
+        /// <summary>
+        /// Creates new child nodes, each one having it's respected value. <br />
+        /// All the nodes that will be created will have this node as their parent.
+        /// </summary>
+        /// <param name="values">The values of the new children nodes.</param>
+        /// <returns>The created tree nodes.</returns>
+        public IEnumerable<TreeNode<T>> CreateChildNodes(params T[] values)
+        {
+            List<TreeNode<T>> added = new(values.Length);
+            if (children is null) {
+                children = new List<TreeNode<T>>(added.Count);
+            } else {
+                children.EnsureCapacity(children.Count + added.Count);
+            }
+            TreeNode<T> temp;
+            foreach (T childvalue in values) {
+                children.Add(temp = new(this, childvalue));
+                added.Add(temp);
+            }
+            return added;
         }
 
         /// <summary>
@@ -85,15 +109,17 @@ namespace MP.Collections
         /// <returns>A collection containing all the child nodes and itself.</returns>
         public IEnumerable<TreeNode<T>> ChildrenAndSelf()
         {
+            List<TreeNode<T>> tempchildren;
             Queue<TreeNode<T>> nodes = new(10);
             nodes.Enqueue(this);
             while (nodes.TryDequeue(out var node))
             {
                 yield return node;
-                if (children is not null && children.Count > 0)
+                tempchildren = node.children;
+                if (tempchildren is not null && tempchildren.Count > 0)
                 {
-                    nodes.EnsureCapacity(nodes.Count + children.Count);
-                    foreach (var c in children) { nodes.Enqueue(c); }
+                    nodes.EnsureCapacity(nodes.Count + tempchildren.Count);
+                    foreach (var c in tempchildren) { nodes.Enqueue(c); }
                 }
             }
         }
@@ -179,10 +205,9 @@ namespace MP.Collections
             foreach (TreeNode<T> item in ChildrenAndSelf())
             {
                 sb.Append(item.Value);
-                sb.Append(", ");
+                sb.Append(comma);
             }
-            if (sb.Length > comma.Length)
-            {
+            if (sb.Length > comma.Length) {
                 sb.Remove(sb.Length - comma.Length, comma.Length);
             }
             sb.Append(" }");

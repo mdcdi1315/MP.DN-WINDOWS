@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MP.Annotations.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace MP.Collections
@@ -11,72 +12,29 @@ namespace MP.Collections
     /// A special collection for creating trees.
     /// </summary>
     /// <typeparam name="T">The type of the elements that this tree will hold.</typeparam>
-    public sealed class Tree<T> : IEnumerable<T>
+    public sealed class Tree<T> :
+        ITreeNodeGetter<TreeNode<T>>,
+        IEnumerable<T>
     {
         /// <summary>
         /// Defines a convenient enumerator class for <see cref="Tree{T}"/> objects.
         /// </summary>
-        public sealed class Enumerator : IEnumerator<T>
+        public sealed class Enumerator : TreeNodeGetterEnumerator<TreeNode<T>> , IEnumerator<T>
         {
-            private TreeNode<T> root, current;
-            private Queue<TreeNode<T>> nodes;
-
             /// <summary>
             /// Creates a new tree enumerator, by starting the enumeration from the specified tree node.
             /// </summary>
             /// <param name="root">The root node where enumeration will begin from.</param>
-            public Enumerator(TreeNode<T> root)
-            {
-                ArgumentNullException.ThrowIfNull(root);
-                this.root = root;
-                current = null;
-                nodes = new(10);
-                nodes.Enqueue(root);
-            }
+            /// <exception cref="ArgumentNullException"><paramref name="root"/> was <see langword="null"/>.</exception>
+            [Throws(typeof(ArgumentNullException))]
+            public Enumerator(TreeNode<T> root) : base(root) { }
+
+            T IEnumerator<T>.Current => Current.Value;
 
             /// <summary>
-            /// Gets the node at the current position.
+            /// Gets the value of the currently pointed to tree node.
             /// </summary>
-            public TreeNode<T> CurrentNode => current;
-
-            /// <summary>
-            /// Gets the current value of the current node.
-            /// </summary>
-            public T Current => current.Value;
-
-            object IEnumerator.Current => Current;
-
-            /// <summary>
-            /// Moves to a next node in the tree.
-            /// </summary>
-            /// <returns><see langword="true"/> when a new child was retrieved; <see langword="false"/> if no more child elements are found.</returns>
-            public bool MoveNext()
-            {
-                if (current is not null) {
-                    foreach (var c in current.Children) { nodes.Enqueue(c); }
-                }
-                return nodes.TryDequeue(out current);
-            }
-
-            /// <summary>
-            /// Resets the enumerator before the root node was specified.
-            /// </summary>
-            public void Reset()
-            {
-                current = null;
-                nodes.Clear();
-                nodes.Enqueue(root);
-            }
-
-            /// <summary>
-            /// Cleans internal state used by this <see cref="Enumerator"/> instance.
-            /// </summary>
-            public void Dispose()
-            {
-                current = null;
-                nodes.Clear();
-                nodes = null;
-            }
+            public T NodeValue => Current.Value;
         }
 
         private TreeNode<T> root;
@@ -95,6 +53,22 @@ namespace MP.Collections
         /// Gets the root node of the tree.
         /// </summary>
         public TreeNode<T> Root => GetNodePrivate();
+
+        TreeNode<T> ITreeNodeGetter<TreeNode<T>>.Parent => null; // This is the top of the tree, no other parents do exist!!
+
+        bool ITreeNodeGetterAccessor.IsRoot => true; // This is always true!!!
+
+        ITreeNodeGetterAccessor ITreeNodeGetterAccessor.Parent => null;
+
+        IEnumerable<ITreeNodeGetterAccessor> ITreeNodeGetterAccessor.Children => Children;
+
+        /// <summary>
+        /// Gets the children of the root node of this tree. 
+        /// </summary>
+        /// <remarks>
+        /// This is equivalent to getting the root node from the <see cref="Root"/> property and from that calling the <see cref="TreeNode{T}.Children"/> property.
+        /// </remarks>
+        public IEnumerable<TreeNode<T>> Children => GetNodePrivate().Children;
 
         /// <summary>
         /// Clears all the elements from the current tree, including the root node.
@@ -123,13 +97,12 @@ namespace MP.Collections
             sb.Append("Tree<");
             sb.Append(typeof(T).FullName);
             sb.Append("> { ");
-            foreach (T item in this)
+            foreach (T item in (IEnumerable<T>)this)
             {
                 sb.Append(item);
-                sb.Append(", ");
+                sb.Append(comma);
             }
-            if (sb.Length > comma.Length)
-            {
+            if (sb.Length > comma.Length) {
                 sb.Remove(sb.Length - comma.Length, comma.Length);
             }
             sb.Append(" }");

@@ -1,12 +1,14 @@
 ﻿
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace MP.Graphics
 {
     /// <summary>
     /// Defines a two-dimensional single-presicion floating integer point.
     /// </summary>
+    [StructLayout(LayoutKind.Explicit, Pack = sizeof(float), Size = sizeof(float) * 2)]
     public readonly struct PointF :
         IEqualityOperators<PointF, PointF, System.Boolean>,
         IEqualityOperators<PointF , Point , System.Boolean>,
@@ -21,9 +23,11 @@ namespace MP.Graphics
         ICloneable
     {
         /// <summary>The X-coordinate of the point.</summary>
+        [FieldOffset(0)]
         public readonly float X;
 
         /// <summary>The Y-coordinate of the point.</summary>
+        [FieldOffset(sizeof(float))]
         public readonly float Y;
 
         /// <summary>
@@ -216,7 +220,8 @@ namespace MP.Graphics
         public static bool operator !=(PointF left, PointF right) => !left.Equals(right);
 
         /// <summary>
-        /// Implcitly converts a <see cref="Point"/> to a <see cref="PointF"/> instance. See <see cref="PointF(Point)"/> constructor for more information.
+        /// Implcitly converts a <see cref="Point"/> to a <see cref="PointF"/> instance. <br />
+        /// See <see cref="PointF(Point)"/> constructor for more information.
         /// </summary>
         /// <param name="point">The <see cref="Point"/> to convert as a <see cref="PointF"/> instance.</param>
         public static implicit operator PointF(Point point) => new(point);
