@@ -27,6 +27,11 @@ namespace MP.Graphics.Windowing.Graphics
         /// <returns>An object referencing the drawn triangle.</returns>
         public GraphicsObjectID CreateTriangle(Triangle triangle);
 
+        /// <summary>Creates a line to be drawn into the current context.</summary>
+        /// <param name="line">The line's bounds.</param>
+        /// <returns>An object referencing the drawn line.</returns>
+        public GraphicsObjectID CreateLine(Line line);
+
         /// <summary>Creates a graphics texture to be drawn into the current context.</summary>
         /// <param name="image">The image to draw.</param>
         /// <param name="texture_area">The drawing area, as a rectangle, that the texture will cover.</param>
@@ -48,6 +53,14 @@ namespace MP.Graphics.Windowing.Graphics
         /// <param name="newtriangle">The new bounds of this triangle graphics object.</param>
         /// <returns>A value whether the operation succeeded or not. Operation also fails if <paramref name="o"/> is not a triangle graphics object.</returns>
         public bool UpdateTriangle(GraphicsObjectID o, Triangle newtriangle);
+
+        /// <summary>
+        /// Updates the line bounds, if the current graphics object is a line.
+        /// </summary>
+        /// <param name="o">The line graphics object to update.</param>
+        /// <param name="line">The new bounds of this line graphics object.</param>
+        /// <returns>A value whether the operation succeeded or not. Operation also fails if <paramref name="o"/> is not a line graphics object.</returns>
+        public bool UpdateLine(GraphicsObjectID o, Line line);
 
         /// <summary>
         /// Updates the texture bounds, if the current graphics object is a texture.
@@ -79,6 +92,11 @@ namespace MP.Graphics.Windowing.Graphics
         /// <summary>Clears the window screen with the specified color.</summary>
         /// <param name="color">The <see cref="IColor"/> instance to clear the window screen with.</param>
         public void Clear(IColor color);
+
+        /// <summary>
+        /// Draws a single frame of the current graphics data.
+        /// </summary>
+        public void DrawFrame();
     }
 
 }

@@ -47,59 +47,63 @@ namespace MP.Graphics.Imaging
         public static IImage FlipVertically(this IImage source)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
-            DefaultImage ret = new(source);
+            DefaultImage ret = DefaultImage.CreateCopy(source);
 			/*
-			The original code for this is located at stb_image.h file in https://github.com/nothings/stb
+			    The original code for this is located at stb_image.h file in https://github.com/nothings/stb
 			
-			Copyright (c) 2017 Sean Barrett
-			Permission is hereby granted, free of charge, to any person obtaining a copy of
-			this software and associated documentation files (the "Software"), to deal in
-			the Software without restriction, including without limitation the rights to
-			use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-			of the Software, and to permit persons to whom the Software is furnished to do
-			so, subject to the following conditions:
-			The above copyright notice and this permission notice shall be included in all
-			copies or substantial portions of the Software.
-			THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-			IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-			FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-			AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-			LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-			OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-			SOFTWARE.
-			
+			    Copyright (c) 2017 Sean Barrett
+
+			    Permission is hereby granted, free of charge, to any person obtaining a copy of
+			    this software and associated documentation files (the "Software"), to deal in
+			    the Software without restriction, including without limitation the rights to
+			    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+			    of the Software, and to permit persons to whom the Software is furnished to do
+			    so, subject to the following conditions:
+
+			    The above copyright notice and this permission notice shall be included in all
+			    copies or substantial portions of the Software.
+
+			    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+			    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+			    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+			    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+			    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+			    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+			    SOFTWARE.
 			*/
-            System.Int32 bytes_per_row = source.Size.Width * source.PixelFormat.GetByteSize();
-            System.Int32 row;
+            System.Int32 bytes_per_row = source.Size.Width * source.PixelFormat.GetByteSize() , row;
             // mdcdi1315: Negate the flipping in the destination image. 
             // If not flipped before, it will be flipped; otherwise it is unflipped.
             ret.IsFlippedVertically = ! source.IsFlippedVertically;
             System.Byte* bytes = ret.NativePointer;
-            Unsafe.CopyBlockUnaligned(bytes, source.NativePointer, GetMemoryByteLength(source).ToUInt32());
-            IMemoryHandle temp = SystemInfo.CreateNativeMemory(2048UL);
-            for (row = 0; row < (source.Size.Height >> 1); row++)
-            {
-                System.Byte* row0 = bytes + row * bytes_per_row;
-                System.Byte* row1 = bytes + (source.Size.Height - row - 1) * bytes_per_row;
-                System.Int32 bytes_left = bytes_per_row;
-                while (bytes_left > 0)
+            IMemoryHandle temp = null;
+            try {
+                temp = SystemInfo.CreateNativeMemory(2048UL);
+                for (row = 0; row < (source.Size.Height >> 1); row++)
                 {
-                    System.UInt32 bytes_copy = ((bytes_left < temp.MemoryLength) ? bytes_left : temp.MemoryLength).ToUInt32();
-                    Unsafe.CopyBlockUnaligned(temp.MemoryPointer, row0, bytes_copy);
-                    Unsafe.CopyBlockUnaligned(row0, row1, bytes_copy);
-                    Unsafe.CopyBlockUnaligned(row1, temp.MemoryPointer, bytes_copy);
-                    row0 += bytes_copy;
-                    row1 += bytes_copy;
-                    bytes_left -= bytes_copy.ToInt32();
+                    System.Byte* row0 = bytes + row * bytes_per_row;
+                    System.Byte* row1 = bytes + (source.Size.Height - row - 1) * bytes_per_row;
+                    System.Int32 bytes_left = bytes_per_row;
+                    while (bytes_left > 0)
+                    {
+                        System.UInt32 bytes_copy = ((bytes_left < temp.MemoryLength) ? bytes_left : temp.MemoryLength).ToUInt32();
+                        Unsafe.CopyBlockUnaligned(temp.MemoryPointer, row0, bytes_copy);
+                        Unsafe.CopyBlockUnaligned(row0, row1, bytes_copy);
+                        Unsafe.CopyBlockUnaligned(row1, temp.MemoryPointer, bytes_copy);
+                        row0 += bytes_copy;
+                        row1 += bytes_copy;
+                        bytes_left -= bytes_copy.ToInt32();
+                    }
                 }
+            } finally {
+                temp?.Dispose();
             }
             return ret;
         }
 
-        private static void RToRGBA(System.Byte* source, System.Byte* destination, Size size)
+        private static void RToRGBA(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source++, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source++, destination += 4)
             {
                 destination[0] = *source;
                 destination[1] = 0;
@@ -108,10 +112,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGToRGBA(System.Byte* source, System.Byte* destination, Size size)
+        private static void RGToRGBA(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source += 2, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source += 2, destination += 4)
             {
                 destination[0] = *source;
                 destination[1] = source[1];
@@ -120,10 +123,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGBToRGBA(System.Byte* source, System.Byte* destination, Size size)
+        private static void RGBToRGBA(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source += 3, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source += 3, destination += 4)
             {
                 destination[0] = *source;
                 destination[1] = source[1];
@@ -132,10 +134,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void ARGBToRGBA(System.Byte* source, System.Byte* destination, Size size)
+        private static void ARGBToRGBA(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source += 4, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source += 4, destination += 4)
             {
                 destination[0] = source[1];
                 destination[1] = source[2];
@@ -153,38 +154,38 @@ namespace MP.Graphics.Imaging
         public static IImage TranslateToRGBA(this IImage source)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
-            DefaultImage ret = new(source);
-            ret.PixelFormat = ImagePixelFormat.RGBA;
-            int size = source.Size.Width * source.Size.Height * 4;
-            ret.InitializeMemoryWithSize(size);
+            // Specify the transformed image, preparing it for accomondating the data.
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size , source.IsFlippedVertically , ImagePixelFormat.RGBA);
             System.Byte* cpy = source.NativePointer;
             System.Byte* outimg = ret.NativePointer;
+            // Specify source image run length.
+            // Will be used by the copy loops to determine how many times they should run.
+            int runlength = source.Size.Width * source.Size.Height; 
             switch (source.PixelFormat)
             {
                 case ImagePixelFormat.R:
-                    RToRGBA(cpy, outimg, source.Size);
+                    RToRGBA(cpy, outimg, runlength);
                     break;
                 case ImagePixelFormat.RG:
-                    RGToRGBA(cpy, outimg, source.Size);
+                    RGToRGBA(cpy, outimg, runlength);
                     break;
                 case ImagePixelFormat.RGB:
-                    RGBToRGBA(cpy, outimg, source.Size);
+                    RGBToRGBA(cpy, outimg, runlength);
                     break;
                 case ImagePixelFormat.ARGB:
-                    ARGBToRGBA(cpy, outimg, source.Size);
+                    ARGBToRGBA(cpy, outimg, runlength);
                     break;
                 case ImagePixelFormat.RGBA:
                     // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
-                    Unsafe.CopyBlockUnaligned(outimg, cpy, size.ToUInt32());
+                    Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
                     break;
             }
             return ret;
         }
 
-        private static void RToARGB(System.Byte* source, System.Byte* destination, Size size)
+        private static void RToARGB(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++ , source++ , destination += 4)
+            for (System.Int32 I = 0; I < len; I++ , source++ , destination += 4)
             {
                 destination[0] = 255;
                 destination[1] = *source;
@@ -193,10 +194,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGToARGB(System.Byte* source , System.Byte* destination, Size size)
+        private static void RGToARGB(System.Byte* source , System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source += 2, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source += 2, destination += 4)
             {
                 destination[0] = 255;
                 destination[1] = *source;
@@ -205,10 +205,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGBToARGB(System.Byte* source, System.Byte* destination, Size size)
+        private static void RGBToARGB(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source += 3, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source += 3, destination += 4)
             {
                 destination[0] = 255;
                 destination[1] = *source;
@@ -217,10 +216,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGBAToARGB(System.Byte* source, System.Byte* destination, Size size)
+        private static void RGBAToARGB(System.Byte* source, System.Byte* destination, int len)
         {
-            int bound = size.Width * size.Height; // In fact the two loops can be combined into one by doing width * height.
-            for (System.Int32 I = 0; I < bound; I++, source += 4, destination += 4)
+            for (System.Int32 I = 0; I < len; I++, source += 4, destination += 4)
             {
                 destination[0] = source[3];
                 destination[1] = *source;
@@ -238,29 +236,30 @@ namespace MP.Graphics.Imaging
         public static IImage TranslateToARGB(this IImage source)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
-            DefaultImage ret = new(source);
-            ret.PixelFormat = ImagePixelFormat.ARGB;
-            int size = source.Size.Width * source.Size.Height * 4;
-            ret.InitializeMemoryWithSize(size);
+            // Specify the transformed image, preparing it for accomondating the data.
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size, source.IsFlippedVertically, ImagePixelFormat.ARGB);
             System.Byte* cpy = source.NativePointer;
             System.Byte* outimg = ret.NativePointer;
+            // Specify source image run length.
+            // Will be used by the copy loops to determine how many times they should run.
+            int runlength = source.Size.Width * source.Size.Height;
             switch (source.PixelFormat)
             {
                 case ImagePixelFormat.R:
-                    RToARGB(cpy , outimg , source.Size);
+                    RToARGB(cpy , outimg , runlength);
                     break;
                 case ImagePixelFormat.RG:
-                    RGToARGB(cpy , outimg , source.Size);
+                    RGToARGB(cpy , outimg , runlength);
                     break;
                 case ImagePixelFormat.RGB:
-                    RGBToARGB(cpy , outimg , source.Size);
+                    RGBToARGB(cpy , outimg , runlength);
                     break;
                 case ImagePixelFormat.RGBA:
-                    RGBAToARGB(cpy , outimg , source.Size);
+                    RGBAToARGB(cpy , outimg , runlength);
                     break;
                 case ImagePixelFormat.ARGB:
                     // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
-                    Unsafe.CopyBlockUnaligned(outimg, cpy, size.ToUInt32());
+                    Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
                     break;
             }
             return ret;
@@ -275,9 +274,7 @@ namespace MP.Graphics.Imaging
         public static IImage Copy(this IImage source)
         {
             if (source is null) { throw new ArgumentNullException(nameof(source)); }
-            DefaultImage ret = new(source);
-            Unsafe.CopyBlockUnaligned(source.NativePointer, ret.NativePointer, source.GetMemoryByteLength().ToUInt32());
-            return ret;
+            return DefaultImage.CreateCopy(source);
         }
 
         /// <summary>Gets the pixel specified at the current image object.</summary>

@@ -1,5 +1,6 @@
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MP.Graphics
@@ -9,7 +10,12 @@ namespace MP.Graphics
     /// Data are depicted by the alpha channel first.
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-    public readonly struct ARGBColor : 
+    public readonly struct ARGBColor :
+        IEqualityOperators<ARGBColor, ARGBColor, bool>,
+        IEquatable<RGBAColor>,
+        IEquatable<ARGBColor>,
+        IEquatable<BGRAColor>,
+        IEquatable<IColor>,
         ITruncatable<RGBColor>,
         ICloneable,
         IColor
@@ -35,10 +41,10 @@ namespace MP.Graphics
         /// <param name="a">The alpha channel value.</param>
         public ARGBColor(byte a, byte r, byte g, byte b)
         {
+            this.a = a;
             this.r = r;
             this.g = g;
             this.b = b;
-            this.a = a;
         }
 
         /// <inheritdoc />
@@ -54,20 +60,94 @@ namespace MP.Graphics
         public readonly byte B => b;
 
         /// <summary>
+        /// Gets a value whether this instance has the same color intensities as another <see cref="ARGBColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(ARGBColor other) => 
+            a == other.a && 
+            r == other.r &&
+            g == other.g && 
+            b == other.b;
+
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as a <see cref="RGBAColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(RGBAColor other) =>
+            a == other.A &&
+            r == other.R && 
+            g == other.G &&
+            b == other.B;
+
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as a <see cref="BGRAColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(BGRAColor other) =>
+            a == other.A &&
+            r == other.R &&
+            g == other.G &&
+            b == other.B;
+
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as any object supporting the <see cref="IColor"/> interface.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> objects are considered equal.</returns>
+        public readonly bool Equals(IColor other) =>
+            a == other.A &&
+            r == other.R &&
+            g == other.G &&
+            b == other.B;
+
+        /// <summary>
+        /// Gets a value whether this <see cref="RGBAColor"/> instance and an object are equal instances.
+        /// </summary>
+        /// <param name="obj">The other object instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="obj"/> objects are considered equal.</returns>
+        public readonly override bool Equals(object obj) => obj switch 
+        { 
+            ARGBColor c => Equals(c),
+            RGBAColor c => Equals(c),
+            BGRAColor c => Equals(c),
+            IColor c => Equals(c),
+            _ => false
+        };
+
+        /// <summary>Gets a hash code for this <see cref="ARGBColor"/> instance.</summary>
+        /// <returns>A hash code for this instance.</returns>
+        public readonly override int GetHashCode() => this.GetCommonHashCode();
+
+        /// <summary>
         /// Truncates this <see cref="ARGBColor"/> instance to an <see cref="RGBColor"/> instance. <br />
         /// The alpha channel is lost.
         /// </summary>
         /// <returns>A new <see cref="RGBColor"/> instance, representing the truncated result.</returns>
-        public RGBColor Truncate() => new(r,g,b);
+        public RGBColor Truncate() => new(r, g, b);
 
         /// <summary>Creates a copy of this <see cref="ARGBColor"/> instance to a new instance.</summary>
         /// <returns>A new instance of the <see cref="ARGBColor"/> structure, having the same color intensities as this <see cref="ARGBColor"/> instance.</returns>
-        public readonly ARGBColor Clone() => new(a,r,g,b);
+        public readonly ARGBColor Clone() => new(a, r, g, b);
 
         readonly object ICloneable.Clone() => Clone();
 
         /// <summary>Gets a string describing this color.</summary>
         /// <returns>The color description.</returns>
-        public override System.String ToString() => $"Color<ARGB> {{ Red: {r} , Green: {g} , Blue: {b} , Alpha: {a} }}";
+        public readonly override System.String ToString() => $"Color<ARGB> {{ Red: {r} , Green: {g} , Blue: {b} , Alpha: {a} }}";
+
+        /// <summary>Defines whether two <see cref="ARGBColor"/> instances are equal.</summary>
+        /// <param name="left">The first <see cref="ARGBColor"/> to compare.</param>
+        /// <param name="right">The second <see cref="ARGBColor"/> to compare.</param>
+        /// <returns>A value whether the two passed <see cref="ARGBColor"/> instances are indeed equal.</returns>
+        public static bool operator ==(ARGBColor left, ARGBColor right) => left.Equals(right);
+
+        /// <summary>Defines whether two <see cref="ARGBColor"/> instances are inequal.</summary>
+        /// <param name="left">The first <see cref="ARGBColor"/> to compare.</param>
+        /// <param name="right">The second <see cref="ARGBColor"/> to compare.</param>
+        /// <returns>A value whether the two passed <see cref="ARGBColor"/> instances are indeed inequal.</returns>
+        public static bool operator !=(ARGBColor left, ARGBColor right) => !left.Equals(right);
     }
 }

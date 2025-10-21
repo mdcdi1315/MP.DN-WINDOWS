@@ -6,9 +6,9 @@ namespace MP.AudioLibrary
     /// <summary>
     /// The <see cref="Decibel"/> structure defines another volume measurement in contrast to the most common attentuation scale from 0 to 1 in floating point.
     /// </summary>
-    public struct Decibel
+    public readonly struct Decibel
     {
-        private System.Single db;
+        private readonly System.Single db;
 
         /// <summary>
         /// Creates a <see cref="Decibel"/> instance which has a value of zero. (No volume)
@@ -30,7 +30,7 @@ namespace MP.AudioLibrary
         public static Decibel FromAttenuation(System.Single scale)
         {
             if (scale < 0 || scale > 1) { throw new ArgumentOutOfRangeException(nameof(scale), "Attenuation must be a value ranging from 0 to 1."); }
-            return new() { db = 20f * MathF.Log(scale, 10f) };
+            return new(20f * MathF.Log(scale, 10f));
         }
 
         /// <summary>

@@ -133,6 +133,8 @@
 		<Compile Include="MP\ExceptionSystem\INativeException.cs" />
 		<Compile Include="MP\ExceptionSystem\MetadataItemNotFoundException.cs" />
 		<Compile Include="MP/ExceptionSystem/EnvironmentVariableNotFoundException.cs" />
+		<Compile Include="MP\ExceptionSystem\RCUEngineInitializationException.cs" />
+		<Compile Include="MP\ExceptionSystem\RCUEngineUninitializationException.cs" />
 		<Compile Include="MP\ExceptionSystem\ReadOnlyArchiveAttributeException.cs" />
 		<Compile Include="MP\ExtensibilitySystem\AssetIntegrityFailedException.cs" />
 		<Compile Include="MP\ExtensibilitySystem\AssetVerificationHashType.cs" />
@@ -180,6 +182,7 @@
 		<Compile Include="MP\Graphics\OpenGL\GLUtils.cs" />
 		<Compile Include="MP\Graphics\OpenGL\GLConstants.cs" />
 		<Compile Include="MP\Graphics\OpenGL\GlGetStringType.cs" />
+		<Compile Include="MP\Graphics\OpenGL\GraphicsContext\OpenGLGraphicsContext.cs" />
 		<Compile Include="MP\Graphics\OpenGL\IOpenGLFunctionLoader.cs" />
 		<Compile Include="MP\Graphics\OpenGL\IOpenGLObject.cs" />
 		<Compile Include="MP\Graphics\OpenGL\OpenGLException.cs" />
@@ -282,6 +285,7 @@
 		<Compile Include="MP\RCUEngine.cs" />
 		<Compile Include="MP\RCUEngineRecieveCommand.cs" />
 		<Compile Include="MP\RCUEngineSendCommand.cs" />
+		<Compile Include="MP\RCUEngineV2.cs" />
 		<Compile Include="MP\SavedDataTagProperty.cs" />
 		<Compile Include="MP\SavedDataTagReader.cs" />
 		<Compile Include="MP\Serialization\Transcoders\EnumerationTypeTranscoder.cs" />

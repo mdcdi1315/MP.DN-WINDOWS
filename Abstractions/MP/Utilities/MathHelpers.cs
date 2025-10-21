@@ -98,6 +98,51 @@ namespace MP.Utilities
         }
 
         /// <summary>
+        /// Converts an unsigned short integer to a byte, respecting the limits of both numeric types. <br />
+        /// However, the arithmetic precision is downgraded by 257 values.
+        /// </summary>
+        /// <param name="value">The value to convert to a byte range.</param>
+        /// <returns>The converted value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ToByteRange(ushort value) => (byte)(value / 257);
+
+        /// <summary>
+        /// Converts an unsigned integer to a byte, respecting the limits of both numeric types. <br />
+        /// However, the arithmetic precision is downgraded by 16843009 values.
+        /// </summary>
+        /// <param name="value">The value to convert to a byte range.</param>
+        /// <returns>The converted value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ToByteRange(uint value) => (byte)(value / 16843009U);
+
+        /// <summary>
+        /// Converts an unsigned long integer to a byte, respecting the limits of both numeric types. <br />
+        /// However, the arithmetic precision is downgraded by 72340172838076673 values.
+        /// </summary>
+        /// <param name="value">The value to convert to a byte range.</param>
+        /// <returns>The converted value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ToByteRange(ulong value) => (byte)(value / 72340172838076673UL);
+
+        /// <summary>
+        /// Converts an unsigned integer to an unsigned short integer, respecting the limits of both numeric types. <br />
+        /// However, the arithmetic precision is downgraded by 65537 values.
+        /// </summary>
+        /// <param name="value">The value to convert to a byte range.</param>
+        /// <returns>The converted value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort ToUShortRange(uint value) => (ushort)(value / 65537U);
+
+        /// <summary>
+        /// Converts an unsigned long integer to an unsigned short integer, respecting the limits of both numeric types. <br />
+        /// However, the arithmetic precision is downgraded by 281479271743489 values.
+        /// </summary>
+        /// <param name="value">The value to convert to a byte range.</param>
+        /// <returns>The converted value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort ToUShortRange(ulong value) => (ushort)(value / 281479271743489UL);
+
+        /// <summary>
         /// Maps a value from the range [<paramref name="inputlowerbound"/>..<paramref name="inputupperbound"/>] to the range [<paramref name="outputlowerbound"/>..<paramref name="outputupperbound"/>].
         /// The value is clamped, if necessary.
         /// </summary>

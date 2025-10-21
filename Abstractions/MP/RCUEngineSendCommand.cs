@@ -91,4 +91,11 @@ namespace MP
     /// <param name="sender">The engine that the command was sent through.</param>
     /// <param name="e">The additional command data to send.</param>
     public delegate void SendCommandDelegate(System.Object sender, SendCommandDataEventArgs e);
+
+    /// <summary>
+    /// Defines the event delegate function signature.
+    /// </summary>
+    /// <param name="sender">The engine that the command was sent through.</param>
+    /// <param name="e">The additional command data to send.</param>
+    public delegate void SendCommandDelegateV2(RCUEngineV2 sender, SendCommandDataEventArgs e);
 }

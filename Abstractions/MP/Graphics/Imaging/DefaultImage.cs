@@ -1,4 +1,6 @@
 ﻿
+using System.Runtime.CompilerServices;
+
 namespace MP.Graphics.Imaging
 {
     /// <summary>
@@ -7,31 +9,48 @@ namespace MP.Graphics.Imaging
     internal sealed class DefaultImage : IImage
     {
         private Size size;
+        private IMemoryHandle mem;
         private System.Boolean flipped;
         private ImagePixelFormat pixfmt;
-        private IMemoryHandle mem;
 
-        public DefaultImage(IImage other)
+        private DefaultImage() 
         {
-            size = other.Size;
-            pixfmt = other.PixelFormat;
-            mem = SystemInfo.CreateNativeMemory(other.GetMemoryByteLength().ToUInt64());
-            flipped = other.IsFlippedVertically;
+            mem = null;
+            size = default;
+            flipped = false;
+            pixfmt = default;
         }
 
-        public DefaultImage(Size size)
+        public DefaultImage(Size size) : this() => this.size = size;
+
+        public static DefaultImage CreateUninitialized(Size desired, bool flipped, ImagePixelFormat pixelformat)
         {
-            this.size = size;
+            DefaultImage img = new();
+            img.pixfmt = pixelformat;
+            img.size = desired;
+            img.flipped = flipped;
+            img.InitializeMemoryWithSize(img.GetMemoryByteLength());
+            return img;
+        }
+
+        public static unsafe DefaultImage CreateCopy(IImage source)
+        {
+            DefaultImage img = new();
+            img.size = source.Size;
+            img.pixfmt = source.PixelFormat;
+            img.flipped = source.IsFlippedVertically;
+            uint size = source.GetMemoryByteLength().ToUInt32();
+            img.mem = SystemInfo.CreateNativeMemory(size);
+            Unsafe.CopyBlockUnaligned(img.mem.MemoryPointer, source.NativePointer, size);
+            return img;
         }
 
         public void InitializeMemoryWithSize(System.Int32 size)
         {
             mem?.Dispose();
-            mem = SystemInfo.CreateNativeMemory(size.ToUInt32());
+            mem = SystemInfo.CreateNativeMemory(size.ToUInt64());
             mem.ZeroMemory();
         }
-
-        public IMemoryHandle Handle => mem;
 
         public unsafe System.Byte* NativePointer => mem.MemoryPointer;
 

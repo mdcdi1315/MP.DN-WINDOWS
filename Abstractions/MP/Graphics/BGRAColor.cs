@@ -1,5 +1,6 @@
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MP.Graphics
@@ -10,8 +11,13 @@ namespace MP.Graphics
     /// This is the same as <see cref="RGBAColor"/>; however, it defines a different data depiction.
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-    public readonly struct BGRAColor : 
+    public readonly struct BGRAColor :
+        IEqualityOperators<BGRAColor, BGRAColor, bool>,
         ITruncatable<BGRColor>,
+        IEquatable<RGBAColor>,
+        IEquatable<ARGBColor>,
+        IEquatable<BGRAColor>,
+        IEquatable<IColor>,
         ICloneable,
         IColor
     {
@@ -67,8 +73,82 @@ namespace MP.Graphics
 
         readonly object ICloneable.Clone() => Clone();
 
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as another <see cref="BGRAColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(BGRAColor other) =>
+            b == other.b &&
+            g == other.g &&
+            r == other.r &&
+            a == other.a;
+
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as a <see cref="RGBAColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(RGBAColor other) =>
+            b == other.B &&
+            g == other.G &&
+            r == other.R &&
+            a == other.A;
+
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as a <see cref="ARGBColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(ARGBColor other) =>
+            b == other.B &&
+            g == other.G &&
+            r == other.R &&
+            a == other.A;
+
+        /// <summary>
+        /// Gets a value whether this instance has the same color intensities as a <see cref="ARGBColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly bool Equals(IColor other) =>
+            b == other.B &&
+            g == other.G &&
+            r == other.R &&
+            a == other.A;
+
+        /// <summary>
+        /// Gets a value whether this <see cref="BGRAColor"/> instance and an object are equal instances.
+        /// </summary>
+        /// <param name="obj">The other object instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="obj"/> objects are considered equal.</returns>
+        public readonly override bool Equals(object obj) => obj switch 
+        { 
+            BGRAColor c => Equals(c),
+            RGBAColor c => Equals(c),
+            ARGBColor c => Equals(c),
+            IColor c => Equals(c),
+            _ => false
+        };
+
+        /// <summary>Gets a hash code for this <see cref="BGRAColor"/> instance.</summary>
+        /// <returns>A hash code for this instance.</returns>
+        public readonly override int GetHashCode() => this.GetCommonHashCode();
+
         /// <summary>Gets a string describing this color.</summary>
         /// <returns>The color description.</returns>
-        public override System.String ToString() => $"Color<BGRA> {{ Red: {r} , Green: {g} , Blue: {b} , Alpha: {a} }}";
+        public readonly override System.String ToString() => $"Color<BGRA> {{ Red: {r} , Green: {g} , Blue: {b} , Alpha: {a} }}";
+
+        /// <summary>Defines whether two <see cref="BGRAColor"/> instances are equal.</summary>
+        /// <param name="left">The first <see cref="BGRAColor"/> to compare.</param>
+        /// <param name="right">The second <see cref="BGRAColor"/> to compare.</param>
+        /// <returns>A value whether the two passed <see cref="BGRAColor"/> instances are indeed equal.</returns>
+        public static bool operator ==(BGRAColor left, BGRAColor right) => left.Equals(right);
+
+        /// <summary>Defines whether two <see cref="BGRAColor"/> instances are inequal.</summary>
+        /// <param name="left">The first <see cref="BGRAColor"/> to compare.</param>
+        /// <param name="right">The second <see cref="BGRAColor"/> to compare.</param>
+        /// <returns>A value whether the two passed <see cref="BGRAColor"/> instances are indeed inequal.</returns>
+        public static bool operator !=(BGRAColor left, BGRAColor right) => !left.Equals(right);
     }
 }
