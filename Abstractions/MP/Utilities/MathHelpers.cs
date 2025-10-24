@@ -199,5 +199,36 @@ namespace MP.Utilities
         /// <returns>A mapped number in the range (0..1).</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ToNormalRange(float v, float min, float max) => Math.Abs(v - min) / Math.Abs(min - max);
+
+        /// <summary>
+        /// Computes the buffer sizes when dispatching requests regarding methods related to data 
+        /// streams that are instructed to read a fixed number of bytes, and are using temporary buffers. <br />
+        /// You pass in the actual number of bytes read or to write, the total number of bytes to read or write, and the actual size of the buffer. <br />
+        /// Example: <br /> <br />
+        /// <code>
+        /// // An example of how to use it
+        /// System.IO.Stream stream; // A data stream to read from. Assumed that it is properly initialized before.
+        /// System.Byte[] temp = new System.Byte[2048];
+        /// 
+        /// long total_bytes = 300000;
+        /// 
+        /// int bytes_read;
+        /// 
+        /// for (long c = 0; c &lt; total_bytes; c += bytes_read)
+        /// {
+        ///     bytes_read = stream.Read(temp , 0 , ComputeStreamBufferSize(c , total_bytes, 2048));
+        ///     
+        ///     // Do something with the data now...
+        /// }
+        /// </code>
+        /// </summary>
+        /// <param name="consumed">The number of bytes already processed.</param>
+        /// <param name="total">The total number of bytes that are to be read/written.</param>
+        /// <param name="buffer_size">The temporary buffer size.</param>
+        /// <returns>A computed value, so that the value is in range [0..<paramref name="buffer_size"/>].</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ComputeStreamBufferSize(long consumed, long total, int buffer_size)
+            => ((consumed + buffer_size) < total) ? buffer_size : (int)(total - consumed);
+
     }
 }

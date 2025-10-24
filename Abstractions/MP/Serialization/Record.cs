@@ -99,7 +99,7 @@ namespace MP.Serialization
                 this.fields = fd;
             } else if (fields is ICollection<SerializedField> collection) { // Collection fallback
                 this.fields = new SerializedField[collection.Count];
-                int I = 0;
+                long I = 0;
                 foreach (SerializedField field in collection) {
                     this.fields[I++] = field;
                 }

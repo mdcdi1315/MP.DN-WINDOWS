@@ -30,5 +30,9 @@ namespace MP.Graphics.Imaging
         /// This is also the most common format.
         /// </summary>
         ARGB = 4,
+        /// <summary>
+        /// Data are packed as the blue channel first , then the green, red and alpha channels do follow.
+        /// </summary>
+        BGRA = 5,
     }
 }

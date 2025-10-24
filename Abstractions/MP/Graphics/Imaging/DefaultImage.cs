@@ -45,7 +45,7 @@ namespace MP.Graphics.Imaging
             return img;
         }
 
-        public void InitializeMemoryWithSize(System.Int32 size)
+        public void InitializeMemoryWithSize(System.Int64 size)
         {
             mem?.Dispose();
             mem = SystemInfo.CreateNativeMemory(size.ToUInt64());

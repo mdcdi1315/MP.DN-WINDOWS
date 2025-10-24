@@ -10,6 +10,15 @@ namespace MP.Graphics.Imaging
     /// In most cases, you should not implement this interface for any reason; <br />
     /// the only implementers of this interface should be image decoders.
     /// </summary>
+    /// <remarks>
+    /// About the image data representation <br /> <br />
+    /// The byte length (size) of the native storage accounted for the pointer provided in the <see cref="NativePointer"/> property
+    /// does not need to be known, neither it's length be exactly as the exact and actual image size. <br />
+    /// It can be more than that, or even alignment restrictions may have been applied to the memory block itself. <br />
+    /// The exact size is not exposed by this abstraction, it is provided though indirectly, through the 
+    /// extension methods provided for this interface. <br />
+    /// Note that, the size of the image, as well as which is it's data representation are described by the <see cref="PixelFormat"/> and <see cref="Size"/> properties of the interface.
+    /// </remarks>
     public unsafe interface IImage : IDisposable
     {
         /// <summary>
@@ -34,7 +43,8 @@ namespace MP.Graphics.Imaging
         public System.Boolean IsFlippedVertically { get; }
 
         /// <summary>
-        /// Gets the image dimensions , in pixels.
+        /// Gets the image dimensions , in pixels. <br />
+        /// Can be negative values, if it has a special meaning for the image decoder.
         /// </summary>
         public Size Size { get; }
     }

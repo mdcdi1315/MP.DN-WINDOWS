@@ -22,7 +22,7 @@ namespace MP.Graphics.Imaging
         public static IImage FromRGB(System.Byte[] rgb, Size desiredsize)
         {
             ArgumentNullException.ThrowIfNull(rgb);
-            if (desiredsize.Width * desiredsize.Height * 3 != rgb.LongLength)
+            if ((((long)desiredsize.Width * desiredsize.Height) * 4L) != rgb.LongLength)
             {
                 throw new ArgumentException($"The array does not contain enough or valid data to be an RGB image with size {desiredsize} .");
             }
@@ -38,14 +38,14 @@ namespace MP.Graphics.Imaging
         /// </summary>
         /// <param name="argb">The raw ARGB data to initialize the <see cref="IImage"/> object from.</param>
         /// <param name="desiredsize">The desired size of the newly created image.</param>
-        /// <returns>The image object, having it's RGB data copied from the specified array.</returns>
+        /// <returns>The image object, having it's ARGB data copied from the specified array.</returns>
         /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="argb"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 4.</exception>
         public static IImage FromARGB(System.Byte[] argb, Size desiredsize)
         {
             ArgumentNullException.ThrowIfNull(argb);
-            if (desiredsize.Width * desiredsize.Height * 4 != argb.LongLength)
+            if ((((long)desiredsize.Width * desiredsize.Height) * 4L) != argb.LongLength)
             {
                 throw new ArgumentException($"The array does not contain enough or valid data to be an ARGB image with size {desiredsize} .");
             }
@@ -61,14 +61,14 @@ namespace MP.Graphics.Imaging
         /// </summary>
         /// <param name="rgba">The raw RGBA data to initialize the <see cref="IImage"/> object from.</param>
         /// <param name="desiredsize">The desired size of the newly created image.</param>
-        /// <returns>The image object, having it's RGB data copied from the specified array.</returns>
+        /// <returns>The image object, having it's RGBA data copied from the specified array.</returns>
         /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="rgba"/> was <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 4.</exception>
         public static IImage FromRGBA(System.Byte[] rgba, Size desiredsize)
         {
             ArgumentNullException.ThrowIfNull(rgba);
-            if (desiredsize.Width * desiredsize.Height * 4 != rgba.LongLength)
+            if ((((long)desiredsize.Width * desiredsize.Height) * 4L) != rgba.LongLength)
             {
                 throw new ArgumentException($"The array does not contain enough or valid data to be an RGBA image with size {desiredsize} .");
             }
@@ -80,6 +80,28 @@ namespace MP.Graphics.Imaging
         }
 
         /// <summary>
+        /// Creates a new <see cref="IImage"/> object from the specified raw BGRA data and the desired image size.
+        /// </summary>
+        /// <param name="bgra">The raw BGRA data to initialize the <see cref="IImage"/> object from.</param>
+        /// <param name="desiredsize">The desired size of the newly created image.</param>
+        /// <returns>The image object, having it's BGRA data copied from the specified array.</returns>
+        /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="bgra"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 4.</exception>
+        public static IImage FromBGRA(System.Byte[] bgra, Size desiredsize)
+        {
+            ArgumentNullException.ThrowIfNull(bgra);
+            long length = bgra.LongLength;
+            if ((((long)desiredsize.Width * desiredsize.Height) * 4L) != length)
+            {
+                throw new ArgumentException($"The array does not contain enough or valid data to be an RGBA image with size {desiredsize} .");
+            }
+            DefaultImage dfi = DefaultImage.CreateUninitialized(desiredsize, false, ImagePixelFormat.RGBA);
+            Unsafe.CopyBlockUnaligned(ref dfi.NativePointer[0], ref bgra[0], length.ToUInt32());
+            return dfi;
+        }
+
+        /// <summary>
         /// Creates a new <see cref="IImage"/> object from the specified 2-dimensional <see cref="IColor"/> array. <br />
         /// The image's dimensions are auto-determined from the array itself.
         /// </summary>
@@ -87,13 +109,12 @@ namespace MP.Graphics.Imaging
         /// <returns>The newly created <see cref="IImage"/> object describing the image.</returns>
         /// <exception cref="OutOfMemoryException">Not enough memory to create the new image object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="cls"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">The size of the array was not equal to the desired dimensions * 4.</exception>
         public static IImage FromColors(IColor[,] cls)
         {
-            if (cls is null) { throw new ArgumentNullException(nameof(cls)); }
+            ArgumentNullException.ThrowIfNull(cls);
             Size se = new(cls.GetLength(0), cls.GetLength(1));
-            DefaultImage img = new(se);
-            img.PixelFormat = ImagePixelFormat.ARGB;
-            img.InitializeMemoryWithSize(img.GetMemoryByteLength());
+            DefaultImage img = DefaultImage.CreateUninitialized(se, false, ImagePixelFormat.ARGB);
             IColor cl;
             System.Byte* temp;
             for (System.Int32 Y = 0; Y < se.Height; Y++)
@@ -112,7 +133,8 @@ namespace MP.Graphics.Imaging
         }
 
         /// <summary>
-        /// Creates an empty <see cref="IImage"/> object whose colors are to be specified by the caller.
+        /// Creates an empty <see cref="IImage"/> object whose colors are to be specified by the caller. <br />
+        /// Note: The data containing by the returned image object are UNDEFINED. That means, the bytes can be whatever values, and not necessarily zeroes.
         /// </summary>
         /// <param name="size">The desired dimensions of the new image object.</param>
         /// <param name="format">The pixel format to use for completeing the image data.</param>
@@ -121,13 +143,10 @@ namespace MP.Graphics.Imaging
         /// <exception cref="ArgumentException">One of the image dimensions was less than 1 pixel.</exception>
         public static IImage CreateEmpty(Size size, ImagePixelFormat format)
         {
-            if (size.Height < 1 || size.Width < 1)
-            {
+            if (size.Height < 1 || size.Width < 1) {
                 throw new ArgumentException("The image dimensions must not be negative or zero!!");
             }
-            DefaultImage img = new(size) { PixelFormat = format };
-            img.InitializeMemoryWithSize(img.GetMemoryByteLength());
-            return img;
+            return DefaultImage.CreateUninitialized(size, false, format);
         }
     }
 }

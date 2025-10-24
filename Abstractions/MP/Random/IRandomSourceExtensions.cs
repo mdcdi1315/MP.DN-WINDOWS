@@ -232,6 +232,29 @@ namespace MP.Random
         }
 
         /// <summary>
+        /// Produces a string that will have random characters. <br />
+        /// Can be used for seeding with strings instead,
+        /// or just ensuring that the underlying random number generator has been well initialized.
+        /// </summary>
+        /// <param name="rng">The random number generator to use</param>
+        /// <param name="char_count">The number of characters to that the returned string will have.</param>
+        /// <returns>A new completely random string</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="char_count"/> was a negative value.</exception>
+        public static System.String NextString(this IRandomSource rng, System.Int32 char_count)
+        {
+            if (char_count < 0) {
+                throw new ArgumentOutOfRangeException(nameof(char_count), "Number of characters to allocate to the returned string must not be negative!");
+            }
+            const short charlower = 7, charupper = 126;
+            System.Text.StringBuilder sb = new(char_count);
+            for (int I = 0; I < char_count; I++)
+            {
+                sb.Append(rng.NextInRange(charlower, charupper).ToChar());
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Produces a new 8.3 random file name from the specified randon number generator.
         /// </summary>
         /// <param name="rng">The random number generator to use.</param>

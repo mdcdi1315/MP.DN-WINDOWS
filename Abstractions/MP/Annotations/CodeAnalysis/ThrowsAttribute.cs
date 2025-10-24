@@ -8,7 +8,8 @@ namespace MP.Annotations.CodeAnalysis
     /// Specified to any executable code (methods and constructors) and specifies the exception types
     /// that are guaranteed to be thrown on known code path failures. <br />
     /// Additional exceptions may be thrown, but this is used to know the most common ones at reflection. <br />
-    /// If you want to specify this attribute on a property, specify it instead to it's accessor method.
+    /// It can be also specified without any types to indicate that the code throws any kind of exceptions. <br />
+    /// If you want to specify this attribute on a property, specify it instead to it's accessor method. <br />
     /// </summary>
     [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public sealed class ThrowsAttribute : Attribute

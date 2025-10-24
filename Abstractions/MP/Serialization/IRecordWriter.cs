@@ -5,7 +5,8 @@ using MP.Annotations.CodeAnalysis;
 namespace MP.Serialization
 {
     /// <summary>
-    /// Defines the base of serializing classes through records.
+    /// Provides the way for writing <see cref="Record"/> instances to data streams. <br />
+    /// This is the final serialization stage.
     /// </summary>
     public interface IRecordWriter : IDisposable
     {

@@ -20,7 +20,8 @@ namespace MP.Graphics.Imaging
             ImagePixelFormat.RG => 2,
             ImagePixelFormat.RGB => 3,
             ImagePixelFormat.RGBA or
-            ImagePixelFormat.ARGB => 4,
+            ImagePixelFormat.ARGB or 
+            ImagePixelFormat.BGRA => 4,
             _ => throw new ArgumentException($"The value given is invalid: {format}"),
         };
 
@@ -29,13 +30,13 @@ namespace MP.Graphics.Imaging
         /// </summary>
         /// <param name="image">The image interface to test.</param>
         /// <returns>The size, in bytes , of the <see cref="IImage.NativePointer"/> property pointer.</returns>
-        public static System.Int32 GetMemoryByteLength(this IImage image)
-                => image.Size.Width * image.Size.Height * GetByteSize(image.PixelFormat);
+        public static System.Int64 GetMemoryByteLength(this IImage image)
+                => GetTotalPixels(image) * GetByteSize(image.PixelFormat);
 
         /// <summary>Gets the size, in pixels, of the entire image.</summary>
         /// <param name="image">The image to inspect.</param>
         /// <returns>The total pixels contained into this image object.</returns>
-        public static System.Int32 GetTotalPixels(this IImage image) => image.Size.Width * image.Size.Height;
+        public static System.Int64 GetTotalPixels(this IImage image) => Math.Abs((long)image.Size.Width) * Math.Abs((long)image.Size.Height);
 
         /// <summary>
         /// From the given image , it takes the image pixels and flips them vertically. <br />
@@ -79,10 +80,11 @@ namespace MP.Graphics.Imaging
             IMemoryHandle temp = null;
             try {
                 temp = SystemInfo.CreateNativeMemory(2048UL);
-                for (row = 0; row < (source.Size.Height >> 1); row++)
+                System.Int32 height = source.Size.Height, height_by_two = height >> 1;
+                for (row = 0; row < height_by_two; row++)
                 {
                     System.Byte* row0 = bytes + row * bytes_per_row;
-                    System.Byte* row1 = bytes + (source.Size.Height - row - 1) * bytes_per_row;
+                    System.Byte* row1 = bytes + (height - row - 1) * bytes_per_row;
                     System.Int32 bytes_left = bytes_per_row;
                     while (bytes_left > 0)
                     {
@@ -101,9 +103,9 @@ namespace MP.Graphics.Imaging
             return ret;
         }
 
-        private static void RToRGBA(System.Byte* source, System.Byte* destination, int len)
+        private static void RToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source++, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source++, destination += 4)
             {
                 destination[0] = *source;
                 destination[1] = 0;
@@ -112,9 +114,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGToRGBA(System.Byte* source, System.Byte* destination, int len)
+        private static void RGToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source += 2, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
             {
                 destination[0] = *source;
                 destination[1] = source[1];
@@ -123,9 +125,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGBToRGBA(System.Byte* source, System.Byte* destination, int len)
+        private static void RGBToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source += 3, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
             {
                 destination[0] = *source;
                 destination[1] = source[1];
@@ -134,14 +136,25 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void ARGBToRGBA(System.Byte* source, System.Byte* destination, int len)
+        private static void ARGBToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source += 4, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
             {
                 destination[0] = source[1];
                 destination[1] = source[2];
                 destination[2] = source[3];
                 destination[3] = *source;
+            }
+        }
+
+        private static void BGRAToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[2]; 
+                destination[1] = source[1]; 
+                destination[2] = *source;
+                destination[3] = source[3];
             }
         }
 
@@ -160,7 +173,7 @@ namespace MP.Graphics.Imaging
             System.Byte* outimg = ret.NativePointer;
             // Specify source image run length.
             // Will be used by the copy loops to determine how many times they should run.
-            int runlength = source.Size.Width * source.Size.Height; 
+            long runlength = GetTotalPixels(source); 
             switch (source.PixelFormat)
             {
                 case ImagePixelFormat.R:
@@ -175,6 +188,9 @@ namespace MP.Graphics.Imaging
                 case ImagePixelFormat.ARGB:
                     ARGBToRGBA(cpy, outimg, runlength);
                     break;
+                case ImagePixelFormat.BGRA:
+                    BGRAToRGBA(cpy, outimg, runlength);
+                    break;
                 case ImagePixelFormat.RGBA:
                     // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
                     Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
@@ -183,9 +199,9 @@ namespace MP.Graphics.Imaging
             return ret;
         }
 
-        private static void RToARGB(System.Byte* source, System.Byte* destination, int len)
+        private static void RToARGB(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++ , source++ , destination += 4)
+            for (System.Int64 I = 0; I < len; I++ , source++ , destination += 4)
             {
                 destination[0] = 255;
                 destination[1] = *source;
@@ -194,9 +210,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGToARGB(System.Byte* source , System.Byte* destination, int len)
+        private static void RGToARGB(System.Byte* source , System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source += 2, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
             {
                 destination[0] = 255;
                 destination[1] = *source;
@@ -205,9 +221,9 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGBToARGB(System.Byte* source, System.Byte* destination, int len)
+        private static void RGBToARGB(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source += 3, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
             {
                 destination[0] = 255;
                 destination[1] = *source;
@@ -216,14 +232,25 @@ namespace MP.Graphics.Imaging
             }
         }
 
-        private static void RGBAToARGB(System.Byte* source, System.Byte* destination, int len)
+        private static void RGBAToARGB(System.Byte* source, System.Byte* destination, System.Int64 len)
         {
-            for (System.Int32 I = 0; I < len; I++, source += 4, destination += 4)
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
             {
                 destination[0] = source[3];
                 destination[1] = *source;
                 destination[2] = source[1];
                 destination[3] = source[2];
+            }
+        }
+
+        private static void BGRAToARGB(System.Byte* source,  System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[3];
+                destination[1] = source[2]; 
+                destination[2] = source[1];
+                destination[3] = *source;    
             }
         }
 
@@ -235,14 +262,14 @@ namespace MP.Graphics.Imaging
         /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
         public static IImage TranslateToARGB(this IImage source)
         {
-            if (source is null) { throw new ArgumentNullException(nameof(source)); }
+            ArgumentNullException.ThrowIfNull(source);
             // Specify the transformed image, preparing it for accomondating the data.
             DefaultImage ret = DefaultImage.CreateUninitialized(source.Size, source.IsFlippedVertically, ImagePixelFormat.ARGB);
             System.Byte* cpy = source.NativePointer;
             System.Byte* outimg = ret.NativePointer;
             // Specify source image run length.
             // Will be used by the copy loops to determine how many times they should run.
-            int runlength = source.Size.Width * source.Size.Height;
+            System.Int64 runlength = GetTotalPixels(source);
             switch (source.PixelFormat)
             {
                 case ImagePixelFormat.R:
@@ -257,7 +284,106 @@ namespace MP.Graphics.Imaging
                 case ImagePixelFormat.RGBA:
                     RGBAToARGB(cpy , outimg , runlength);
                     break;
+                case ImagePixelFormat.BGRA:
+                    BGRAToARGB(cpy , outimg , runlength);
+                    break;
                 case ImagePixelFormat.ARGB:
+                    // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
+                    Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
+                    break;
+            }
+            return ret;
+        }
+
+        private static void RToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source++, destination += 4)
+            {
+                destination[0] = 0;
+                destination[1] = 0;
+                destination[2] = *source;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
+            {
+                destination[0] = 0;
+                destination[1] = source[1];
+                destination[2] = *source;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGBToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
+            {
+                destination[0] = source[2];
+                destination[1] = source[1];
+                destination[2] = *source;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGBAToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[2];
+                destination[1] = source[1];
+                destination[2] = *source;
+                destination[3] = source[3];
+            }
+        }
+
+        private static void ARGBToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[3];
+                destination[1] = source[2];
+                destination[2] = source[1];
+                destination[3] = *source;
+            }
+        }
+
+        /// <summary>
+        /// From the given image , it returns the same image that returns it's pixels packed as the BGRA format.
+        /// </summary>
+        /// <param name="source">The image to translate.</param>
+        /// <returns>A new independent image object that represents the translated image as BGRA.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        public static IImage TranslateToBGRA(this IImage source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            // Specify the transformed image, preparing it for accomondating the data.
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size, source.IsFlippedVertically, ImagePixelFormat.ARGB);
+            System.Byte* cpy = source.NativePointer;
+            System.Byte* outimg = ret.NativePointer;
+            // Specify source image run length.
+            // Will be used by the copy loops to determine how many times they should run.
+            System.Int64 runlength = GetTotalPixels(source);
+            switch (source.PixelFormat)
+            {
+                case ImagePixelFormat.R:
+                    RToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RG:
+                    RGToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RGB:
+                    RGBToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RGBA:
+                    RGBAToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.ARGB:
+                    ARGBToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.BGRA:
                     // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
                     Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
                     break;
@@ -271,9 +397,9 @@ namespace MP.Graphics.Imaging
         /// <param name="source">The image to copy data from.</param>
         /// <returns>The cloned image.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
-        public static IImage Copy(this IImage source)
+        public static IImage Clone(this IImage source)
         {
-            if (source is null) { throw new ArgumentNullException(nameof(source)); }
+            ArgumentNullException.ThrowIfNull(source);
             return DefaultImage.CreateCopy(source);
         }
 
@@ -287,7 +413,7 @@ namespace MP.Graphics.Imaging
         /// <exception cref="ArgumentException">The <paramref name="source"/>'s <see cref="IImage.PixelFormat"/> property had an invalid value.</exception>
         public static IColor GetPixel(this IImage source, System.Int32 x, System.Int32 y)
         {
-            if (source is null) { throw new ArgumentNullException(nameof(source)); }
+            ArgumentNullException.ThrowIfNull(source);
             if (x < 0 || y < 0) { throw new ArgumentOutOfRangeException(nameof(source), "Both X and Y parameters must not be negative."); }
             if (x >= source.Size.Width || y >= source.Size.Height) { throw new ArgumentOutOfRangeException(nameof(source), "Both X and Y parameters must be inside the image bounds."); }
             System.Byte* pbase = source.NativePointer + ((y * source.Size.Width + x) * source.PixelFormat.GetByteSize());
@@ -297,6 +423,7 @@ namespace MP.Graphics.Imaging
                 ImagePixelFormat.RGB => new RGBColor(pbase[0], pbase[1], pbase[2]),
                 ImagePixelFormat.RGBA => new RGBAColor(pbase[0], pbase[1], pbase[2], pbase[3]),
                 ImagePixelFormat.ARGB => new ARGBColor(pbase[0], pbase[1], pbase[2], pbase[3]),
+                ImagePixelFormat.BGRA => new BGRAColor(pbase[0], pbase[1], pbase[2], pbase[3]),
                 _ => throw new ArgumentException($"Invalid pixel format {source.PixelFormat}.", nameof(source)),
             };
         }
@@ -310,7 +437,7 @@ namespace MP.Graphics.Imaging
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> and/or <paramref name="y"/> had invalid ranges.</exception>
         public static void SetPixel(this IImage source, System.Int32 x, System.Int32 y, IColor pixel)
         {
-            if (source is null) { throw new ArgumentNullException(nameof(source)); }
+            ArgumentNullException.ThrowIfNull(source);
             if (x < 0 || y < 0) { throw new ArgumentOutOfRangeException("", "Both X and Y parameters must not be negative."); }
             if (x >= source.Size.Width || y >= source.Size.Height) { throw new ArgumentOutOfRangeException("", "Both X and Y parameters must be inside the image bounds."); }
             System.Byte* pbase = source.NativePointer + ((y * source.Size.Width + x) * source.PixelFormat.GetByteSize());
@@ -340,8 +467,28 @@ namespace MP.Graphics.Imaging
                     pbase[2] = pixel.G;
                     pbase[3] = pixel.B;
                     break;
+                case ImagePixelFormat.BGRA:
+                    pbase[0] = pixel.B;
+                    pbase[1] = pixel.G;
+                    pbase[2] = pixel.R;
+                    pbase[3] = pixel.A;
+                    break;
             }
         }
+
+        private delegate IColor GetPixelsTranslationDelegate(System.Byte* pointer);
+
+        private static IColor NativePointerToRColorTranslation(System.Byte* pointer) => new RGBColor(*pointer, 0 , 0);
+
+        private static IColor NativePointerToRGColorTranslation(System.Byte* pointer) => new RGBColor(*pointer, pointer[1], 0);
+
+        private static IColor NativePointerToRGBColorTranslation(System.Byte* pointer) => new RGBColor(*pointer, pointer[1], pointer[2]);
+
+        private static IColor NativePointerToRGBAColorTranslation(System.Byte* pointer) => new RGBAColor(*pointer, pointer[1], pointer[2] , pointer[3]);
+
+        private static IColor NativePointerToARGBColorTranslation(System.Byte* pointer) => new ARGBColor(*pointer, pointer[1], pointer[2], pointer[3]);
+
+        private static IColor NativePointerToBGRAColorTranslation(System.Byte* pointer) => new BGRAColor(*pointer, pointer[1], pointer[2], pointer[3]);
 
         /// <summary>
         /// Gets the entire pixel array as a <see cref="IColor"/> 2-dimensional array defining the literal image coordinates.
@@ -350,24 +497,26 @@ namespace MP.Graphics.Imaging
         /// <returns>The created image data.</returns>
         public static IColor[,] GetPixels2DPlane(this IImage source)
         {
-            if (source is null) { throw new ArgumentNullException(nameof(source)); }
-            IColor[,] colors = new IColor[source.Size.Width, source.Size.Height];
-            System.Byte* ptemp;
-            System.Int32 bs = source.PixelFormat.GetByteSize();
-            for (System.Int32 Y = 0; Y < source.Size.Height; Y++)
+            ArgumentNullException.ThrowIfNull(source);
+            System.Int32 
+                bs = source.PixelFormat.GetByteSize(), 
+                width = source.Size.Width,
+                height = source.Size.Height;
+            IColor[,] colors = new IColor[width, height];
+            GetPixelsTranslationDelegate translation = source.PixelFormat switch {
+                ImagePixelFormat.R => new(NativePointerToRColorTranslation),
+                ImagePixelFormat.RG => new(NativePointerToRGColorTranslation),
+                ImagePixelFormat.RGB => new(NativePointerToRGBColorTranslation),
+                ImagePixelFormat.RGBA => new(NativePointerToRGBAColorTranslation),
+                ImagePixelFormat.ARGB => new(NativePointerToARGBColorTranslation),
+                ImagePixelFormat.BGRA => new(NativePointerToBGRAColorTranslation),
+                _ => null, // See GetByteSize above. It handles that for us.
+            };
+            for (System.Int32 Y = 0; Y < height; Y++)
             {
-                for (System.Int32 X = 0; X < source.Size.Width; X++)
+                for (System.Int32 X = 0; X < width; X++)
                 {
-                    ptemp = source.NativePointer + (Y * source.Size.Width + X) * bs;
-                    colors[X, Y] = source.PixelFormat switch
-                    {
-                        ImagePixelFormat.R => new RGBColor(*ptemp, 0, 0),
-                        ImagePixelFormat.RG => new RGBColor(ptemp[0], ptemp[1], 0),
-                        ImagePixelFormat.RGB => new RGBColor(ptemp[0], ptemp[1], ptemp[2]),
-                        ImagePixelFormat.RGBA => new RGBAColor(ptemp[0], ptemp[1], ptemp[2], ptemp[3]),
-                        ImagePixelFormat.ARGB => new ARGBColor(ptemp[0], ptemp[1], ptemp[2], ptemp[3]),
-                        _ => default
-                    };
+                    colors[X, Y] = translation(source.NativePointer + ((Y * width + X) * bs));
                 }
             }
             return colors;
@@ -386,8 +535,8 @@ namespace MP.Graphics.Imaging
             const System.Int32 buffersize = 4096;
             if (stream is null) { throw new ArgumentNullException(nameof(stream)); }
             if (stream.CanWrite == false) { throw new ArgumentException("Stream must be writeable.", nameof(stream)); }
-            System.Int32 length = source.GetMemoryByteLength();
-            System.Int32 ch = length / buffersize, rem = length % buffersize;
+            System.Int64 length = source.GetMemoryByteLength();
+            System.Int64 ch = length / buffersize, rem = length % buffersize;
             System.Byte[] temp = new System.Byte[buffersize];
             System.Byte* srcp = source.NativePointer;
             while (ch > 0)
@@ -405,7 +554,7 @@ namespace MP.Graphics.Imaging
                 {
                     Unsafe.CopyBlockUnaligned(dst, srcp, rem.ToUInt32());
                 }
-                stream.Write(temp, 0, rem);
+                stream.Write(temp, 0, (int)rem);
             }
         }
     }

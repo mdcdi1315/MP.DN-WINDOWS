@@ -12,19 +12,24 @@ namespace MP
         /// you must provide the encoded type. <br />
         /// Otherwise , you have incorrectly read the span.
         /// </summary>
+        /// <returns>The number of bytes written to the stream. This value does exclude the four-byte signed integer written before the array was written to the stream.</returns>
         /// <typeparam name="T">The span's element type to be encoded. Only supports the unmanaged types.</typeparam>
         /// <param name="strm">The stream to write the encoded span to.</param>
         /// <param name="span">The span to encode.</param>
         /// <seealso cref="ReadEncodedSpan{T}(System.IO.Stream)"/>
-        public static void WriteEncodedSpan<T>(this System.IO.Stream strm , System.ReadOnlySpan<T> span)
+        /// <seealso cref="ReadTypedArray{T}(System.IO.Stream, int)"/>
+        /// <seealso cref="ReadTypedSpan{T}(System.IO.Stream, int)"/>
+        public static long WriteEncodedSpan<T>(this System.IO.Stream strm , System.ReadOnlySpan<T> span)
             where T : unmanaged
         { 
             strm.WriteInt32(span.Length);
-            if (span.Length > 0)
-            {
+            if (span.Length > 0) {
                 System.Byte[] dt = new System.Byte[span.Length * sizeof(T)];
                 Unsafe.CopyBlockUnaligned(ref dt[0], ref Unsafe.As<T, System.Byte>(ref Unsafe.AsRef(in span[0])), dt.LongLength.ToUInt32());
                 strm.WriteBytes(dt);
+                return dt.LongLength;
+            } else {
+                return 0;
             }
         }
 

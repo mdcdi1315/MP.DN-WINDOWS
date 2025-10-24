@@ -1,6 +1,7 @@
 
 using System;
 using MP.Annotations;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
@@ -15,7 +16,10 @@ namespace MP.Graphics
     [Preliminary]
     [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 4)]
     public readonly struct HSLColor :
-        ITruncatable<RGBColor>
+        IEqualityOperators<HSLColor, HSLColor , bool>,
+        ITruncatable<RGBColor>,
+        IEquatable<HSLColor>,
+        ICloneable
     {
         [FieldOffset(0)]
         private readonly ushort hue;
@@ -25,6 +29,13 @@ namespace MP.Graphics
 
         [FieldOffset(3)]
         private readonly byte luminance;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float Round(float value)
+        {
+            int v = (int)value;
+            return (value - v > 0.4999999f) ? v + 1f : v;
+        }
 
         /// <summary>
         /// Initializes a new <see cref="HSLColor"/> instance from the specified RGB color.
@@ -102,46 +113,29 @@ namespace MP.Graphics
         {
             float t_lum = luminance * 0.01f;
             float t_sat = saturation * 0.01f;
-            if (saturation == 0)
-            {
+            float[] colorst;
+            if (saturation == 0) {
                 // No saturation, color is in grayscale, thus map luminance directly
-                byte color = (System.Byte)(t_lum * 255f);
-                return new RGBColor(
-                    color,
-                    color,
-                    color
-                );
-            }
-            else
-            {
+                colorst = new float[] { t_lum, t_lum , t_lum };
+            } else {
                 float t1 = (luminance < 50) ? (t_lum * (1.0f + t_sat)) : (t_lum + t_sat) - (t_lum * t_sat);
                 float t2 = (2 * t_lum) - t1;
                 float hue = this.hue / 360f;
-                float[] colorst = new float[] { hue + 0.333f, hue, hue - 0.333f };
+                colorst = new float[] { hue + 0.333f, hue, hue - 0.333f };
                 for (int I = 0; I < colorst.Length; I++)
                 {
-                    if (colorst[I] > 1f) {
-                        colorst[I] -= 1;
-                    } else if (colorst[I] < 0f) {
-                        colorst[I] += 1;
-                    }
-                    if ((6f * colorst[I]) < 1f) {
-                        colorst[I] = t2 + ((t1 - t2) * 6f * colorst[I]);
-                    } else if ((2f * colorst[I]) < 1f) {
-                        colorst[I] = t1;
-                    } else if ((3f * colorst[I]) < 2f) {
-                        colorst[I] = t2 + ((t1 - t2) * ((0.666f - colorst[I]) * 6f));
-                    } else {
-                        colorst[I] = t2;
-                    }
+                    colorst[I] = (colorst[I] > 1f) ? colorst[I] - 1f : ((colorst[I] < 0f) ? colorst[I] + 1f : colorst[I]);
+                    colorst[I] = ((6f * colorst[I]) < 1f) ?
+                            t2 + ((t1 - t2) * 6f * colorst[I]) :
+                                ((2f * colorst[I]) < 1f) ?
+                                    t1 : (((3f * colorst[I]) < 2f) ? t2 + ((t1 - t2) * ((0.666f - colorst[I]) * 6f)) : t2);
                 }
-
-                return new RGBColor(
+            }
+            return new RGBColor(
                     (System.Byte)Round(colorst[0] * 255f),
                     (System.Byte)Round(colorst[1] * 255f),
                     (System.Byte)Round(colorst[2] * 255f)
-                );
-            }
+            );
         }
 
         RGBColor ITruncatable<RGBColor>.Truncate() => ToRGB();
@@ -155,15 +149,47 @@ namespace MP.Graphics
         /// <summary>Luminance of the color</summary>
         public readonly byte Luminance => luminance;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float Round(float value)
-        {
-            int v = (int)value;
-            return (value - v > 0.4999999f) ? v + 1f : v;
-        }
+        /// <summary>
+        /// Gets a value whether this <see cref="HSLColor"/> instance has the same hue, saturation, and luminance as another <see cref="HSLColor"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> structures are considered equal.</returns>
+        public readonly System.Boolean Equals(HSLColor other) =>
+            other.luminance == luminance &&
+            other.saturation == saturation &&
+            other.hue == hue;
+
+        /// <summary>Creates a copy this <see cref="HSLColor"/> instance to another instance.</summary>
+        /// <returns>A new <see cref="HSLColor"/> instance, but having the same values as this <see cref="HSLColor"/> instance.</returns>
+        public readonly HSLColor Clone() => new(hue, saturation, luminance);
+
+        readonly object ICloneable.Clone() => Clone();
 
         /// <summary>Gets a string describing this color.</summary>
         /// <returns>The color description.</returns>
         public readonly override System.String ToString() => $"Color<HSL> {{ Hue: {hue} Degrees , Saturation: {saturation} % , Luminance: {luminance} % }}";
+
+        /// <summary>
+        /// Gets a value whether this <see cref="HSLColor"/> instance and an object are equal instances.
+        /// </summary>
+        /// <param name="obj">The other object instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="obj"/> objects are considered equal.</returns>
+        public readonly override bool Equals(object obj) => obj is HSLColor c && Equals(c);
+
+        /// <summary>Gets a hash code for this <see cref="HSLColor"/> instance.</summary>
+        /// <returns>A hash code for this instance.</returns>
+        public readonly override int GetHashCode() => RuntimeHelpers.GetHashCode(this);
+
+        /// <summary>Defines whether two <see cref="HSLColor"/> instances are equal.</summary>
+        /// <param name="left">The first <see cref="HSLColor"/> to compare.</param>
+        /// <param name="right">The second <see cref="HSLColor"/> to compare.</param>
+        /// <returns>A value whether the two passed <see cref="HSLColor"/> instances are indeed equal.</returns>
+        public static bool operator ==(HSLColor left, HSLColor right) => left.Equals(right);
+
+        /// <summary>Defines whether two <see cref="HSLColor"/> instances are inequal.</summary>
+        /// <param name="left">The first <see cref="HSLColor"/> to compare.</param>
+        /// <param name="right">The second <see cref="HSLColor"/> to compare.</param>
+        /// <returns>A value whether the two passed <see cref="HSLColor"/> instances are indeed inequal.</returns>
+        public static bool operator !=(HSLColor left, HSLColor right) => !left.Equals(right);
     }
 }

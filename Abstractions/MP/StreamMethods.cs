@@ -72,6 +72,12 @@ namespace MP
             stream = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int ComputeStreamBufferSize(long consumed, long total, int buffer_size) => ((consumed + buffer_size) < total) ? buffer_size : (int)(total - consumed);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint ComputeStreamBufferSize(long consumed , long total , uint buffer_size) => ((consumed + buffer_size) < total) ? buffer_size : (uint)(total - consumed);
+
         /// <summary>
         /// Writes a string to the specified stream , under the specified encoding.
         /// </summary>
@@ -79,16 +85,131 @@ namespace MP
         /// <param name="str">The string to write.</param>
         /// <param name="enc">The character encoding under which <paramref name="str"/> will be saved.</param>
         /// <exception cref="System.ArgumentNullException"><paramref name="enc"/> was null.</exception>
-        public static void WriteString(this System.IO.Stream stream , System.String str , System.Text.Encoding enc)
+        /// <returns>The number of bytes written for saving the string into the data stream.</returns>
+        public static long WriteString(this System.IO.Stream stream , System.String str , System.Text.Encoding enc)
         {
             if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
-            if (System.String.IsNullOrEmpty(str)) { return; }
-            System.Int32 len = enc.GetByteCount(str);
-            System.Byte[] bt = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(len);
-            System.Int32 actual = enc.GetBytes(str, 0, str.Length, bt, 0);
-            stream.Write(bt, 0, actual);
-            System.Buffers.ArrayPool<System.Byte>.Shared.Return(bt);
-            bt = null;
+            if (System.String.IsNullOrEmpty(str)) { return 0; }
+
+            System.Byte[] temp_1 = null;
+            
+            System.Text.Encoder encoder = enc.GetEncoder();
+
+            try {
+
+                temp_1 = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(2048);
+
+                int len = str.Length, chars_consumed = 0, bytes_written;
+                long total_bytes = 0;
+
+                bool completed;
+
+                fixed (System.Char* pstring = str)
+                {
+                    System.Char* mutable = pstring;
+
+                    do {
+                        // Process the string buffer, getting it by 2048 byte chunks and repeating if the string is too large to directly fit in 2048 characters.
+                        fixed (System.Byte* pdest = temp_1)
+                            encoder.Convert(mutable, len, pdest, 2048, len == 0, out chars_consumed, out bytes_written, out completed);
+
+                        mutable += chars_consumed;
+                        len -= chars_consumed;
+
+                        if (bytes_written > 0) {
+                            stream.Write(temp_1, 0, bytes_written);
+                            total_bytes += bytes_written;
+                        }
+                    } while (!completed);
+                }
+
+                return total_bytes;
+            } finally {
+                if (temp_1 is not null) {
+                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(temp_1);
+                    temp_1 = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reads a string value previously written with the <see cref="WriteString(System.IO.Stream, string, System.Text.Encoding)"/> method.
+        /// </summary>
+        /// <param name="stream">The data stream to read the specified string from.</param>
+        /// <param name="enc">The character encoding under which the string will be read back.</param>
+        /// <param name="nbytes">The number of bytes comprising the string data</param>
+        /// <returns>The read string.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="enc"/> was <see langword="null"/>.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="nbytes"/> was negative.</exception>
+        public static System.String ReadString(this System.IO.Stream stream, System.Text.Encoding enc, long nbytes)
+        {
+            if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
+            if (nbytes < 0) { 
+                throw new System.ArgumentOutOfRangeException(nameof(nbytes), "Number of bytes cannot be negative!!");
+            } else if (nbytes == 0) {
+                return System.String.Empty;
+            }
+
+            System.Byte[] temp_1 = null;
+            System.Char[] temp_2 = null;
+
+            try {
+                // Get the decoder to use
+                System.Text.Decoder dec = enc.GetDecoder();
+
+                // Allocate temporary processing buffers
+                temp_1 = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(2048);
+                temp_2 = System.Buffers.ArrayPool<System.Char>.Shared.Rent(2048);
+
+                // OK. Now allocate our string builder
+                System.Text.StringBuilder sb = new((nbytes / 4).ToInt32());
+
+                int temp_bytes_consumed = 0, temp_chars_used, proc_bytes_used, proc_byte_index;
+
+                // Assume that the end of stream is not reached yet.
+                // This is done so that the loop can enter the first time.
+                bool completed , end_of_stream = false;
+
+                // Read bytes to a temporary buffer, process the buffer through the decoder, and append the decoded data to the string builder.
+                // Continue doing that until: 
+                // -> End of stream is not reached yet
+                // -> The number of consumed bytes is less than the expected length in bytes of the string.
+                for (long consumed = 0; !end_of_stream && consumed < nbytes; consumed += temp_bytes_consumed)
+                {
+                    end_of_stream = (temp_bytes_consumed = stream.Read(temp_1, 0, ComputeStreamBufferSize(consumed , nbytes , 2048))) == 0;
+
+                    proc_byte_index = 0;
+
+                    // Process string data
+                    // If we reached end of stream, process decoder leftovers
+                    do {
+                        dec.Convert(temp_1, proc_byte_index, temp_bytes_consumed - proc_byte_index
+                            , temp_2, 0, 2048,
+                            end_of_stream,
+                            out proc_bytes_used,
+                            out temp_chars_used,
+                            out completed);
+
+                        sb.Append(temp_2, 0, temp_chars_used);
+
+                        proc_byte_index += proc_bytes_used;
+                    } while (!completed);
+                }
+
+                // Combine all the buffers and return the results as one string.
+                return sb.ToString();
+
+            } finally {
+                if (temp_1 is not null) {
+                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(temp_1);
+                    temp_1 = null;
+                }
+                if (temp_2 is not null) {
+                    System.Buffers.ArrayPool<System.Char>.Shared.Return(temp_2);
+                    temp_2 = null;
+                }
+            }
+
         }
 
         /// <summary>
@@ -97,25 +218,18 @@ namespace MP
         /// <param name="stream">The stream where the fixed-length string will be written to.</param>
         /// <param name="str">The string to write.</param>
         /// <param name="enc">The character encoding under which <paramref name="str"/> will be saved.</param>
+        /// <returns>The length, in bytes, written to the stream, for writing the value contained in <paramref name="str"/>.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="enc"/> was null.</exception>
-        public static void WriteFixedLengthString(this System.IO.Stream stream, System.String str , System.Text.Encoding enc)
+        public static long WriteFixedLengthString(this System.IO.Stream stream, System.String str , System.Text.Encoding enc)
         {
             if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
             if (System.String.IsNullOrEmpty(str))
             {
                 Write7BitEncodedInt(stream, 0);
-                return;
+                return 0;
             }
-            System.Int32 len = enc.GetByteCount(str);
-            System.Byte[] bt = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(len);
-            System.Int32 actual = enc.GetBytes(str, 0, str.Length, bt, 0);
-            Write7BitEncodedInt(stream , actual);
-            try {
-                stream.Write(bt, 0, actual);
-            } finally {
-                System.Buffers.ArrayPool<System.Byte>.Shared.Return(bt);
-            }
-            bt = null;
+            Write7BitEncodedInt(stream , enc.GetByteCount(str));
+            return WriteString(stream, str, enc);
         }
 
         /// <summary>
@@ -347,7 +461,8 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to read the signed byte.</param>
         /// <returns>The read signed byte.</returns>
-        public static System.SByte ReadSByte(this System.IO.Stream stream) => stream.ReadByte().ToSByte();
+        public static System.SByte ReadSByte(this System.IO.Stream stream) 
+            => stream.ReadByte().ToSByte();
 
         /// <summary>
         /// Reads a signed short integer from the stream.
@@ -355,12 +470,7 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read signed short integer.</returns>
         public static System.Int16 ReadInt16(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.Int16);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToInt16(0);
-        }
+            => ReadBytes(stream, sizeof(System.Int16)).ToInt16(0);
 
         /// <summary>
         /// Reads a signed integer from the stream.
@@ -368,12 +478,7 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read signed integer.</returns>
         public static System.Int32 ReadInt32(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.Int32);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToInt32(0);
-        }
+            => ReadBytes(stream, sizeof(System.Int32)).ToInt32(0);
 
         /// <summary>
         /// Reads a signed long integer from the stream.
@@ -381,12 +486,7 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read signed long integer.</returns>
         public static System.Int64 ReadInt64(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.Int64);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToInt64(0);
-        }
+            => ReadBytes(stream, sizeof(System.Int64)).ToInt64(0);
 
         /// <summary>
         /// Reads an unsigned short integer from the stream.
@@ -394,12 +494,7 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read unsigned short integer.</returns>
         public static System.UInt16 ReadUInt16(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.UInt16);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToUInt16(0);
-        }
+            => ReadBytes(stream, sizeof(System.UInt16)).ToUInt16(0);
 
         /// <summary>
         /// Reads an unsigned integer from the stream.
@@ -407,12 +502,7 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read unsigned integer.</returns>
         public static System.UInt32 ReadUInt32(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.UInt32);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToUInt32(0);
-        }
+            => ReadBytes(stream, sizeof(System.UInt32)).ToUInt32(0);
 
         /// <summary>
         /// Reads an unsigned integer from the stream.
@@ -420,19 +510,15 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read unsigned integer.</returns>
         public static System.UInt64 ReadUInt64(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.UInt64);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToUInt64(0);
-        }
+            => ReadBytes(stream, sizeof(System.UInt64)).ToUInt64(0);
 
         /// <summary>
         /// Writes a boolean to the stream.
         /// </summary>
         /// <param name="stream">The stream to write.</param>
         /// <param name="value">The boolean value to write.</param>
-        public static void WriteBoolean(this System.IO.Stream stream, System.Boolean value) => stream.WriteByte((value ? 1 : 0).ToByte());
+        public static void WriteBoolean(this System.IO.Stream stream, System.Boolean value) 
+            => stream.WriteByte((value ? 1 : 0).ToByte());
 
         /// <summary>
         /// Reads a boolean from the stream.
@@ -458,13 +544,8 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to read the decimal from.</param>
         /// <returns>The read decimal value.</returns>
-        public static System.Decimal ReadDecimal(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.Decimal);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToDecimal(0);
-        }
+        public static System.Decimal ReadDecimal(this System.IO.Stream stream) 
+            => ReadBytes(stream, sizeof(System.Decimal)).ToDecimal(0);
 
         /// <summary>
         /// Writes a double-precision floating-point value to the stream.
@@ -496,12 +577,7 @@ namespace MP
         /// <param name="stream">The stream to read.</param>
         /// <returns>The read double-precision floating-point value.</returns>
         public static System.Double ReadDouble(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.Double);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToDouble(0);
-        }
+            => ReadBytes(stream, sizeof(System.Double)).ToDouble(0);
 
         /// <summary>
         /// Reads a single-precision floating-point value from the stream.
@@ -509,19 +585,20 @@ namespace MP
         /// <param name="stream">The stream to read.</param>
         /// <returns>The read single-precision floating-point value.</returns>
         public static System.Single ReadSingle(this System.IO.Stream stream)
-        {
-            System.Int32 size = sizeof(System.Single);
-            System.Byte[] data = new System.Byte[size];
-            stream.Read(data, 0, size);
-            return data.ToSingle(0);
-        }
+            => ReadBytes(stream, sizeof(System.Single)).ToSingle(0);
 
-        /// <summary>
-        /// Reads a byte from the stream.
-        /// </summary>
+        /// <summary>Reads a byte from the stream.</summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read byte value.</returns>
-        public static System.Byte ReadLiteralByte(this System.IO.Stream stream) => stream.ReadByte().ToByte();
+        /// <exception cref="System.IO.EndOfStreamException">The stream was ended.</exception>
+        public static System.Byte ReadLiteralByte(this System.IO.Stream stream)
+        {
+            int byte2int = stream.ReadByte();
+            return byte2int switch {
+                -1 => throw new System.IO.EndOfStreamException("Stream was ended prematurely."),
+                _ => byte2int.ToByte(),
+            };
+        }
 
         /// <summary>
         /// Writes a structure of type <typeparamref name="T"/> to the stream.
@@ -548,9 +625,12 @@ namespace MP
         /// <seealso cref="WriteStructure{T}(System.IO.Stream, T)"/>
         public static T ReadStructure<T>(this System.IO.Stream stream) where T : struct
         {
+            int rem = 0, read;
             System.Byte[] temp = new System.Byte[Unsafe.SizeOf<T>()];
-            System.Int32 rb = stream.Read(temp , 0 , temp.Length);
-            if (rb != temp.Length) { throw new System.IO.EndOfStreamException($"Cannot read the structure of type {typeof(T).FullName}: Expected to read {temp.Length} bytes while read {rb} bytes."); }
+            do {
+                 rem += (read = stream.Read(temp, rem, temp.Length - rem));
+            } while (read > 0 && rem < temp.Length);
+            if (rem != temp.Length) { throw new System.IO.EndOfStreamException($"Cannot read the structure of type {typeof(T).FullName}: Expected to read {temp.Length} bytes while read {rem} bytes."); }
             return temp.ReadStructure<T>(0);
         }
 
@@ -564,15 +644,13 @@ namespace MP
         /// <seealso cref="Write7BitEncodedInt(System.IO.Stream, int)"/>
         public static System.Int32 Read7BitEncodedInt(this System.IO.Stream reader)
         {
-            System.Int32 rb , num = 0 , num2 = 0;
+            System.Int32 num = 0 , num2 = 0;
             System.Byte b;
             do {
                 if (num2 == 35) {
                     throw new System.FormatException("Too many bytes of what should have been a 7-bit encoded Int32.");
                 }
-                rb = reader.ReadByte();
-                if (rb == -1) { throw new System.IO.EndOfStreamException("The stream ended prematurely."); }
-                b = rb.ToByte();
+                b = ReadLiteralByte(reader);
                 num |= (b & 0x7F) << num2;
                 num2 += 7;
             } while ((b & 0x80u) != 0);
@@ -601,64 +679,83 @@ namespace MP
         /// <param name="stream">The stream to read the bytes from.</param>
         /// <param name="count">The number of bytes to read.</param>
         /// <returns>The read array.</returns>
-        public static System.Byte[] ReadBytes(this System.IO.Stream stream , System.Int32 count)
+        public static System.Byte[] ReadBytes(this System.IO.Stream stream, System.Int32 count)
         {
-            if (count == 0) { return System.Array.Empty<System.Byte>(); }
-            System.Byte[] bytes = new System.Byte[count];
-            System.Int32 index = 0 , rb;
-            do {
-                rb = stream.Read(bytes, index, count);
-                if (rb == 0) { break; }
-
-                index += rb;
-                count -= rb;
-            } while (count > 0);
-
-            // Special case: If no data were read from the stream (directly returned 0)
-            // we must not enter the if statement.
-            if (index > 0 && index != bytes.Length)
-            {
-                System.Byte[] bret = new System.Byte[index];
-                bytes.Copy(0 , bret, 0, index.ToUInt32());
-                bytes = bret;
+            if (count < 0) {
+                throw new System.ArgumentOutOfRangeException(nameof(count), "The number of bytes to copy cannot be negative.");
+            } else if (count == 0) {
+                return System.Array.Empty<System.Byte>();
+            } else if (count < BUFSIZE) {
+                // Trivial array / buffer reading, use fast path
+                System.Byte[] ret = new System.Byte[count];
+                int read_total = 0, read;
+                // If not all bytes requested were able to be fetched in a single pass,
+                // the method is called again with the number of remaining bytes to read.
+                do {
+                    read_total += (read = stream.Read(ret, read_total, count - read_total));
+                } while (read > 0 && read_total < count);
+                return ret;
+            } else {
+                // Use our optimized workhorse method for all large arrays - they will benefit from buffering.
+                return ReadBytes(stream, count, BUFSIZE);
             }
-
-            return bytes;
         }
 
         /// <summary>
-        /// Reads <paramref name="count"/> bytes from the stream.
+        /// Reads <paramref name="bytes_to_copy"/> bytes from the stream.
         /// </summary>
         /// <param name="stream">The stream to read the bytes from.</param>
-        /// <param name="count">The number of bytes to read.</param>
+        /// <param name="bytes_to_copy">The number of bytes to read.</param>
         /// <returns>The read array.</returns>
-        public static System.Byte[] ReadBytes(this System.IO.Stream stream , System.Int64 count)
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="bytes_to_copy"/> parameter was negative.</exception>
+        public static System.Byte[] ReadBytes(this System.IO.Stream stream, long bytes_to_copy) => ReadBytes(stream, bytes_to_copy, BUFSIZE);
+
+        /// <summary>
+        /// Reads <paramref name="bytes_to_copy"/> bytes from the stream.
+        /// </summary>
+        /// <param name="stream">The stream to read the bytes from.</param>
+        /// <param name="bytes_to_copy">The number of bytes to read.</param>
+        /// <param name="buffer_size">The temporary buffer size to use for copying the data to the newly created array.</param>
+        /// <returns>The read array.</returns>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <paramref name="bytes_to_copy"/> parameter was negative. <br /> 
+        /// -or- <br />
+        /// <paramref name="buffer_size"/> was too small to be used for a temporary buffer.
+        /// </exception>
+        public static System.Byte[] ReadBytes(this System.IO.Stream stream , long bytes_to_copy, int buffer_size)
         {
-            if (count == 0) { return System.Array.Empty<System.Byte>(); }
-            System.Byte[] ret = new System.Byte[count];
-            // Read 'count' bytes from the stream. To achieve that , use a second temp buffer which will copy the stream data incrementally to the result buffer.
-            // This is done to achieve offset indexes longer than 2147483647.
-            System.Byte[] tempbuf = new System.Byte[BUFSIZE];
-            // cb variable: Consumed bytes.
-            // rbb variable: Factually read bytes. Used as an index in the copy operation.
-            System.Int64 cb = count , rbb = 0; 
-            System.Int32 rb; // Read bytes from the stream.
-            do {
-                // The condition specifies that if we have bufferable data , the entire buffer will be used;
-                // otherwise , read only the required bytes. Do that in order for the stream's position to
-                // only advance by count bytes.
-                rb = stream.Read(tempbuf , 0 , (cb >= BUFSIZE) ? tempbuf.Length : cb.ToInt32());
-                // No more data to read , exit and return whatever we found.
-                if (rb == 0) { break; }
+            if (bytes_to_copy < 0) {
+                throw new System.ArgumentOutOfRangeException(nameof(bytes_to_copy), "The number of bytes to copy cannot be negative.");
+            } else if (bytes_to_copy == 0) {
+                return System.Array.Empty<System.Byte>();
+            } else if (buffer_size < 1024) {
+                throw new System.ArgumentOutOfRangeException(nameof(buffer_size), "The buffer_size parameter is too small and could degrade performance.");
+            }
 
-                // Bump the read bytes into the final buffer.
-                tempbuf.Copy(0, ret, rbb, rb.ToUInt32());
+            System.Byte[] ret = new System.Byte[bytes_to_copy], buffer = null;
 
-                // Update index and consumed bytes.
-                rbb += rb;
-                cb -= rb;
-            } while (cb > 0); // Do this until the entire buffer has been fetched.
-            tempbuf = null;
+            int temp_read_bytes;
+
+            try {
+
+                buffer = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(buffer_size);
+
+                for (long consumed = 0; consumed < bytes_to_copy; consumed += temp_read_bytes)
+                {
+                    if ((temp_read_bytes = stream.Read(buffer, 0, ComputeStreamBufferSize(consumed, bytes_to_copy, buffer_size))) > 0) {
+                        Unsafe.CopyBlockUnaligned(ref ret[consumed], ref buffer[0], temp_read_bytes.ToUInt32());
+                    } else {
+                        break;
+                    }
+                }
+
+            } finally {
+                if (buffer is not null)
+                {
+                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(buffer);
+                    buffer = null;
+                }
+            }
             return ret;
         }
 
@@ -667,25 +764,33 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the bytes to.</param>
         /// <param name="data">The bytes to write to the stream.</param>
-        // Copied from ParserHelpers.cs - WriteBuffered method.
         public static void WriteBytes(this System.IO.Stream stream, System.Byte[] data)
         {
-            // Abstract: Writes bytes to a stream with a 'buffered' method.
-            // Calculate the blocks that will be raw-copied. 
-            // Also , calculate the remaining data that will be plainly passed.
-            System.Int64 blocks = data.LongLength / BUFSIZE, c = data.LongLength % BUFSIZE;
-            System.Int32 pos = 0;
-            // Copy all data to the stream
-            while (blocks > 0)
-            {
-                stream.Write(data, pos, BUFSIZE);
-                pos += BUFSIZE;
-                blocks--;
+            // Abstract: Gets all the bytes defined in the 'data' array and copies them to the stream.
+            // To avoid hard limits such as int integer limits, the data copy is instead managed by an temporary buffer
+            // dispatching writes with the temporary buffer instead.
+            // This would be the same as writing directly the array, however this assures that these implicit limits do not longer pose problems.
+
+            uint transferred; // # of bytes actually transferred to the temporary buffer
+            long len = data.LongLength; // The length of the 'data' buffer
+            System.Byte[] temp = null;
+
+            try {
+                temp = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(2048);
+
+                for (long consumed = 0; consumed < len; consumed += transferred)
+                {
+                    Unsafe.CopyBlockUnaligned(ref temp[0], ref data[consumed], transferred = ComputeStreamBufferSize(consumed, len, 2048U));
+
+                    stream.Write(temp, 0, transferred.ToInt32());
+                }
+
+            } finally {
+                if (temp is not null)
+                {
+                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(temp);
+                }
             }
-            // If the input array size is not exactly a multiple of BUFSIZE , the rest data will be copied as-it-is.
-            // This even works for cases that data.LongLength < BUFSIZE because the while loop
-            // will never be entered.
-            if (c > 0) { stream.Write(data, pos, c.ToInt32()); }
         }
 
         /// <summary>
@@ -723,19 +828,80 @@ namespace MP
         /// </summary>
         /// <param name="input">The source stream.</param>
         /// <param name="output">The target stream.</param>
-        /// <param name="buffersize">The buffer size in bytes that the method should allocate. This buffer will be used to copy data from the one stream to the another.</param>
+        /// <param name="buffersize">The buffer size, in bytes, that the method should allocate. This buffer will be used to copy data from the one stream to the another.</param>
         /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="buffersize"/> parameter was less than 1024 bytes.</exception>
         public static void DirectCopyToStream(this System.IO.Stream input , System.IO.Stream output , System.Int32 buffersize)
         {
             if (output is null) { throw new System.ArgumentNullException(nameof(output)); }
             if (buffersize < 1024) { throw new System.ArgumentOutOfRangeException(nameof(buffersize) , "The buffersize parameter is too small and could degrade performance."); }
-            System.Byte[] buffer = new System.Byte[buffersize];
+            System.Byte[] buffer = null;
             System.Int32 readin;
-            while ((readin = input.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                output.Write(buffer, 0, readin);
+            try {
+
+                buffer = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(buffersize);
+
+                while ((readin = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    output.Write(buffer, 0, readin);
+                }
+
+            } finally {
+                if (buffer is not null)
+                {
+                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(buffer);
+                    buffer = null;
+                }
             }
         }
+
+        /// <summary>
+        /// Directly copies the specified number of bytes from the current stream to the destination stream. <br />
+        /// Both positions will be respectively updated by <paramref name="bytes_copy"/>.
+        /// </summary>
+        /// <param name="input">The source stream.</param>
+        /// <param name="output">The target stream.</param>
+        /// <param name="bytes_copy">The exact number of bytes to copy from this stream to <paramref name="output"/>.</param>
+        /// <param name="buffer_size">The buffer size, in bytes, that the method should allocate. This buffer will be used to copy data from the one stream to the another.</param>
+        /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="buffer_size"/> parameter was less than 1024 bytes, -or- the <paramref name="bytes_copy"/> parameter was negative.</exception>
+        public static void CopySpecificToStream(this System.IO.Stream input, System.IO.Stream output, System.Int64 bytes_copy, System.Int32 buffer_size)
+        {
+            if (output is null) { throw new System.ArgumentNullException(nameof(output)); }
+            if (bytes_copy < 0) { throw new System.ArgumentOutOfRangeException(nameof(bytes_copy), "The number of bytes to copy cannot be negative."); }
+            if (buffer_size < 1024) { throw new System.ArgumentOutOfRangeException(nameof(buffer_size), "The buffer_size parameter is too small and could degrade performance."); }
+            System.Byte[] buffer = null;
+            int bytes_copied;
+            try {
+                buffer = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(buffer_size);
+
+                for (long consumed = 0; consumed < bytes_copy; consumed += bytes_copied)
+                {
+                    if ((bytes_copied = input.Read(buffer, 0, ComputeStreamBufferSize(consumed, bytes_copy, buffer_size))) > 0) {
+                        output.Write(buffer, 0, bytes_copied);
+                    } else {
+                        break;
+                    }
+                }
+
+            } finally {
+                if (buffer is not null) {
+                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(buffer);
+                    buffer = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Directly copies the specified number of bytes from the current stream to the destination stream. <br />
+        /// Both positions will be respectively updated by <paramref name="bytes_copy"/>.
+        /// </summary>
+        /// <param name="input">The source stream.</param>
+        /// <param name="output">The target stream.</param>
+        /// <param name="bytes_copy">The exact number of bytes to copy from this stream to <paramref name="output"/>.</param>
+        /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="bytes_copy"/> parameter was negative.</exception>
+        public static void CopySpecificToStream(this System.IO.Stream input, System.IO.Stream output, System.Int64 bytes_copy)
+            => CopySpecificToStream(input , output, bytes_copy, BUFSIZE);
     }
 }
