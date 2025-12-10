@@ -9,13 +9,15 @@ namespace MP.Graphics
     /// <summary>
     /// Defines a two-dimensional size offsetting from point (0 , 0)
     /// </summary>
-    [StructLayout(LayoutKind.Explicit , Pack = sizeof(int) , Size = sizeof(int) * 4)]
+    [StructLayout(LayoutKind.Explicit , Pack = sizeof(int) , Size = sizeof(int) * 2)]
     public readonly struct Size :
         IEqualityOperators<Size, Size, System.Boolean>,
         IAdditionOperators<Size , Size , Size>,
         ISubtractionOperators<Size , Size , Size>,
         IUnaryNegationOperators<Size , Size>,
-        ICloneable, IEquatable<Size>
+        IEquatable<Size>,
+        IEquatable<SizeF>,
+        ICloneable
     {
         /// <summary>
         /// The width or the displacement starting from X = 0 to the current value.
@@ -73,10 +75,18 @@ namespace MP.Graphics
         /// <returns>A value representing the equality of both structures.</returns>
         public readonly bool Equals(Size other) => Width == other.Width && Height == other.Height;
 
+        /// <summary>
+        /// Gets a value whether the current <see cref="Size"/> instance and the specified <see cref="SizeF"/> instance are equal.
+        /// </summary>
+        /// <param name="other">The other <see cref="SizeF"/> instance to compare this structure against.</param>
+        /// <returns>A value representing the equality of both structures.</returns>
+        public readonly bool Equals(SizeF other) => Width == other.Width && Height == other.Height;
+
         /// <inheritdoc />
         public readonly override bool Equals(System.Object obj) => obj switch
         {
             Size p => Equals(p),
+            SizeF pf => Equals(pf),
             _ => false,
         };
 

@@ -1,7 +1,8 @@
 ﻿
-using MP.Imaging;
+
 using Microsoft.IO;
 using System.Drawing;
+using MP.Graphics.Imaging;
 using System.Collections.Generic;
 
 namespace MP.Caches.PlaylistIconCache
@@ -104,9 +105,10 @@ namespace MP.Caches.PlaylistIconCache
                         img.Save(Path.Join(basedir.FullName, generatedsmallname), System.Drawing.Imaging.ImageFormat.Bmp);
                     }
                     using (var resultimg = bm.ToImage())
-                    using (var bitmapwriter = new Imaging.RawBitmapWriter(resultimg))
+                    using (var fs = new FileStream(Path.Join(basedir.FullName, generatedlargename), FileMode.Create))
+                    using (var bitmapwriter = new Graphics.Imaging.WindowsBitmap.RawBitmapWriter(resultimg))
                     {
-                        bitmapwriter.Save(Path.Join(basedir.FullName, generatedlargename));
+                        bitmapwriter.Save(fs);
                     }
                 }
                 item.IconFileName = generatedlargename;

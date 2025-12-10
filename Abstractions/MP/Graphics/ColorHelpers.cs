@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 namespace MP.Graphics
@@ -7,6 +8,44 @@ namespace MP.Graphics
     /// <summary>Defines utilities around colors.</summary>
     public static class ColorHelpers
     {
+        [StructLayout(LayoutKind.Explicit , Pack = 1, Size = 8)]
+        private readonly struct Color16Internal : IColor16
+        {
+            [FieldOffset(0)]
+            private readonly ushort a;
+            [FieldOffset(sizeof(ushort))]
+            private readonly ushort r;
+            [FieldOffset(sizeof(ushort) * 2)]
+            private readonly ushort g;
+            [FieldOffset(sizeof(ushort) * 3)]
+            private readonly ushort b;
+
+            public Color16Internal(ushort a , ushort r , ushort g , ushort b)
+            {
+                this.a = a;
+                this.r = r;
+                this.g = g;
+                this.b = b;
+            }
+
+            public Color16Internal(IColor color)
+            {
+                // Doing simply color_channel * 257 is OK because 255 * 257 = 65535.
+                a = (ushort)(color.A * 257);
+                r = (ushort)(color.R * 257);
+                g = (ushort)(color.G * 257);
+                b = (ushort)(color.B * 257);
+            }
+
+            public ushort A => a;
+
+            public ushort R => r;
+
+            public ushort G => g;
+
+            public ushort B => b;
+        }
+
         /// <summary>
         /// Returns a 'common', non-collisible, hash code for this 8-bit color instance. <br />
         /// This hash code matches integer ARGB values.
@@ -135,10 +174,17 @@ namespace MP.Graphics
         public static FloatColor ToFloat(this IColor color) => new(color);
 
         /// <summary>
+        /// Converts any <see cref="IColor16"/> instance to a <see cref="FloatColor"/> instance.
+        /// </summary>
+        /// <param name="color_16">The color to convert.</param>
+        /// <returns>The converted color in floating point format.</returns>
+        public static FloatColor ToFloat(this IColor16 color_16) => new(color_16);
+
+        /// <summary>
         /// Converts any <see cref="IColor16"/> instance to a 8-bit-depth <see cref="IColor"/> instance.
         /// </summary>
         /// <param name="c16">The color to convert.</param>
-        /// <returns>The converted color in floating point format.</returns>
+        /// <returns>The converted color in 8-bit-depth format.</returns>
         public static IColor To8BitColor(this IColor16 c16) => new ARGBColor(
             // It seems that doing channel / 257f is working the same as (channel / 65535f) * 255f and it perfectly divides 65535 and returns value 255 when the color channel is such!
             (byte)(c16.A / 257f),
@@ -146,5 +192,12 @@ namespace MP.Graphics
             (byte)(c16.G / 257f),
             (byte)(c16.B / 257f)
         );
+
+        /// <summary>
+        /// Converts any <see cref="IColor"/> instance to a 16-bit-depth <see cref="IColor16"/> instance.
+        /// </summary>
+        /// <param name="color">The color to convert.</param>
+        /// <returns>The converted color as a 16-bit-depth format.</returns>
+        public static IColor16 To16BitColor(this IColor color) => new Color16Internal(color);
     }
 }

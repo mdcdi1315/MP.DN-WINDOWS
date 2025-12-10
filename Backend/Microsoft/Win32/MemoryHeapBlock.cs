@@ -113,6 +113,8 @@ namespace Microsoft.Win32
             get => handle == System.IntPtr.Zero;
         }
 
+        public System.IntPtr Handle => handle;
+
         protected override bool ReleaseHandle()
         {
             if (flags.HasFlag(MEMHEAPCLASSFLAGS.IsDefaultProcessHeap) || flags.HasFlag(MEMHEAPCLASSFLAGS.IsProtectedHeap)) {

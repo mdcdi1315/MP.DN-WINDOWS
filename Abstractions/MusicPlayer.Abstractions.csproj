@@ -53,6 +53,9 @@
 		<Compile Include="MP/Annotations/ObjectiveCWrappedTypeAttribute.cs" />
 		<Compile Include="MP/Annotations/RequiresNativeLayerAttribute.cs" />
 		<Compile Include="MP/Annotations/CodeAnalysis/*.cs" />
+		<Compile Remove="MP\Graphics\OpenGL\GraphicsContext\**" />
+		<EmbeddedResource Remove="MP\Graphics\OpenGL\GraphicsContext\**" />
+		<None Remove="MP\Graphics\OpenGL\GraphicsContext\**" />
 		<Compile Include="MP\ArchivedPlaylistAttribute.cs" />
 		<Compile Include="MP\ArchivedPlaylistAttributeCollection.cs" />
 		<Compile Include="MP\AudioLibrary\AudioFormat.cs" />
@@ -107,7 +110,10 @@
 		<Compile Include="MP\Collections\DelegateComparerOfTD.cs" />
 		<Compile Include="MP\Collections\DelegateEqualityComparerOfTD.cs" />
 		<Compile Include="MP\Collections\DisposableListOfT.cs" />
+		<Compile Include="MP\Collections\EmptyEnumerableOfT.cs" />
+		<Compile Include="MP\Collections\EmptyEnumeratorOfT.cs" />
 		<Compile Include="MP\Collections\ITreeNodeGetterOfT.cs" />
+		<Compile Include="MP\Collections\PartialResourceIdentifierEqualityComparer.cs" />
 		<Compile Include="MP\Collections\ReadOnlyListOfT.cs" />
 		<Compile Include="MP/Collections/ICollectableAttributeable.cs" />
 		<Compile Include="MP/Collections/AttributeKeyValuePair.cs" />
@@ -182,7 +188,6 @@
 		<Compile Include="MP\Graphics\OpenGL\GLUtils.cs" />
 		<Compile Include="MP\Graphics\OpenGL\GLConstants.cs" />
 		<Compile Include="MP\Graphics\OpenGL\GlGetStringType.cs" />
-		<Compile Include="MP\Graphics\OpenGL\GraphicsContext\OpenGLGraphicsContext.cs" />
 		<Compile Include="MP\Graphics\OpenGL\IOpenGLFunctionLoader.cs" />
 		<Compile Include="MP\Graphics\OpenGL\IOpenGLObject.cs" />
 		<Compile Include="MP\Graphics\OpenGL\OpenGLException.cs" />
@@ -207,8 +212,6 @@
 		<Compile Include="MP\Graphics\OpenGL\UnloadableOpenGLFunctionException.cs" />
 		<Compile Include="MP\Graphics\OpenGL\VertexArrayObject.cs" />
 		<Compile Include="MP\Graphics\OpenGL\VertexAttributePointerDataType.cs" />
-		<Compile Include="MP\Graphics\Windowing\Graphics\GraphicsObjectID.cs" />
-		<Compile Include="MP\Graphics\Windowing\Graphics\IWindowGuiGraphicsContext.cs" />
 		<Compile Include="MP\Graphics\Windowing\Input\Cursor.cs" />
 		<Compile Include="MP\Graphics\Windowing\INativeWindow.cs" />
 		<Compile Include="MP\Graphics\Windowing\Input\IInputProvider.cs" />
@@ -229,6 +232,11 @@
 		<Compile Include="MP\IID3V2TagReaderBase.cs" />
 		<Compile Include="MP\ILibraryHandle.cs" />
 		<Compile Include="MP\IMemoryHandle.cs" />
+		<Compile Include="MP\NativeInterop\Windows\BOOL.cs" />
+		<Compile Include="MP\NativeInterop\Windows\BOOLEAN.cs" />
+		<Compile Include="MP\NativeInterop\Windows\GUID.cs" />
+		<Compile Include="MP\NativeInterop\Windows\UNICODE_STRING.cs" />
+		<Compile Include="MP\NativeInterop\Windows\WindowsVersions.cs" />
 		<Compile Include="MP\IOggTagReaderBase.cs" />
 		<Compile Include="MP\IO\AbstractFileStream.cs" />
 		<Compile Include="MP\IO\CopyMoveDirectoryOptions.cs" />
@@ -288,6 +296,7 @@
 		<Compile Include="MP\RCUEngineV2.cs" />
 		<Compile Include="MP\Resources\IResourceReader.cs" />
 		<Compile Include="MP\Resources\IResourceWriter.cs" />
+		<Compile Include="MP\Resources\Management\PartialResourceIdentifier.cs" />
 		<Compile Include="MP\Resources\ResourceEntry.cs" />
 		<Compile Include="MP\SavedDataTagProperty.cs" />
 		<Compile Include="MP\SavedDataTagReader.cs" />

@@ -25,47 +25,6 @@ namespace MP
 
         // Note also that we will have an additional perf gain in .NET 10 - where there the 'stackalloc' is gaining further optimizations.
 
-        // We may need to re-visit the conversion methods at some later moment - they need further opt and it seems in IL that some bad stuff are happening
-        [System.Diagnostics.DebuggerHidden]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static TResult WideningConversion<TInput, TResult>(TInput input)
-                where TResult : unmanaged
-                where TInput : unmanaged
-        {
-            // Defines a numeric conversion between two numbers that is widening.
-            if (sizeof(TResult) < sizeof(TInput)) { throw new ArgumentException("The input type given must be smaller than the output type."); }
-            TResult* ppt = stackalloc TResult[1];
-            *((TInput*)ppt) = input; // The input data type fits into the result type , and it is smaller than that
-            return *ppt;
-        }
-
-        [System.Diagnostics.DebuggerHidden]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static TResult NarrowingConversion<TInput, TResult>(TInput input)
-                where TResult : unmanaged
-                where TInput : unmanaged
-        {
-            // Defines a numeric conversion between two numbers that is narrowing.
-            if (sizeof(TResult) >= sizeof(TInput)) { throw new ArgumentException("The input type given must be larger than the output type."); }
-            // stackalloc a single TInput element, pass the data from the argument and load it as a TResult pointer.
-            TInput* pti = stackalloc TInput[1];
-            *pti = input;
-            return *((TResult*)pti);
-        }
-
-        // This should possibly work, but do not use it yet till I find that this is correct to say.
-        [System.Diagnostics.DebuggerHidden]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static TResult LinearConversionUnmanaged<TInput , TResult>(TInput input)
-            where TResult : unmanaged
-            where TInput : unmanaged
-        {
-            if (sizeof(TResult) != sizeof(TInput)) { throw new NotSupportedException("The structures must have the same size so that the linear conversion can be performed."); }
-            TResult* ptt = stackalloc TResult[1];
-            *((TInput*)ptt) = input;
-            return *ptt;
-        }
-
         // NOTE: The method implementation is the same as the Unsafe.BitCast class method.
         [System.Diagnostics.DebuggerHidden]
         // Keep this method with no additional optimizations (Seems to lose a tick or so)
@@ -98,11 +57,11 @@ namespace MP
             Justification = "This method is always hidden by the debugger and any methods that use this pass the sidx parameter as StartIndex.")]
         private static T GetFromBytesTemplate<T>(System.Byte[] bytes , System.Int32 sidx) where T : unmanaged
         {
-            if (sidx < 0 || (sidx + sizeof(T)) > bytes.Length)
-            {
+            if (sidx < 0 || (sidx + sizeof(T)) > bytes.Length) {
                 throw new ArgumentOutOfRangeException("StartIndex" , "StartIndex must be more or equal to zero and smaller than the array length plus the size of the structure.");
+            } else {
+                return Unsafe.ReadUnaligned<T>(ref bytes[sidx]);
             }
-            return Unsafe.ReadUnaligned<T>(ref bytes[sidx]);
         }
 
         /// <summary>
@@ -114,8 +73,11 @@ namespace MP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetFirstArrayElementRef<T>(this T[] array) where T : notnull
         {
-            if (array is null || array.Length <= 0) { return ref Unsafe.NullRef<T>(); }
-            return ref array[0];
+            if (array is null || array.Length < 1) { 
+                return ref Unsafe.NullRef<T>(); 
+            } else {
+                return ref array[0];
+            }
         }
 
         /// <summary>
@@ -126,10 +88,10 @@ namespace MP
         /// <returns>A copied version of <paramref name="input"/>.</returns>
         public static T Copy<T>(this T input) where T : unmanaged
         {
-            System.Byte[] temp = GetBytesTemplate(input);
-            System.Byte[] copied = new System.Byte[temp.Length];
-            Unsafe.CopyBlockUnaligned(ref copied[0], ref temp[0], temp.Length.ToUInt32());
-            temp = null;
+            int size = sizeof(T);
+            System.Byte[] copied = new System.Byte[size];
+            // Instead of allocating a new array, cook the input reference instead.
+            Unsafe.CopyBlockUnaligned(ref copied[0], ref Unsafe.As<T, System.Byte>(ref input), size.ToUInt32());
             return Unsafe.ReadUnaligned<T>(ref copied[0]);
         }
 
@@ -253,10 +215,12 @@ namespace MP
                 // Endianess swap in byte level is now possible because a decomposal method to binary was found.
                 b = ReverseEndianess_Byte(b);
                 return Unsafe.As<System.Byte , T>(ref b);
+            } else {
+                // Since this does not modify the original input because input is passed by value, we are possibly OK
+                ref T reference = ref input;
+                ReverseInner_Byte(ref Unsafe.As<T, System.Byte>(ref reference), new System.UIntPtr(sizeof(T).ToUInt32()));
+                return reference;
             }
-            System.Byte[] bt = GetBytesTemplate(input);
-            bt.Reverse();
-            return GetFromBytesTemplate<T>(bt , 0);
         }
 
         private static System.Byte ReverseEndianess_Byte(System.Byte b)
@@ -287,13 +251,29 @@ namespace MP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ReverseInner<T>(ref T elements, nuint length)
         {
-            if (length <= 1) { return; }
+            if (length < 2) { return; }
 
             ref T first = ref elements;
             ref T last = ref Unsafe.Subtract(ref Unsafe.Add(ref first, length), 1);
             do
             {
                 T temp = first;
+                first = last;
+                last = temp;
+                first = ref Unsafe.Add(ref first, 1);
+                last = ref Unsafe.Subtract(ref last, 1);
+            } while (Unsafe.IsAddressLessThan(ref first, ref last));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ReverseInner_Byte(ref System.Byte elements, nuint length)
+        {
+            if (length < 2) { return; }
+
+            ref System.Byte first = ref elements;
+            ref System.Byte last = ref Unsafe.Subtract(ref Unsafe.Add(ref first, length), 1);
+            do {
+                System.Byte temp = first;
                 first = last;
                 last = temp;
                 first = ref Unsafe.Add(ref first, 1);
@@ -329,14 +309,30 @@ namespace MP
         /// <param name="data">The byte array to read the structure to.</param>
         /// <param name="startindex">The starting index to start writing from.</param>
         /// <param name="structure">The structure to write.</param>
+        /// <returns>The number of written bytes to <paramref name="data"/>. Useful for streaming methods.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="startindex"/> was negative , or it's current value is not enough to write a structure of type <typeparamref name="T"/>.</exception>
-        public static void WriteStructure<T>(this System.Byte[] data, System.Int32 startindex, T structure) where T : struct
+        public static int WriteStructure<T>(this System.Byte[] data, System.Int32 startindex, T structure) where T : struct
         {
             System.Int32 ssize = sizeof(T);
             if (startindex < 0) { throw new ArgumentOutOfRangeException(nameof(startindex)); }
             // NRE is tested by the below statement , so leave it as is
             if (data.Length - startindex < ssize) { throw new ArgumentOutOfRangeException(nameof(startindex), $"The array is not large enough in order to write a structure of type {typeof(T).FullName}."); }
             Unsafe.CopyBlockUnaligned(ref data[startindex], ref Unsafe.As<T, System.Byte>(ref structure), ssize.ToUInt32());
+            return ssize;
+        }
+
+        /// <summary>
+        /// Like <see cref="WriteStructure{T}(byte[], int, T)"/>, this method does instead create the array where the structure will be written to.
+        /// </summary>
+        /// <typeparam name="T">The structure type to write to a new array.</typeparam>
+        /// <param name="structure">The instance to write.</param>
+        /// <returns>The written structure, decomposed to a new byte array.</returns>
+        public static System.Byte[] WriteStructureToNewArray<T>(this T structure) where T : struct
+        {
+            System.Int32 size = sizeof(T);
+            System.Byte[] ret = new System.Byte[size];
+            Unsafe.CopyBlockUnaligned(ref ret[0], ref Unsafe.As<T, System.Byte>(ref structure), size.ToUInt32());
+            return ret;
         }
 
         #region Conversions to Int64
@@ -345,42 +341,72 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int64 ToInt64(this System.Int32 number) => WideningConversion<System.Int32, System.Int64>(number);
+        public static System.Int64 ToInt64(this System.Int32 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *((System.Int32*)ppt) = number; // The input data type fits into the result type , and it is smaller than that
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt64"/> to a <see cref="System.Int64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int64 ToInt64(this System.UInt64 number) => LinearConversion<System.UInt64 , System.Int64>(number);
+        public static System.Int64 ToInt64(this System.UInt64 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *((System.UInt64*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Char"/> to a <see cref="System.Int64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="character">The character to convert.</param>
-        public static System.Int64 ToInt64(this System.Char character) => WideningConversion<System.Char, System.Int64>(character);
+        public static System.Int64 ToInt64(this System.Char character)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *((System.Char*)ppt) = character;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt32"/> to a <see cref="System.Int64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int64 ToInt64(this System.UInt32 number) => WideningConversion<System.UInt32 , System.Int64>(number);
+        public static System.Int64 ToInt64(this System.UInt32 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *((System.UInt32*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt16"/> to a <see cref="System.Int64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int64 ToInt64(this System.UInt16 number) => WideningConversion<System.UInt16, System.Int64>(number);
+        public static System.Int64 ToInt64(this System.UInt16 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *((System.UInt16*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int16"/> to a <see cref="System.Int64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int64 ToInt64(this System.Int16 number) => WideningConversion<System.Int16, System.Int64>(number);
+        public static System.Int64 ToInt64(this System.Int16 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *((System.Int16*)ppt) = number;
+            return *ppt;
+        }
         #endregion
 
         #region Conversions to UInt64
@@ -389,21 +415,36 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt64 ToUInt64(this System.Int64 number) => LinearConversion<System.Int64 , System.UInt64>(number);
+        public static System.UInt64 ToUInt64(this System.Int64 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *((System.Int64*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt32"/> to a <see cref="System.UInt64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt64 ToUInt64(this System.UInt32 number) => WideningConversion<System.UInt32, System.UInt64>(number);
+        public static System.UInt64 ToUInt64(this System.UInt32 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *((System.UInt32*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int32"/> to a <see cref="System.UInt64"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt64 ToUInt64(this System.Int32 number) => WideningConversion<System.Int32, System.UInt64>(number);
+        public static System.UInt64 ToUInt64(this System.Int32 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *((System.Int32*)ppt) = number;
+            return *ppt;
+        }
         #endregion
 
         #region Conversions to Int32
@@ -412,35 +453,60 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int32 ToInt32(this System.Int16 number) => WideningConversion<System.Int16, System.Int32>(number);
+        public static System.Int32 ToInt32(this System.Int16 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *((System.Int16*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int64"/> to a <see cref="System.Int32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int32 ToInt32(this System.Int64 number) => NarrowingConversion<System.Int64, System.Int32>(number);
+        public static System.Int32 ToInt32(this System.Int64 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *ppt = number;
+            return *((System.Int32*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt32"/> to a <see cref="System.Int32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int32 ToInt32(this System.UInt32 number) => LinearConversion<System.UInt32, System.Int32>(number);
+        public static System.Int32 ToInt32(this System.UInt32 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *((System.UInt32*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Char"/> to a <see cref="System.Int32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="character">The character to convert.</param>
-        public static System.Int32 ToInt32(this System.Char character) => WideningConversion<System.Char, System.Int32>(character);
+        public static System.Int32 ToInt32(this System.Char character)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *((System.Char*)ppt) = character;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt64"/> to a <see cref="System.Int32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int32 ToInt32(this System.UInt64 number) => NarrowingConversion<System.UInt64 , System.Int32>(number);
+        public static System.Int32 ToInt32(this System.UInt64 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *ppt = number;
+            return *((System.Int32*)ppt);
+        }
         #endregion
 
         #region Conversions to UInt32
@@ -449,35 +515,60 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt32 ToUInt32(this System.Int32 number) => LinearConversion<System.Int32 , System.UInt32>(number);
+        public static System.UInt32 ToUInt32(this System.Int32 number)
+        {
+            System.UInt32* ppt = stackalloc System.UInt32[1];
+            *((System.Int32*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt64"/> to a <see cref="System.UInt32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt32 ToUInt32(this System.UInt64 number) => NarrowingConversion<System.UInt64, System.UInt32>(number);
+        public static System.UInt32 ToUInt32(this System.UInt64 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *ppt = number;
+            return *((System.UInt32*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int64"/> to a <see cref="System.UInt32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt32 ToUInt32(this System.Int64 number) => NarrowingConversion<System.Int64, System.UInt32>(number);
+        public static System.UInt32 ToUInt32(this System.Int64 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *ppt = number;
+            return *((System.UInt32*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt16"/> to a <see cref="System.UInt32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt32 ToUInt32(this System.UInt16 number) => WideningConversion<System.UInt16 , System.UInt32>(number);
+        public static System.UInt32 ToUInt32(this System.UInt16 number)
+        {
+            System.UInt32* ppt = stackalloc System.UInt32[1];
+            *((System.UInt16*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int16"/> to a <see cref="System.UInt32"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt32 ToUInt32(this System.Int16 number) => WideningConversion<System.Int16, System.UInt32>(number);
+        public static System.UInt32 ToUInt32(this System.Int16 number)
+        {
+            System.UInt32* ppt = stackalloc System.UInt32[1];
+            *((System.Int16*)ppt) = number;
+            return *ppt;
+        }
         #endregion
 
         #region Conversions to Int16
@@ -486,42 +577,72 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int16 ToInt16(this System.Byte number) => WideningConversion<System.Byte, System.Int16>(number);
+        public static System.Int16 ToInt16(this System.Byte number)
+        {
+            System.Int16* ppt = stackalloc System.Int16[1];
+            *((System.Byte*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt16"/> to a <see cref="System.Int16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int16 ToInt16(this System.UInt16 number) => LinearConversion<System.UInt16, System.Int16>(number);
+        public static System.Int16 ToInt16(this System.UInt16 number)
+        {
+            System.Int16* ppt = stackalloc System.Int16[1];
+            *((System.UInt16*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int64"/> to a <see cref="System.Int16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int16 ToInt16(this System.Int64 number) => NarrowingConversion<System.Int64 , System.Int16>(number);
+        public static System.Int16 ToInt16(this System.Int64 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *ppt = number;
+            return *((System.Int16*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int32"/> to a <see cref="System.Int16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int16 ToInt16(this System.Int32 number) => NarrowingConversion<System.Int32, System.Int16>(number);
+        public static System.Int16 ToInt16(this System.Int32 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *ppt = number;
+            return *((System.Int16*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt64"/> to a <see cref="System.Int16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Int16 ToInt16(this System.UInt64 number) => NarrowingConversion<System.UInt64 , System.Int16>(number);
+        public static System.Int16 ToInt16(this System.UInt64 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *ppt = number;
+            return *((System.Int16*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Char"/> to a <see cref="System.Int16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="character">The character to convert.</param>
-        public static System.Int16 ToInt16(this System.Char character) => LinearConversion<System.Char , System.Int16>(character);
+        public static System.Int16 ToInt16(this System.Char character)
+        {
+            System.Int16* ppt = stackalloc System.Int16[1];
+            *((System.Char*)ppt) = character;
+            return *ppt;
+        }
         #endregion
 
         #region Conversions to UInt16
@@ -530,35 +651,60 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt16 ToUInt16(this System.Int16 number) => LinearConversion<System.Int16, System.UInt16>(number);
+        public static System.UInt16 ToUInt16(this System.Int16 number)
+        {
+            System.UInt16* ppt = stackalloc System.UInt16[1];
+            *((System.Int16*)ppt) = number;
+            return *ppt;
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt32"/> to a <see cref="System.UInt16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt16 ToUInt16(this System.UInt32 number) => NarrowingConversion<System.UInt32, System.UInt16>(number);
+        public static System.UInt16 ToUInt16(this System.UInt32 number)
+        {
+            System.UInt32* ppt = stackalloc System.UInt32[1];
+            *ppt = number;
+            return *((System.UInt16*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int64"/> to a <see cref="System.UInt16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt16 ToUInt16(this System.Int64 number) => NarrowingConversion<System.Int64 , System.UInt16>(number);
+        public static System.UInt16 ToUInt16(this System.Int64 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *ppt = number;
+            return *((System.UInt16*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt64"/> to a <see cref="System.Int16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt16 ToUInt16(this System.UInt64 number) => NarrowingConversion<System.UInt64, System.UInt16>(number);
+        public static System.UInt16 ToUInt16(this System.UInt64 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *ppt = number;
+            return *((System.UInt16*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int32"/> to a <see cref="System.UInt16"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.UInt16 ToUInt16(this System.Int32 number) => NarrowingConversion<System.Int32, System.UInt16>(number);
+        public static System.UInt16 ToUInt16(this System.Int32 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *ppt = number;
+            return *((System.UInt16*)ppt);
+        }
         #endregion
 
         #region Conversions to Byte
@@ -567,49 +713,84 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Byte ToByte(this System.Int16 number) => NarrowingConversion<System.Int16, System.Byte>(number);
+        public static System.Byte ToByte(this System.Int16 number)
+        {
+            System.Int16* ppt = stackalloc System.Int16[1];
+            *ppt = number;
+            return *((System.Byte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int32"/> to a <see cref="System.Byte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Byte ToByte(this System.Int32 number) => NarrowingConversion<System.Int32 , System.Byte>(number);
+        public static System.Byte ToByte(this System.Int32 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *ppt = number;
+            return *((System.Byte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Char"/> to a <see cref="System.Byte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="character">The character to convert.</param>
-        public static System.Byte ToByte(this System.Char character) => NarrowingConversion<System.Char , System.Byte>(character);
+        public static System.Byte ToByte(this System.Char character)
+        {
+            System.Char* ppt = stackalloc System.Char[1];
+            *ppt = character;
+            return *((System.Byte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt16"/> to a <see cref="System.Byte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Byte ToByte(this System.UInt16 number) => NarrowingConversion<System.UInt16 , System.Byte>(number);
+        public static System.Byte ToByte(this System.UInt16 number)
+        {
+            System.UInt16* ppt = stackalloc System.UInt16[1];
+            *ppt = number;
+            return *((System.Byte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt32"/> to a <see cref="System.Byte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Byte ToByte(this System.UInt32 number) => NarrowingConversion<System.UInt32, System.Byte>(number);
+        public static System.Byte ToByte(this System.UInt32 number)
+        {
+            System.UInt32* ppt = stackalloc System.UInt32[1];
+            *ppt = number;
+            return *((System.Byte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt64"/> to a <see cref="System.Byte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Byte ToByte(this System.UInt64 number) => NarrowingConversion<System.UInt64, System.Byte>(number);
+        public static System.Byte ToByte(this System.UInt64 number)
+        {
+            System.UInt64* ppt = stackalloc System.UInt64[1];
+            *ppt = number;
+            return *((System.Byte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.SByte"/> to a <see cref="System.Byte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Byte ToByte(this System.SByte number) => LinearConversion<System.SByte , System.Byte>(number);
+        public static System.Byte ToByte(this System.SByte number)
+        {
+            System.Byte* ppt = stackalloc System.Byte[1];
+            *((System.SByte*)ppt) = number;
+            return *ppt;
+        }
         #endregion
 
         #region Conversions to Char
@@ -618,42 +799,72 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Char ToChar(this System.Int64 number) => NarrowingConversion<System.Int64, System.Char>(number);
+        public static System.Char ToChar(this System.Int64 number)
+        {
+            System.Int64* ppt = stackalloc System.Int64[1];
+            *ppt = number;
+            return *((System.Char*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int32"/> to a <see cref="System.Char"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Char ToChar(this System.Int32 number) => NarrowingConversion<System.Int32, System.Char>(number);
+        public static System.Char ToChar(this System.Int32 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *ppt = number;
+            return *((System.Char*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt32"/> to a <see cref="System.Char"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Char ToChar(this System.UInt32 number) => NarrowingConversion<System.UInt32, System.Char>(number);
+        public static System.Char ToChar(this System.UInt32 number)
+        {
+            System.UInt32* ppt = stackalloc System.UInt32[1];
+            *ppt = number;
+            return *((System.Char*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int16"/> to a <see cref="System.Char"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Char ToChar(this System.Int16 number) => LinearConversion<System.Int16, System.Char>(number);
+        public static System.Char ToChar(this System.Int16 number)
+        {
+            System.Int16* ppt = stackalloc System.Int16[1];
+            *ppt = number;
+            return *((System.Char*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.UInt16"/> to a <see cref="System.Char"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Char ToChar(this System.UInt16 number) => LinearConversion<System.UInt16, System.Char>(number);
+        public static System.Char ToChar(this System.UInt16 number)
+        {
+            System.UInt16* ppt = stackalloc System.UInt16[1];
+            *ppt = number;
+            return *((System.Char*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Byte"/> to a <see cref="System.Char"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.Char ToChar(this System.Byte number) => WideningConversion<System.Byte , System.Char>(number);
+        public static System.Char ToChar(this System.Byte number)
+        {
+            System.Char* ppt = stackalloc System.Char[1];
+            *((System.Byte*)ppt) = number;
+            return *ppt;
+        }
         #endregion
 
         #region Conversions to SByte
@@ -662,14 +873,24 @@ namespace MP
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.SByte ToSByte(this System.Byte number) => LinearConversion<System.Byte, System.SByte>(number);
+        public static System.SByte ToSByte(this System.Byte number)
+        {
+            System.Byte* ppt = stackalloc System.Byte[1];
+            *ppt = number;
+            return *((System.SByte*)ppt);
+        }
 
         /// <summary>
         /// Uses unsafe schemes to convert a <see cref="System.Int32"/> to a <see cref="System.SByte"/>. 
         /// The conversion is only performed with less checks during runtime.
         /// </summary>
         /// <param name="number">The number to convert.</param>
-        public static System.SByte ToSByte(this System.Int32 number) => NarrowingConversion<System.Int32 , System.SByte>(number);
+        public static System.SByte ToSByte(this System.Int32 number)
+        {
+            System.Int32* ppt = stackalloc System.Int32[1];
+            *ppt = number;
+            return *((System.SByte*)ppt);
+        }
         #endregion
 
         #region Get Bytes from numeric types
@@ -882,7 +1103,8 @@ namespace MP
 
         #region Bit Manipulations
         // Parts of bit conversion code do belong from referencesource.microsoft.com/en-us !.
-        private static System.Byte GetBitValue(System.Int32 bitidx) => (1 << (bitidx & 7)).ToByte();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static System.Int32 GetBitValue(System.Int32 bitidx) => 1 << (bitidx & 7);
 
         /// <summary>
         /// Gets the bit on the specified index inside the byte. <br />
@@ -893,7 +1115,7 @@ namespace MP
         /// <returns>The bit value. <see langword="true"/> means that the bit is set.</returns>
         public static System.Boolean GetBit(this System.Byte bt , System.Int32 bitindex)
         {
-            System.Byte bitval = GetBitValue(bitindex);
+            System.Int32 bitval = GetBitValue(bitindex);
             return (bt & bitval) == bitval;
         }
 
@@ -908,14 +1130,8 @@ namespace MP
         public static void SetBit(this ref System.Byte bt , System.Int32 bitindex , System.Boolean value)
         {
             // GetBitValue will be used in both cases so why not computing it before the code paths do split out?
-            var bv = GetBitValue(bitindex);
-            if (value) {
-                bt |= bv;
-            } else {
-                // A faster alternative , compared to the older one.
-                // This will always unset the target bit, not corrupting the state of the other bits.
-                bt = (bt & ~bv).ToByte();
-            }
+            System.Int32 bv = GetBitValue(bitindex);
+            bt = (value ? (bt | bv) : (bt & ~bv)).ToByte();
         }
 
         /// <summary>

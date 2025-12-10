@@ -1,4 +1,7 @@
 
+using System;
+using MP.Annotations.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace MP
@@ -10,9 +13,12 @@ namespace MP
     {
         // A typed length for temporary buffers.
         private const System.Int32 BUFSIZE = 2048;
-        // A typed length for ReadFixedLengthString method's internal byte buffer.
-        private const System.Int32 MaxCharBytesSize = 128;
-        private const System.String DefaultPadString = "PAD";
+
+        /// <summary>
+        /// Provides the default padding string used by the <see cref="WritePadString(System.IO.Stream, string, int)"/> method. <br />
+        /// It is publicly exposed if you want to explicitly use this.
+        /// </summary>
+        public const System.String DefaultPadString = "PAD";
 
         /// <summary>
         /// Defines a temporary buffer size for operations that must use intermediate buffers.
@@ -25,7 +31,8 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the specified string.</param>
         /// <param name="str">The string to write to the stream.</param>
-        public static void WriteASCIIString(this System.IO.Stream stream, System.String str)
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
+        public static void WriteASCIIString(this System.IO.Stream stream, [MaybeNull] System.String str)
         {
             if (System.String.IsNullOrEmpty(str)) { return; }
             System.Byte[] data = new System.Byte[str.Length];
@@ -33,8 +40,7 @@ namespace MP
             for (System.Int32 I = 0; I < str.Length; I++)
             {
                 temp = str[I];
-                if (temp > 255) { data[I] = 63; continue; }
-                data[I] = temp.ToByte();
+                data[I] = ((temp > 255) ? 63 : temp).ToByte();
             }
             stream.Write(data, 0, data.Length);
             data = null;
@@ -45,31 +51,14 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the specified string.</param>
         /// <param name="str">The string to write to the stream.</param>
-        public static void WriteUTF16LEString(this System.IO.Stream stream, System.String str)
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
+        public static void WriteUTF16LEString(this System.IO.Stream stream, [MaybeNull] System.String str)
         {
-            if (System.String.IsNullOrEmpty(str)) { return; }
-            System.Int32 exactlen = str.Length * sizeof(System.Char);
-            System.Byte[] data = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(exactlen);
-#if MP_PROJECT_BUILDTASKS
-            fixed (System.Byte* pdest = data)
-            fixed (System.Char* psrc = str)
-            {
-                Unsafe.CopyBlockUnaligned(pdest, psrc, exactlen.ToUInt32());
+            if (System.String.IsNullOrEmpty(str)) { 
+                return; 
+            } else {
+                WriteString(stream, str, System.Text.Encoding.Unicode);
             }
-#else
-            Unsafe.CopyBlockUnaligned(ref data[0],
-                ref Unsafe.As<System.Char , System.Byte>(
-                    ref Unsafe.AsRef(str.GetPinnableReference())
-                ),
-                exactlen.ToUInt32()
-            );
-#endif
-            try {
-                stream.Write(data, 0, exactlen);
-            } finally {
-                System.Buffers.ArrayPool<System.Byte>.Shared.Return(data);
-            }
-            stream = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,18 +73,19 @@ namespace MP
         /// <param name="stream">The stream to write the specified string.</param>
         /// <param name="str">The string to write.</param>
         /// <param name="enc">The character encoding under which <paramref name="str"/> will be saved.</param>
-        /// <exception cref="System.ArgumentNullException"><paramref name="enc"/> was null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enc"/> was null.</exception>
         /// <returns>The number of bytes written for saving the string into the data stream.</returns>
+        [Throws(typeof(ArgumentNullException), typeof(System.IO.IOException) , typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static long WriteString(this System.IO.Stream stream , System.String str , System.Text.Encoding enc)
         {
-            if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
+            ArgumentNullException.ThrowIfNull(enc);
             if (System.String.IsNullOrEmpty(str)) { return 0; }
 
             System.Byte[] temp_1 = null;
-            
-            System.Text.Encoder encoder = enc.GetEncoder();
 
             try {
+
+                System.Text.Encoder encoder = enc.GetEncoder();
 
                 temp_1 = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(2048);
 
@@ -139,8 +129,15 @@ namespace MP
         /// <param name="enc">The character encoding under which the string will be read back.</param>
         /// <param name="nbytes">The number of bytes comprising the string data</param>
         /// <returns>The read string.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="enc"/> was <see langword="null"/>.</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="nbytes"/> was negative.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enc"/> was <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="nbytes"/> was negative.</exception>
+        [Throws(
+            typeof(System.IO.IOException), 
+            typeof(ArgumentNullException),
+            typeof(NotSupportedException),
+            typeof(ObjectDisposedException),
+            typeof(ArgumentOutOfRangeException)
+        )]
         public static System.String ReadString(this System.IO.Stream stream, System.Text.Encoding enc, long nbytes)
         {
             if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
@@ -219,17 +216,19 @@ namespace MP
         /// <param name="str">The string to write.</param>
         /// <param name="enc">The character encoding under which <paramref name="str"/> will be saved.</param>
         /// <returns>The length, in bytes, written to the stream, for writing the value contained in <paramref name="str"/>.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="enc"/> was null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enc"/> was null.</exception>
+        [Throws(
+            typeof(System.IO.IOException),
+            typeof(NotSupportedException),
+            typeof(ObjectDisposedException),
+            typeof(ArgumentNullException)
+        )]
         public static long WriteFixedLengthString(this System.IO.Stream stream, System.String str , System.Text.Encoding enc)
         {
-            if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
-            if (System.String.IsNullOrEmpty(str))
-            {
-                Write7BitEncodedInt(stream, 0);
-                return 0;
-            }
-            Write7BitEncodedInt(stream , enc.GetByteCount(str));
-            return WriteString(stream, str, enc);
+            ArgumentNullException.ThrowIfNull(enc);
+            int bc = (str is null) ? 0 : enc.GetByteCount(str);
+            Write7BitEncodedInt(stream, bc);
+            return (bc == 0) ? 0 : WriteString(stream, str, enc); 
         }
 
         /// <summary>
@@ -239,13 +238,14 @@ namespace MP
         /// <param name="stream">The stream to write the pad string to.</param>
         /// <param name="pad">The pad string to use to write the pads. Can have any content , as long as it is does only use ASCII characters.</param>
         /// <param name="pads">The number of pad bytes to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WritePadString(this System.IO.Stream stream , System.String pad, System.Int32 pads)
         {
             // If no pads required , do not throw an exception. Consider it as a valid call and instead
             // do not write anyting on the target stream.
             // For safety , the method will not also write a padding that is very large (e.g. 8000 pads) , 
             // which a padding will never be such large in a real format.
-            if (pads <= 0 || pads > 512) { return; }
+            if (pads < 1 || pads > 512) { return; }
             // Assign a default pad string if the user failed to give a proper one.
             if (System.String.IsNullOrEmpty(pad)) { pad = DefaultPadString; } 
             System.Int32 padidx = 0;
@@ -270,110 +270,47 @@ namespace MP
         /// <param name="stream">The stream to read from.</param>
         /// <param name="length">The length, in bytes , of the string to read.</param>
         /// <returns>The read string contents.</returns>
-        public static System.String ReadASCIIString(this System.IO.Stream stream , System.Int32 length) 
-        {
-            if (length < 0) { return null; }
-            System.Byte[] data = new System.Byte[length];
-            System.Int32 rb = stream.Read(data, 0, data.Length);
-            fixed (System.Byte* src = data)
-            {
-                return new((System.SByte*)src, 0, rb);
-            }
-        }
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
+        public static System.String ReadASCIIString(this System.IO.Stream stream , System.Int32 length) => (length < 0) ? null : ReadString(stream, System.Text.Encoding.ASCII, length);
 
         /// <summary>
         /// Reads an UTF16-encoded string with little endianess from the stream. 
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <param name="length">The length, in bytes , of the string to be read.</param>
-        public static System.String ReadUTF16LEString(this System.IO.Stream stream , System.Int32 length)
-        {
-            if (length < 0) { return null; }
-            System.Byte[] data = new System.Byte[length];
-            System.Int32 rb = stream.Read(data, 0, data.Length);
-            fixed (System.Byte* src = data)
-            {
-                return new((System.Char*)src, 0, rb / sizeof(System.Char));
-            }
-        }
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> was negative.</exception>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(ArgumentOutOfRangeException))]
+        public static System.String ReadUTF16LEString(this System.IO.Stream stream , System.Int32 length) => ReadString(stream, System.Text.Encoding.Unicode , length);
 
         /// <summary>
         /// Reads an UTF16-encoded string with little endianess from the stream. 
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <param name="length">The length, in bytes , of the string to be read.</param>
-        public static System.String ReadUTF16LEString(this System.IO.Stream stream, System.UInt32 length)
-        {
-            if (length < 0) { return null; }
-            System.Byte[] data = new System.Byte[length];
-            System.Int32 rb = stream.Read(data, 0, data.Length);
-            fixed (System.Byte* src = data)
-            {
-                return new((System.Char*)src, 0, rb / sizeof(System.Char));
-            }
-        }
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> was negative.</exception>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(ArgumentOutOfRangeException))]
+        public static System.String ReadUTF16LEString(this System.IO.Stream stream, System.UInt32 length) => ReadString(stream, System.Text.Encoding.Unicode, length);
 
-        // Code portions of below method belong from BinaryReader from .NET Foundation: 
-        // Licensed to the .NET Foundation under one or more agreements.
-        // The .NET Foundation licenses this file to you under the MIT license.
         /// <summary>
         /// Reads a fixed-length string from the specified string , with the specified text encoding.
         /// </summary>
         /// <param name="stream">The stream to read the fixed-length string from.</param>
         /// <param name="enc">The encoding under the string was written.</param>
         /// <returns>The decoded string.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enc"/> is <see langword="null"/>.</exception>
+        /// <exception cref="FormatException">The read number of bytes was negative, possibly indicating a corrupt stream.</exception>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(FormatException), typeof(ArgumentNullException))]
         public static System.String ReadFixedLengthString(this System.IO.Stream stream , System.Text.Encoding enc)
         {
-            if (enc is null) { throw new System.ArgumentNullException(nameof(enc)); }
-            System.Text.Decoder dec = enc.GetDecoder();
-
-            int currPos = 0;
-            int n;
-            int stringLength;
-            int readLength;
-            int charsRead;
-
+            ArgumentNullException.ThrowIfNull(enc);
             // Length of the string in bytes, not chars
-            stringLength = Read7BitEncodedInt(stream);
-            if (stringLength < 0) { throw new System.FormatException($"Invalid fixed string length: {stringLength}."); }
-            if (stringLength == 0) { return System.String.Empty; }
-
-            System.Byte[] CharBytes = null;
-            System.Char[] CharBuffer = null;
-            try 
-            {
-                CharBytes = System.Buffers.ArrayPool<System.Byte>.Shared.Rent(MaxCharBytesSize);
-                CharBuffer = System.Buffers.ArrayPool<System.Char>.Shared.Rent(enc.GetMaxCharCount(CharBytes.Length));
-
-                System.Text.StringBuilder sb = new(2048); // Give an arbitrary capacity of 2048 characters.
-
-                do
-                {
-                    readLength = ((stringLength - currPos) > MaxCharBytesSize) ? MaxCharBytesSize : (stringLength - currPos);
-
-                    n = stream.Read(CharBytes, 0, readLength);
-                    if (n == 0) { throw new System.IO.EndOfStreamException("The stream was ended prematurely."); }
-
-                    charsRead = dec.GetChars(CharBytes, 0, n, CharBuffer, 0);
-
-                    if (currPos == 0 && n == stringLength)
-                    {
-                        return new string(CharBuffer, 0, charsRead);
-                    }
-
-                    sb.Append(CharBuffer, 0, charsRead);
-                    currPos += n;
-                } while (currPos < stringLength);
-                dec = null;
-                return sb.ToString();
-            } finally {
-                if (CharBytes is not null) {
-                    System.Buffers.ArrayPool<System.Byte>.Shared.Return(CharBytes);
-                }
-                if (CharBuffer is not null) {
-                    System.Buffers.ArrayPool<System.Char>.Shared.Return(CharBuffer);
-                }
-            }
+            int stringLength = Read7BitEncodedInt(stream);
+            // The older method was not very performant, so fall back now to ReadString instead.
+            return stringLength switch {
+                < 0 => throw new System.FormatException($"Invalid fixed string length: {stringLength}."),
+                0 => System.String.Empty,
+                _ => ReadString(stream, enc, stringLength),
+            };
         }
 
         /// <summary>
@@ -381,14 +318,15 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the signed byte.</param>
         /// <param name="signedbyte">The signed byte to write.</param>
-        public static void WriteSByte(this System.IO.Stream stream, System.SByte signedbyte) 
-            => stream.WriteByte(signedbyte.ToByte());
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
+        public static void WriteSByte(this System.IO.Stream stream, System.SByte signedbyte) => stream.WriteByte(signedbyte.ToByte());
 
         /// <summary>
         /// Writes a signed short integer to the stream.
         /// </summary>
         /// <param name="stream">The stream to write the signed integer.</param>
         /// <param name="value">The signed short integer to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WriteInt16(this System.IO.Stream stream , System.Int16 value)
         {
             System.Byte[] dt = value.GetBytes();
@@ -401,6 +339,7 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the unsigned integer.</param>
         /// <param name="value">The unsigned short integer to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WriteUInt16(this System.IO.Stream stream, System.UInt16 value)
         {
             System.Byte[] dt = value.GetBytes();
@@ -413,6 +352,7 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the unsigned integer.</param>
         /// <param name="value">The unsigned integer to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WriteUInt32(this System.IO.Stream stream, System.UInt32 value)
         {
             System.Byte[] dt = value.GetBytes();
@@ -425,6 +365,7 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the signed integer.</param>
         /// <param name="value">The signed integer to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WriteInt32(this System.IO.Stream stream, System.Int32 value)
         {
             System.Byte[] dt = value.GetBytes();
@@ -437,6 +378,7 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the signed integer.</param>
         /// <param name="value">The signed integer to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WriteInt64(this System.IO.Stream stream, System.Int64 value)
         {
             System.Byte[] dt = value.GetBytes();
@@ -449,6 +391,7 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the unsigned integer.</param>
         /// <param name="value">The unsigned long integer to write.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException))]
         public static void WriteUInt64(this System.IO.Stream stream, System.UInt64 value)
         {
             System.Byte[] dt = value.GetBytes();
@@ -461,71 +404,64 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to read the signed byte.</param>
         /// <returns>The read signed byte.</returns>
-        public static System.SByte ReadSByte(this System.IO.Stream stream) 
-            => stream.ReadByte().ToSByte();
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(System.IO.EndOfStreamException), typeof(ObjectDisposedException))]
+        public static System.SByte ReadSByte(this System.IO.Stream stream) => ReadLiteralByte(stream).ToSByte();
 
         /// <summary>
         /// Reads a signed short integer from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read signed short integer.</returns>
-        public static System.Int16 ReadInt16(this System.IO.Stream stream)
-            => ReadBytes(stream, sizeof(System.Int16)).ToInt16(0);
+        public static System.Int16 ReadInt16(this System.IO.Stream stream) => ReadBytes(stream, sizeof(System.Int16)).ToInt16(0);
 
         /// <summary>
         /// Reads a signed integer from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read signed integer.</returns>
-        public static System.Int32 ReadInt32(this System.IO.Stream stream)
-            => ReadBytes(stream, sizeof(System.Int32)).ToInt32(0);
+        public static System.Int32 ReadInt32(this System.IO.Stream stream) => ReadBytes(stream, sizeof(System.Int32)).ToInt32(0);
 
         /// <summary>
         /// Reads a signed long integer from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read signed long integer.</returns>
-        public static System.Int64 ReadInt64(this System.IO.Stream stream)
-            => ReadBytes(stream, sizeof(System.Int64)).ToInt64(0);
+        public static System.Int64 ReadInt64(this System.IO.Stream stream) => ReadBytes(stream, sizeof(System.Int64)).ToInt64(0);
 
         /// <summary>
         /// Reads an unsigned short integer from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read unsigned short integer.</returns>
-        public static System.UInt16 ReadUInt16(this System.IO.Stream stream)
-            => ReadBytes(stream, sizeof(System.UInt16)).ToUInt16(0);
+        public static System.UInt16 ReadUInt16(this System.IO.Stream stream) => ReadBytes(stream, sizeof(System.UInt16)).ToUInt16(0);
 
         /// <summary>
         /// Reads an unsigned integer from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read unsigned integer.</returns>
-        public static System.UInt32 ReadUInt32(this System.IO.Stream stream)
-            => ReadBytes(stream, sizeof(System.UInt32)).ToUInt32(0);
+        public static System.UInt32 ReadUInt32(this System.IO.Stream stream) => ReadBytes(stream, sizeof(System.UInt32)).ToUInt32(0);
 
         /// <summary>
         /// Reads an unsigned integer from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read unsigned integer.</returns>
-        public static System.UInt64 ReadUInt64(this System.IO.Stream stream)
-            => ReadBytes(stream, sizeof(System.UInt64)).ToUInt64(0);
+        public static System.UInt64 ReadUInt64(this System.IO.Stream stream) => ReadBytes(stream, sizeof(System.UInt64)).ToUInt64(0);
 
         /// <summary>
         /// Writes a boolean to the stream.
         /// </summary>
         /// <param name="stream">The stream to write.</param>
         /// <param name="value">The boolean value to write.</param>
-        public static void WriteBoolean(this System.IO.Stream stream, System.Boolean value) 
-            => stream.WriteByte((value ? 1 : 0).ToByte());
+        public static void WriteBoolean(this System.IO.Stream stream, System.Boolean value) => stream.WriteByte((value ? 1 : 0).ToByte());
 
         /// <summary>
         /// Reads a boolean from the stream.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>
         /// <returns>The read boolean value.</returns>
-        public static System.Boolean ReadBoolean(this System.IO.Stream stream) => stream.ReadByte() != 0;
+        public static System.Boolean ReadBoolean(this System.IO.Stream stream) => ReadLiteralByte(stream) != 0;
 
         /// <summary>
         /// Writes a decimal to the stream.
@@ -609,8 +545,7 @@ namespace MP
         /// <seealso cref="ReadStructure{T}(System.IO.Stream)"/>
         public static void WriteStructure<T>(this System.IO.Stream stream, T structure) where T : struct 
         {
-            System.Byte[] temp = new System.Byte[Unsafe.SizeOf<T>()];
-            temp.WriteStructure(0 , structure);
+            System.Byte[] temp = structure.WriteStructureToNewArray();
             stream.Write(temp , 0 , temp.Length);
             temp = null;
         }
@@ -644,15 +579,15 @@ namespace MP
         /// <seealso cref="Write7BitEncodedInt(System.IO.Stream, int)"/>
         public static System.Int32 Read7BitEncodedInt(this System.IO.Stream reader)
         {
-            System.Int32 num = 0 , num2 = 0;
+            System.Int32 num = 0 , bits = 0;
             System.Byte b;
             do {
-                if (num2 == 35) {
+                if (bits == 35) {
                     throw new System.FormatException("Too many bytes of what should have been a 7-bit encoded Int32.");
                 }
                 b = ReadLiteralByte(reader);
-                num |= (b & 0x7F) << num2;
-                num2 += 7;
+                num |= (b & 0x7F) << bits;
+                bits += 7;
             } while ((b & 0x80u) != 0);
             return num;
         }
@@ -679,6 +614,8 @@ namespace MP
         /// <param name="stream">The stream to read the bytes from.</param>
         /// <param name="count">The number of bytes to read.</param>
         /// <returns>The read array.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> parameter was negative.</exception>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(ArgumentOutOfRangeException))]
         public static System.Byte[] ReadBytes(this System.IO.Stream stream, System.Int32 count)
         {
             if (count < 0) {
@@ -707,7 +644,8 @@ namespace MP
         /// <param name="stream">The stream to read the bytes from.</param>
         /// <param name="bytes_to_copy">The number of bytes to read.</param>
         /// <returns>The read array.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="bytes_to_copy"/> parameter was negative.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="bytes_to_copy"/> parameter was negative.</exception>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(ArgumentOutOfRangeException))]
         public static System.Byte[] ReadBytes(this System.IO.Stream stream, long bytes_to_copy) => ReadBytes(stream, bytes_to_copy, BUFSIZE);
 
         /// <summary>
@@ -717,19 +655,20 @@ namespace MP
         /// <param name="bytes_to_copy">The number of bytes to read.</param>
         /// <param name="buffer_size">The temporary buffer size to use for copying the data to the newly created array.</param>
         /// <returns>The read array.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="bytes_to_copy"/> parameter was negative. <br /> 
         /// -or- <br />
         /// <paramref name="buffer_size"/> was too small to be used for a temporary buffer.
         /// </exception>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(ArgumentOutOfRangeException))]
         public static System.Byte[] ReadBytes(this System.IO.Stream stream , long bytes_to_copy, int buffer_size)
         {
             if (bytes_to_copy < 0) {
-                throw new System.ArgumentOutOfRangeException(nameof(bytes_to_copy), "The number of bytes to copy cannot be negative.");
+                throw new ArgumentOutOfRangeException(nameof(bytes_to_copy), "The number of bytes to copy cannot be negative.");
             } else if (bytes_to_copy == 0) {
-                return System.Array.Empty<System.Byte>();
+                return Array.Empty<System.Byte>();
             } else if (buffer_size < 1024) {
-                throw new System.ArgumentOutOfRangeException(nameof(buffer_size), "The buffer_size parameter is too small and could degrade performance.");
+                throw new ArgumentOutOfRangeException(nameof(buffer_size), "The buffer_size parameter is too small and could degrade performance.");
             }
 
             System.Byte[] ret = new System.Byte[bytes_to_copy], buffer = null;
@@ -764,6 +703,7 @@ namespace MP
         /// </summary>
         /// <param name="stream">The stream to write the bytes to.</param>
         /// <param name="data">The bytes to write to the stream.</param>
+        [Throws(typeof(System.IO.IOException), typeof(NotSupportedException), typeof(ObjectDisposedException), typeof(ArgumentNullException))]
         public static void WriteBytes(this System.IO.Stream stream, System.Byte[] data)
         {
             // Abstract: Gets all the bytes defined in the 'data' array and copies them to the stream.
@@ -786,9 +726,9 @@ namespace MP
                 }
 
             } finally {
-                if (temp is not null)
-                {
+                if (temp is not null) {
                     System.Buffers.ArrayPool<System.Byte>.Shared.Return(temp);
+                    temp = null;
                 }
             }
         }
@@ -800,8 +740,14 @@ namespace MP
         /// <param name="stream">The stream to read the typed array from.</param>
         /// <param name="elementcount">The number of <typeparamref name="T"/> elements to read from the <paramref name="stream"/>.</param>
         /// <returns>The typed array read from the stream.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="elementcount"/> was negative.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="elementcount"/> was negative.</exception>
         /// <seealso cref="ReadTypedSpan{T}(System.IO.Stream, int)"/>
+        [Throws(
+            typeof(System.IO.IOException), 
+            typeof(NotSupportedException), 
+            typeof(ObjectDisposedException), 
+            typeof(ArgumentOutOfRangeException)
+        )]
         public static T[] ReadTypedArray<T>(this System.IO.Stream stream , System.Int32 elementcount)
             where T : unmanaged
         {
@@ -818,7 +764,13 @@ namespace MP
         /// </summary>
         /// <param name="input">The source stream.</param>
         /// <param name="output">The target stream.</param>
-        /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
+        /// <exception cref="ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
+        [Throws(
+            typeof(System.IO.IOException),
+            typeof(ArgumentNullException),
+            typeof(NotSupportedException),
+            typeof(ObjectDisposedException)
+        )]
         public static void DirectCopyToStream(this System.IO.Stream input, System.IO.Stream output)
             => DirectCopyToStream(input, output, BUFSIZE);
 
@@ -829,11 +781,18 @@ namespace MP
         /// <param name="input">The source stream.</param>
         /// <param name="output">The target stream.</param>
         /// <param name="buffersize">The buffer size, in bytes, that the method should allocate. This buffer will be used to copy data from the one stream to the another.</param>
-        /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="buffersize"/> parameter was less than 1024 bytes.</exception>
+        /// <exception cref="ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The <paramref name="buffersize"/> parameter was less than 1024 bytes.</exception>
+        [Throws(
+            typeof(System.IO.IOException),
+            typeof(ArgumentNullException),
+            typeof(NotSupportedException),
+            typeof(ObjectDisposedException),
+            typeof(ArgumentOutOfRangeException)
+        )]
         public static void DirectCopyToStream(this System.IO.Stream input , System.IO.Stream output , System.Int32 buffersize)
         {
-            if (output is null) { throw new System.ArgumentNullException(nameof(output)); }
+            ArgumentNullException.ThrowIfNull(output);
             if (buffersize < 1024) { throw new System.ArgumentOutOfRangeException(nameof(buffersize) , "The buffersize parameter is too small and could degrade performance."); }
             System.Byte[] buffer = null;
             System.Int32 readin;
@@ -865,9 +824,16 @@ namespace MP
         /// <param name="buffer_size">The buffer size, in bytes, that the method should allocate. This buffer will be used to copy data from the one stream to the another.</param>
         /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="buffer_size"/> parameter was less than 1024 bytes, -or- the <paramref name="bytes_copy"/> parameter was negative.</exception>
+        [Throws(
+            typeof(System.IO.IOException),
+            typeof(ArgumentNullException),
+            typeof(NotSupportedException),
+            typeof(ObjectDisposedException),
+            typeof(ArgumentOutOfRangeException)
+        )]
         public static void CopySpecificToStream(this System.IO.Stream input, System.IO.Stream output, System.Int64 bytes_copy, System.Int32 buffer_size)
         {
-            if (output is null) { throw new System.ArgumentNullException(nameof(output)); }
+            ArgumentNullException.ThrowIfNull(output);
             if (bytes_copy < 0) { throw new System.ArgumentOutOfRangeException(nameof(bytes_copy), "The number of bytes to copy cannot be negative."); }
             if (buffer_size < 1024) { throw new System.ArgumentOutOfRangeException(nameof(buffer_size), "The buffer_size parameter is too small and could degrade performance."); }
             System.Byte[] buffer = null;
@@ -901,6 +867,13 @@ namespace MP
         /// <param name="bytes_copy">The exact number of bytes to copy from this stream to <paramref name="output"/>.</param>
         /// <exception cref="System.ArgumentNullException">The <paramref name="output"/> parameter was null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="bytes_copy"/> parameter was negative.</exception>
+        [Throws(
+            typeof(System.IO.IOException),
+            typeof(ArgumentNullException),
+            typeof(NotSupportedException),
+            typeof(ObjectDisposedException),
+            typeof(ArgumentOutOfRangeException)
+        )]
         public static void CopySpecificToStream(this System.IO.Stream input, System.IO.Stream output, System.Int64 bytes_copy)
             => CopySpecificToStream(input , output, bytes_copy, BUFSIZE);
     }

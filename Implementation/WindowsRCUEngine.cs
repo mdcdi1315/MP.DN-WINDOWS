@@ -1619,7 +1619,7 @@ namespace MP
             }
         }
 
-        private DiscordUpdateInfoData CreateInfoData(System.String details, System.String state , System.Boolean isinst = false)
+        private static DiscordUpdateInfoData CreateInfoData(System.String details, System.String state , System.Boolean isinst = false)
             => new() { Assets = new() { LargeImage = "appicon", LargeText = "", SmallImage = "appicon_small", SmallText = "" }, Details = details , State = state, IsInstancedSession = isinst , Timestamps = default};
 
         public override System.Int32 CurrentTrackIndex

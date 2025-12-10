@@ -58,10 +58,6 @@ namespace MP.Collections
 
         bool ITreeNodeGetterAccessor.IsRoot => true; // This is always true!!!
 
-        ITreeNodeGetterAccessor ITreeNodeGetterAccessor.Parent => null;
-
-        IEnumerable<ITreeNodeGetterAccessor> ITreeNodeGetterAccessor.Children => Children;
-
         /// <summary>
         /// Gets the children of the root node of this tree. 
         /// </summary>

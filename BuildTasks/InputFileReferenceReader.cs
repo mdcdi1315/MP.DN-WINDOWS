@@ -1,5 +1,4 @@
 ﻿
-using MP;
 using System;
 using DotNetResourcesExtensions;
 
@@ -21,7 +20,7 @@ namespace MusicPlayer.BuildTasks
         {
             System.IO.FileStream fsm = new(data.FileName, System.IO.FileMode.Open);
             try {
-                System.Byte[] data = fsm.ReadBytes(fsm.Length);
+                System.Byte[] data = fsm.ReadBytes(fsm.Length, 2048);
                 transformed = this.data.AsEncoding().GetString(data);
                 data = null;
             } finally {
@@ -33,7 +32,7 @@ namespace MusicPlayer.BuildTasks
         {
             System.IO.FileStream fsm = new(data.FileName, System.IO.FileMode.Open);
             try {
-                transformed = fsm.ReadBytes(fsm.Length);
+                transformed = fsm.ReadBytes(fsm.Length, 2048);
             } finally {
                 fsm?.Dispose();
             }

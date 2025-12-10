@@ -22,6 +22,14 @@ namespace MP.AudioLibrary.MediaFoundation
             return hr;
         }
 
+        internal static HRESULT ConvertToContiguousBuffer(this IMFSample sample, out IMFMediaBufferNative buffer_native)
+        {
+            void* pbuffer;
+            HRESULT hr = sample.ConvertToContiguousBuffer(&pbuffer);
+            buffer_native = (hr.FAILED) ? default : new IMFMediaBufferNative(pbuffer);
+            return hr;
+        }
+
         public static HRESULT AddBuffer(this IMFSample sample , IMFMediaBuffer buffer)
         {
             ArgumentNullException.ThrowIfNull(buffer);

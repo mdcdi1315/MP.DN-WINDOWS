@@ -51,8 +51,7 @@ namespace MP.AudioLibrary.MediaFoundation
 
         private IMFSample tempsample1 , tempsample2; // Temporary samples - are pooled so that no additional samples are allocated at run time
 
-        [IsPointerToCOMInterfaceType(typeof(IMFMediaBuffer))]
-        private System.IntPtr tbf2; // This is a native COM object of the IMFMediaBuffer interface
+        private IMFMediaBufferNative buffer;
 
         private static System.Int64 BytesToNsPosition(System.Int32 bytes, AudioFormat format) => (10000000L * bytes) / format.AverageBytesPerSecond;
 
@@ -120,8 +119,7 @@ namespace MP.AudioLibrary.MediaFoundation
                 hr.ThrowOnFailure();
                 hr = MediaFoundationInterfacesFactory.CreateSample(out tempsample2);
                 hr.ThrowOnFailure();
-                hr = Interop.MfPlat.MFCreateMemoryBuffer_IntPtr(sourcebuffer.Length, out tbf2);
-                hr.ThrowOnFailure();
+                this.buffer = CreateBufferAndReturn(sourcebuffer.Length);
             }
             // Reposition code
             if (HasFlagFast(MEDTRANSFORMFLAGS.FireReposition))
@@ -207,6 +205,12 @@ namespace MP.AudioLibrary.MediaFoundation
             outputbufferoffset = 0;
         }
 
+        private static IMFMediaBufferNative CreateBufferAndReturn(int length)
+        {
+            Interop.MfPlat.MFCreateMemoryBuffer_IntPtr(length, out var buf).ThrowOnFailure();
+            return new IMFMediaBufferNative(buf);
+        }
+
         /// <summary>
         /// Attempts to read from the transform
         /// Some useful info here:
@@ -216,10 +220,10 @@ namespace MP.AudioLibrary.MediaFoundation
         private unsafe System.Int32 ReadFromTransform()
         {
             var outputDataBuffer = new MFT_OUTPUT_DATA_BUFFER();
-            Interop.MfPlat.MFCreateMemoryBuffer_IntPtr(outputbuffer.Length, out var tbf1).ThrowOnFailure();
+            IMFMediaBufferNative bf_source = CreateBufferAndReturn(outputbuffer.Length);
             // AddBuffer can fail for a number of reasons, check error code.
             tempsample1.DeleteAllItems();
-            tempsample1.AddBuffer(tbf1.ToPointer()).ThrowOnFailure();
+            tempsample1.AddBuffer(bf_source.ToNative()).ThrowOnFailure();
             tempsample1.SetSampleTime(outputposition); // hopefully this is not needed
             outputDataBuffer.pSample = Marshal.GetIUnknownForObject(tempsample1).ToPointer();
             outputDataBuffer.pEvents = null;
@@ -244,12 +248,11 @@ namespace MP.AudioLibrary.MediaFoundation
 
             System.Byte* pOutputBuffer;
             System.UInt32 outputBufferLength, maxSize;
-            hr = tempsample1.ConvertToContiguousBuffer(out var cts);
+            hr = tempsample1.ConvertToContiguousBuffer(out IMFMediaBufferNative cts);
             tempsample1.RemoveAllBuffers();
             if (hr.FAILED) {
                 // In such case, the original media buffer will not be destroyed.
-                while (tbf1 != IntPtr.Zero && Marshal.Release(tbf1) > 0) { }
-                tbf1 = IntPtr.Zero;
+                while (bf_source.ToNative() is not null && bf_source.Release() > 0) { }
             }
             hr.ThrowOnFailure();
             cts.Lock(&pOutputBuffer, &maxSize, &outputBufferLength);
@@ -259,9 +262,8 @@ namespace MP.AudioLibrary.MediaFoundation
             Unsafe.CopyBlockUnaligned(ref outputbuffer[0], ref pOutputBuffer[0], outputBufferLength);
             cts.Unlock();
             outputbufferoffset = 0;
-            ComMarshalling.ReleaseInteropObject(cts);
-            cts = null;
-            tbf1 = IntPtr.Zero; // Ignore disposing the tbf1 media buffer, that has already happened by ConvertToContiguousBuffer.
+            while (cts.ToNative() is not null && cts.Release() > 0) ;
+            // Ignore disposing the tbf1 media buffer, that has already happened by ConvertToContiguousBuffer.
             outputposition += BytesToNsPosition(outputbuffercount = outputBufferLength.ToInt32(), fmtout); // hopefully not needed
             if (outputDataBuffer.pEvents is not null) {
                 while (ComMarshalling.Release(outputDataBuffer.pEvents) > 0);
@@ -288,25 +290,21 @@ namespace MP.AudioLibrary.MediaFoundation
                 return;
             }
 
-            var mediaBuffer = (IMFMediaBuffer)Marshal.GetUniqueObjectForIUnknown(tbf2);
             System.Byte* pbuf;
             System.UInt32 maxlen, currentlen;
-            mediaBuffer.SetCurrentLength(bytesRead.ToUInt32());
-            mediaBuffer.Lock(&pbuf, &maxlen, &currentlen);
+            buffer.SetCurrentLength(bytesRead.ToUInt32());
+            buffer.Lock(&pbuf, &maxlen, &currentlen);
             Unsafe.CopyBlockUnaligned(ref pbuf[0], ref sourcebuffer[0], bytesRead.ToUInt32());
-            mediaBuffer.Unlock();
+            buffer.Unlock();
 
             // This may occur if a full playback was performed and the stream was stopped.
             tempsample2 ??= MediaFoundationInterfacesFactory.CreateSample();
-            tempsample2.AddBuffer(mediaBuffer);
+            tempsample2.AddBuffer(buffer.ToNative());
             // we'll set the time, I don't think it is needed for Resampler, but other MFTs might need it though.
             tempsample2.SetSampleTime(inputposition);
             long duration = BytesToNsPosition(bytesRead, provider.Format);
             tempsample2.SetSampleDuration(duration);
             inputposition += duration;
-            ComMarshalling.ReleaseInteropObject(mediaBuffer);
-            Marshal.Release(tbf2);
-            mediaBuffer = null;
         }
 
         private System.Int32 ReadFromOutputBuffer(byte[] buffer, int offset, int needed)
@@ -341,7 +339,7 @@ namespace MP.AudioLibrary.MediaFoundation
         /// <summary>
         /// Disposes this Media Foundation transform
         /// </summary>
-        protected virtual void Dispose(bool disposing)
+        protected unsafe virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -364,8 +362,8 @@ namespace MP.AudioLibrary.MediaFoundation
                     ComMarshalling.ReleaseInteropObject(tempsample2);
                     tempsample2 = null;
                 }
-                while (tbf2 != IntPtr.Zero && Marshal.Release(tbf2) > 0) { }
-                tbf2 = IntPtr.Zero;
+                while (buffer.ToNative() is not null && (buffer.Release() > 0)) { }
+                // while (tbf2 != IntPtr.Zero && Marshal.Release(tbf2) > 0) { }
                 // Now release and the underlying audio provider too...
                 provider?.Dispose();
                 provider = null;

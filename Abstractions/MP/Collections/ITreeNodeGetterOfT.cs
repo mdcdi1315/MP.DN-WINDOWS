@@ -2,8 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using MP.Annotations.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MP.Collections
 {
@@ -21,6 +21,7 @@ namespace MP.Collections
         /// Gets the parent node getter of this node getter accessor. <br />
         /// This should return the object as a <see cref="ITreeNodeGetterAccessor"/> instance for further inspection.
         /// </summary>
+        [MaybeNull]
         public ITreeNodeGetterAccessor Parent { get; }
 
         /// <summary>
@@ -36,9 +37,40 @@ namespace MP.Collections
     public interface ITreeNodeGetter<T> : ITreeNodeGetterAccessor
         where T : ITreeNodeGetter<T>
     {
+        private sealed class WrappedEnumerable
+            : IEnumerable<ITreeNodeGetterAccessor>
+        {
+            private readonly IEnumerable<T> original;
+
+            public WrappedEnumerable(IEnumerable<T> original) => this.original = original;
+
+            private sealed class WrappedEnumerator
+                : IEnumerator<ITreeNodeGetterAccessor>
+            {
+                private readonly IEnumerator<T> original;
+
+                public WrappedEnumerator(IEnumerator<T> original) => this.original = original;
+
+                public ITreeNodeGetterAccessor Current => original.Current;
+
+                object IEnumerator.Current => Current;
+
+                public void Dispose() => original.Dispose();
+
+                public bool MoveNext() => original.MoveNext();
+
+                public void Reset() => original.Reset();
+            }
+
+            public IEnumerator<ITreeNodeGetterAccessor> GetEnumerator() => new WrappedEnumerator(original.GetEnumerator());
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
         /// <summary>
         /// Gets the parent node getter of this node getter.
         /// </summary>
+        [MaybeNull]
         public new T Parent { get; }
 
         /// <summary>
@@ -48,6 +80,10 @@ namespace MP.Collections
             [return: MaybeReturnEmptyCollectionButNeverNull]
             get; 
         }
+
+        ITreeNodeGetterAccessor ITreeNodeGetterAccessor.Parent => Parent;
+
+        IEnumerable<ITreeNodeGetterAccessor> ITreeNodeGetterAccessor.Children => new WrappedEnumerable(Children);
     }
 
     /// <summary>
@@ -94,15 +130,39 @@ namespace MP.Collections
             where T : ITreeNodeGetter<T>
         {
             yield return getter;
-            if (getter.IsRoot) {
-                yield break;
-            } else {
-                var p = getter.Parent;
-                while (!getter.IsRoot)
-                {
-                    yield return p;
-                    p = p.Parent;
-                }
+            var p = getter.Parent;
+            while (!p.IsRoot)
+            {
+                yield return p;
+                p = p.Parent;
+            }
+        }
+
+        /// <summary>Gets all the ancestor nodes.</summary>
+        /// <returns>A collection containing all the ancestor nodes of this node.</returns>
+        public static IEnumerable<T> GetAncestors<T>(this T getter)
+            where T : ITreeNodeGetter<T>
+        {
+            var p = getter.Parent;
+            while (!p.IsRoot)
+            {
+                yield return p;
+                p = p.Parent;
+            }
+        }
+
+        /// <summary>
+        /// Finds all the ancestor nodes that pass the specified predicate.
+        /// </summary>
+        /// <param name="getter"></param>
+        /// <param name="predicate">The predicate to match against.</param>
+        /// <returns>A collection of all the ancestor nodes that match on the predicate specified.</returns>
+        public static IEnumerable<T> FindAncestorNodes<T>(this T getter, Predicate<T> predicate)
+            where T : ITreeNodeGetter<T>
+        {
+            ArgumentNullException.ThrowIfNull(predicate);
+            foreach (T ancestor in GetAncestors(getter)) {
+                if (predicate(ancestor)) { yield return ancestor; }
             }
         }
 

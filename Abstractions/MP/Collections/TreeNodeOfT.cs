@@ -50,9 +50,7 @@ namespace MP.Collections
         /// <summary>
         /// Gets the child tree nodes of this tree node.
         /// </summary>
-        public IEnumerable<TreeNode<T>> Children => children ?? new List<TreeNode<T>>();
-
-        ITreeNodeGetterAccessor ITreeNodeGetterAccessor.Parent => Parent;
+        public IEnumerable<TreeNode<T>> Children => (IEnumerable<TreeNode<T>>)children ?? new EmptyEnumerable<TreeNode<T>>();
 
         IEnumerable<ITreeNodeGetterAccessor> ITreeNodeGetterAccessor.Children => Children;
 

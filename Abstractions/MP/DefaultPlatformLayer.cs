@@ -1,8 +1,8 @@
 
 using System;
 using System.Collections;
-using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MP
 {
@@ -21,26 +21,29 @@ namespace MP
 
         private sealed class InteropServicesMemoryFactory : MemoryHandleFactory
         {
-            private sealed unsafe class DefaultMemoryHandle : SafeBaseMemoryHandle
+            [return: NotNull]
+            public unsafe void* CreateRaw(ulong size)
             {
-                private ulong size;
-
-                public DefaultMemoryHandle(System.UIntPtr size)
-                {
-                    this.size = size;
-                    handle = new(NativeMemory.Alloc(size));
-                }
-
-                public override int MemoryLength => size.ToInt32();
-
-                protected override bool ReleaseHandle()
-                {
-                    NativeMemory.Free(handle.ToPointer());
-                    return true;
+                try {
+                    return NativeMemory.Alloc(new System.UIntPtr(size));
+                } catch (OutOfMemoryException e) {
+                    throw new InsufficientMemoryException(e.Message);
                 }
             }
 
-            public IMemoryHandle CreateMemoryHandle(ulong size) => new DefaultMemoryHandle(new(size));
+            [return: NotNull]
+            public unsafe void* CreateRawAligned(ulong size, uint align)
+            {
+                try {
+                    return NativeMemory.AlignedAlloc(new System.UIntPtr(size), align);
+                } catch (OutOfMemoryException e) {
+                    throw new InsufficientMemoryException(e.Message);
+                }
+            }
+
+            public unsafe void FreeRaw([MaybeNull] void* ptr) => NativeMemory.Free(ptr);
+
+            public unsafe void FreeRawAligned([MaybeNull] void* ptr) => NativeMemory.AlignedFree(ptr);
 
             public IAttributeable GetStatistics() => null;
         }

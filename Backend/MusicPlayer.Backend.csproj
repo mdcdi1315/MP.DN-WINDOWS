@@ -53,6 +53,7 @@
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAsyncCallback.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAsyncCallbackExtensions.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFAsyncResult.cs" />
+	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFMediaBufferNative.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSampleExtensions.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFSourceReaderExtensions.cs" />
 	  <Compile Include="MP\AudioLibrary\MediaFoundation\IMFTransformAttributes.cs" />

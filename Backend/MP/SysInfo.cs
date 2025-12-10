@@ -13,14 +13,25 @@ namespace MP
             public IMemoryHandle CreateMemoryHandle(ulong size) => (hp ??= MemoryHeap.Create()).Allocate(size);
 
             [return: MaybeNull]
-            public IAttributeable GetStatistics()
+            public IAttributeable GetStatistics() => throw new NotImplementedException();
+
+            public void Dispose() => hp?.Dispose();
+
+            [return: NotNull]
+            public unsafe void* CreateRaw(ulong size)
             {
-                throw new System.NotImplementedException();
+                void* p = Interop.Kernel32.HeapAlloc((hp ??= MemoryHeap.Create()).Handle, Interop.Kernel32.HeapAllocFlags.None, size);
+                if (p is null) {
+                    throw new InsufficientMemoryException($"Failed to allocate a memory block. \nDetails: {Interop.Kernel32.GetMessage(Interop.Kernel32.GetLastError())}");
+                }
+                return p;
             }
 
-            public void Dispose()
+            public unsafe void FreeRaw([MaybeNull] void* ptr)
             {
-                hp?.Dispose();
+                if (ptr is not null) {
+                    Interop.Kernel32.HeapFree((hp ??= MemoryHeap.Create()).Handle, Interop.Kernel32.HeapFreeFlags.None, ptr);
+                }
             }
         }
 

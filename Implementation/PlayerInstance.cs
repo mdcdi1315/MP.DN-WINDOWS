@@ -4,6 +4,7 @@ using MP.ExtSystemApi;
 using MP.ExtensibilitySystem;
 using MP.AudioLibrary.MMDevice;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace MP
 {
@@ -486,30 +487,35 @@ namespace MP
 
         protected override void DestroyInstance()
         {
-            if (flags.HasFlag(PlayerInstanceFlags.Disposed)) { return; }
-            flags |= PlayerInstanceFlags.Disposed;
-            if (outdev is not null)
-            {
-                if (flags.HasFlag(PlayerInstanceFlags.RepeatRoutineRegistered))
+            Monitor.Enter(this);
+            try {
+                if (flags.HasFlag(PlayerInstanceFlags.Disposed)) { return; }
+                if (outdev is not null)
                 {
-                    outdev.PlaybackStopped -= RepeatRoutine;
+                    if (flags.HasFlag(PlayerInstanceFlags.RepeatRoutineRegistered))
+                    {
+                        outdev.PlaybackStopped -= RepeatRoutine;
+                    }
+                    outdev.PlaybackStopped -= g_method31;
+                    if (outdev.State >= PlaybackState.Playing) { outdev.Stop(); }
+                    // The player must ensure that the MDU thread will be disposed of
+                    flags &= ~PlayerInstanceFlags.RunMDUThread;
+                    outdev.Dispose();
+                    outdev = null;
                 }
-                outdev.PlaybackStopped -= g_method31;
-                if (outdev.State >= PlaybackState.Playing) { outdev.Stop(); }
-                // The player must ensure that the MDU thread will be disposed of
-                flags &= ~PlayerInstanceFlags.RunMDUThread;
-                outdev.Dispose();
-                outdev = null;
+                // This if statement is managed by 'outdev' but you never know... 
+                if (codec is not null)
+                {
+                    codec.AudioStream?.Dispose();
+                    codec.AudioStream = null;
+                    codec = null;
+                }
+                temp.Stream.Dispose();
+                temp.Stream = null;
+                flags |= PlayerInstanceFlags.Disposed;
+            } finally {
+                Monitor.Exit(this);
             }
-            // This if statement is managed by 'outdev' but you never know... 
-            if (codec is not null)
-            {
-                codec.AudioStream?.Dispose();
-                codec.AudioStream = null;
-                codec = null;
-            }
-            temp.Stream.Dispose();
-            temp.Stream = null;
         }
     }
 

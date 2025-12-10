@@ -19,6 +19,7 @@ namespace MP.Graphics
         IEquatable<FloatColor>,
         IEquatable<RGBAColor>,
         IEquatable<ARGBColor>,
+        IEquatable<IColor16>,
         IEquatable<IColor>,
         ICloneable
     {
@@ -76,6 +77,22 @@ namespace MP.Graphics
             green = color.G / 255f;
             blue = color.B / 255f;
             alpha = color.A / 255f;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="FloatColor"/> structure from an existing <see cref="IColor16"/> instance. <br />
+        /// The byte values contained by the <see cref="IColor"/> instance are appropriately transformed to floating-point values during construction time.
+        /// </summary>
+        /// <param name="color_16">The <see cref="IColor16"/> instance to create a new floating-point color from.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="color_16"/> was <see langword="null"/>.</exception>
+        [Throws(typeof(ArgumentNullException))]
+        public FloatColor(IColor16 color_16)
+        {
+            ArgumentNullException.ThrowIfNull(color_16);
+            red = color_16.R / 65535f;
+            green = color_16.G / 65535f;
+            blue = color_16.B / 65535f;
+            alpha = color_16.A / 65535f;
         }
 
         /// <summary>
@@ -152,6 +169,17 @@ namespace MP.Graphics
             other.A / 255f == alpha;
 
         /// <summary>
+        /// Gets a value whether this <see cref="FloatColor"/> instance has the same color intensities as the passed <see cref="IColor16"/> instance.
+        /// </summary>
+        /// <param name="other">The other instance to compare this instance against.</param>
+        /// <returns>A value whether the current and the <paramref name="other"/> instances are considered equal.</returns>
+        public readonly bool Equals(IColor16 other) =>
+            other.R / 65535f == red &&
+            other.G / 65535f == green &&
+            other.B / 65535f == blue &&
+            other.A / 65535f == alpha;
+
+        /// <summary>
         /// Gets a value whether this <see cref="FloatColor"/> instance and an object are equal instances.
         /// </summary>
         /// <param name="obj">The other object instance to compare this instance against.</param>
@@ -162,6 +190,7 @@ namespace MP.Graphics
             RGBAColor rgba => Equals(rgba),
             ARGBColor argb => Equals(argb),
             IColor color => Equals(color),
+            IColor16 color => Equals(color),
             _ => false,
         };
 

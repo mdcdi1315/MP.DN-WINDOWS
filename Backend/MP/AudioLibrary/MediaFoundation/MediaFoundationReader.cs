@@ -251,7 +251,7 @@ namespace MP.AudioLibrary.MediaFoundation
 
             HRESULT hr = default;
             IMFSample pSample = null;
-            IMFMediaBuffer pBuffer = null;
+            IMFMediaBufferNative pBuffer;
             while (bytesWritten < count)
             {
                 hr = reader.ReadSample(MF_SOURCE_READER_STREAM_SELECTION.FIRST_AUDIO_STREAM, 0,
@@ -284,8 +284,8 @@ namespace MP.AudioLibrary.MediaFoundation
                 EnsureBuffer(decoderoutputcount = bufsize.ToInt32());
                 Unsafe.CopyBlockUnaligned(ref decoderoutputbuffer[0], ref pd[0], bufsize);
                 pBuffer.Unlock();
-                
-                ComMarshalling.ReleaseInteropObject(pBuffer);
+
+                while (pBuffer.Release() > 0) ;
                 ComMarshalling.ReleaseInteropObject(pSample);
 
                 bytesWritten += ReadFromDecoderBuffer(buffer, offset + bytesWritten, count - bytesWritten);

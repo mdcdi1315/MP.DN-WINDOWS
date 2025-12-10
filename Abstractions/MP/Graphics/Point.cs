@@ -14,7 +14,9 @@ namespace MP.Graphics
         IAdditionOperators<Point , Point , Point>,
         ISubtractionOperators<Point , Point , Point>,
         IUnaryNegationOperators<Point , Point>,
-        ICloneable, IEquatable<Point>
+        IEquatable<Point>,
+        IEquatable<PointF>,
+        ICloneable
     {
         /// <summary>The X-coordinate of the point.</summary>
         [FieldOffset(0)]
@@ -131,10 +133,18 @@ namespace MP.Graphics
         /// <returns>A value representing the equality of both structures.</returns>
         public readonly bool Equals(Point other) => X == other.X && Y == other.Y;
 
+        /// <summary>
+        /// Gets a value whether the current <see cref="Point"/> instance and the specified <see cref="PointF"/> instance are equal.
+        /// </summary>
+        /// <param name="other">The other <see cref="PointF"/> instance to compare this structure against.</param>
+        /// <returns>A value representing the equality of both structures.</returns>
+        public readonly bool Equals(PointF other) => X == other.X && Y == other.Y;
+
         /// <inheritdoc />
         public readonly override bool Equals(System.Object obj) => obj switch
         {
             Point p => Equals(p),
+            PointF pf => Equals(pf),
             _ => false,
         };
 
