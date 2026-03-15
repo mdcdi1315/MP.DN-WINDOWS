@@ -1,0 +1,49 @@
+﻿{
+	"name": "IPersistSerializedPropStorage",
+	"namespace": "MP.NativeInterop.Windows.COM",
+	"iid": "E318AD57-0AA0-450F-ACA5-6FAB7103D917",
+	"imports": [
+		"MP.NativeInterop.Windows.HRESULT",
+		"MP.NativeInterop.Windows.COM.PERSIST_SPROPSTORE_FLAGS"
+	],
+	"methods": [
+		{
+			"name": "SetFlags",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "flags",
+					"type": "PERSIST_SPROPSTORE_FLAGS"
+				}
+			]
+		},
+		{
+			"name": "SetPropertyStorage",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "pdata",
+					"type": "System.Byte*"
+				},
+				{
+					"name": "sdata",
+					"type": "System.UInt32"
+				}
+			]
+		},
+		{
+			"name": "GetPropertyStorage",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "pdata",
+					"type": "System.Byte**"
+				},
+				{
+					"name": "sdata",
+					"type": "System.UInt32*"
+				}
+			]
+		}
+	]
+}

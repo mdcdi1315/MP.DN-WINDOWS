@@ -1,0 +1,70 @@
+﻿{
+	"name": "IDWriteLocalFontFileLoader",
+	"namespace": "MP.Graphics.Text.DWrite",
+	"base_type": "MP.Graphics.Text.DWrite.IDWriteFontFileLoader",
+	"iid": "b2d9f3ec-c9fe-4a11-a2ec-d86208f7c0a2",
+	"imports": [
+		"MP.NativeInterop.Windows.HRESULT",
+		"MP.NativeInterop.Windows.FILETIME"
+	],
+	"methods": [
+		{
+			"name": "GetFilePathLengthFromKey",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "fontFileReferenceKey",
+					"type": "void*"
+				},
+				{
+					"name": "fontFileReferenceKeySize",
+					"type": "uint"
+				},
+				{
+					"name": "filePathLength",
+					"type": "uint*"
+				}
+			]
+		},
+		{
+			"name": "GetFilePathFromKey",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "fontFileReferenceKey",
+					"type": "void*"
+				},
+				{
+					"name": "fontFileReferenceKeySize",
+					"type": "uint"
+				},
+				{
+					"name": "filePath",
+					"type": "char*"
+				},
+				{
+					"name": "filePathSize",
+					"type": "uint"
+				}
+			]
+		},
+		{
+			"name": "GetLastWriteTimeFromKey",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "fontFileReferenceKey",
+					"type": "void*"
+				},
+				{
+					"name": "fontFileReferenceKeySize",
+					"type": "uint"
+				},
+				{
+					"name": "lastWriteTime",
+					"type": "FILETIME*"
+				}
+			]
+		}
+	]
+}

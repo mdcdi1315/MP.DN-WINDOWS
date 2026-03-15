@@ -1,0 +1,36 @@
+﻿{
+	"name": "IDWriteRenderingParams",
+	"namespace": "MP.Graphics.Text.DWrite",
+	"iid": "2f0da53a-2add-47cd-82ee-d9ec34688e75",
+	"imports": [
+		"MP.Graphics.Text.DWrite.DWRITE_PIXEL_GEOMETRY",
+		"MP.Graphics.Text.DWrite.DWRITE_RENDERING_MODE"
+	],
+	"methods": [
+		{
+			"name": "GetGamma",
+			"return_type": "float",
+			"arguments": []
+		},
+		{
+			"name": "GetEnhancedContrast",
+			"return_type": "float",
+			"arguments": []
+		},
+		{
+			"name": "GetClearTypeLevel",
+			"return_type": "float",
+			"arguments": []
+		},
+		{
+			"name": "GetPixelGeometry",
+			"return_type": "DWRITE_PIXEL_GEOMETRY",
+			"arguments": []
+		},
+		{
+			"name": "GetRenderingMode",
+			"return_type": "DWRITE_RENDERING_MODE",
+			"arguments": []
+		}
+	]
+}

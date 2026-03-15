@@ -1,0 +1,62 @@
+﻿{
+	"name": "IDWriteFontFileStream",
+	"namespace": "MP.Graphics.Text.DWrite",
+	"iid": "6d4865fe-0ab8-4d91-8f62-5dd6be34a3e0",
+	"imports": [
+		"MP.NativeInterop.Windows.HRESULT"
+	],
+	"methods": [
+		{
+			"name": "ReadFileFragment",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "fragmentStart",
+					"type": "void**"
+				},
+				{
+					"name": "fileOffset",
+					"type": "ulong"
+				},
+				{
+					"name": "fragmentSize",
+					"type": "ulong"
+				},
+				{
+					"name": "fragmentContext",
+					"type": "void**"
+				}
+			]
+		},
+		{
+			"name": "ReleaseFileFragment",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "fragmentContext",
+					"type": "void*"
+				}
+			]
+		},
+		{
+			"name": "GetFileSize",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "fileSize",
+					"type": "ulong*"
+				}
+			]
+		},
+		{
+			"name": "GetLastWriteTime",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "lastWriteTime",
+					"type": "ulong*"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,69 @@
+﻿{
+  "name": "IPropertyStore",
+  "namespace": "MP.NativeInterop.Windows.COM",
+  "iid": "886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99",
+  "imports": [
+    "MP.NativeInterop.Windows.HRESULT",
+    "MP.NativeInterop.Windows.PROPVARIANT",
+    "MP.NativeInterop.Windows.PROPERTYKEY"
+  ],
+  "methods": [
+    {
+      "name": "GetCount",
+      "return_type": "HRESULT",
+      "arguments": [
+        {
+          "name": "ppropcount",
+          "type": "System.UInt32*"
+        }
+      ]
+    },
+    {
+      "name": "GetAt",
+      "return_type": "HRESULT",
+      "arguments": [
+        {
+          "name": "property",
+          "type": "System.UInt32"
+        },
+        {
+          "name": "poutkey",
+          "type": "PROPERTYKEY*"
+        }
+      ]
+    },
+    {
+      "name": "GetValue",
+      "return_type": "HRESULT",
+      "arguments": [
+        {
+          "name": "pkey",
+          "type": "PROPERTYKEY*"
+        },
+        {
+          "name": "value",
+          "type": "PROPVARIANT*"
+        }
+      ]
+    },
+    {
+      "name": "SetValue",
+      "return_type": "HRESULT",
+      "arguments": [
+        {
+          "name": "pkey",
+          "type": "PROPERTYKEY*"
+        },
+        {
+          "name": "value",
+          "type": "PROPVARIANT*"
+        }
+      ]
+    },
+    {
+      "name": "Commit",
+      "return_type": "HRESULT",
+      "arguments": []
+    }
+  ]
+}

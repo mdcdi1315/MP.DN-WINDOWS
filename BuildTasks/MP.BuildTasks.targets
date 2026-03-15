@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<MPBuildTasksAssemblyPath>$(MSBuildThisFileDirectory)MP_BUILDTASKS\MP.BuildTasks.dll</MPBuildTasksAssemblyPath>
+		<MP_OutputResFilePath></MP_OutputResFilePath>
+		<MP_OutputFileType>DotNetBinary</MP_OutputFileType>
+		<MP_BaseFileReferenceLoadingPath Condition="'$(MP_BaseFileReferenceLoadingPath)' == ''">$(MSBuildThisFileDirectory)../</MP_BaseFileReferenceLoadingPath>	
+	</PropertyGroup>
+	
+	<UsingTask AssemblyFile="$(MPBuildTasksAssemblyPath)" TaskName="MusicPlayer.BuildTasks.DntResExtResourcesGenerator" />
+
+	<ItemDefinitionGroup>
+		<MP_InputResourceFile>
+			<BaseResourceLoadingPath />
+		</MP_InputResourceFile>
+		<MP_InputFileReference>
+			<Name></Name>
+			<SaveType></SaveType>
+			<StringEncoding></StringEncoding>
+			<Comment></Comment>
+		</MP_InputFileReference>
+	</ItemDefinitionGroup>
+	
+	<Target Name="MP_ResourceGeneration" Condition="'$(IsDesignTimeBuild)' != 'true'">
+		<Message Importance="normal" Text="Running Resource Generator." />
+		<DntResExtResourcesGenerator 
+			InputFiles="@(MP_InputResourceFile)"
+			AdditionalFilesToEmbed="@(MP_InputFileReference)"
+			OutputFilePath="$(MP_OutputResFilePath)"
+			OutputFileType="$(MP_OutputFileType)"
+			FileReferencesLoadingPath="$(MP_BaseFileReferenceLoadingPath)"
+			/>
+		<Message Importance="normal" Text="Resource Generator ended." />
+	</Target>
+
+</Project>

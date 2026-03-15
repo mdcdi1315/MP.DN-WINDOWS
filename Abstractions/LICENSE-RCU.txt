@@ -1,0 +1,31 @@
+
+RCU Engine components specific license
+
+Copyright (©) 2025-2026 mdcdi1315
+
+The RCU Engine is provided by mdcdi1315 for the "Music Player On .NET" project and cannot be used outside of it.
+
+That is, the RCU Engine cannot be used as-is on any other project NOT AUTHORED by mdcdi1315,
+cannot be publicly distributed as a standalone component by third parties, cannot be sublicensed, 
+cannot be modified, and cannot be used for any other purpose except for:
+
+1) The modified code is a fork of the official code and is EXPLICITLY STATED THAT IS A FORK OF.
+
+2) The modified code is code going to be merged to the public repository where the RCU Engine code is into.
+
+3) If it is re-branded and it is NOT CONNECTED BY ANY MEANS to mdcdi1315.
+
+4) If the official library containing the Engine is consumed in a third party project. In this case the app containing the library must EXPLICITLY AND CLEARLY MENTION that it uses the mdcdi1315's RCU Engine.
+
+5) If mdcdi1315 is aware of and has permitted to violate some or all of the above limitations. Contact mdcdi1315 for more information.
+
+Additionally, if no (additional) exceptions apply, this license file MUST be existing into the code repository where the RCU Engine code is into.
+
+Moreover, mdcdi1315 has the ability at any time to add or remove exceptions and/or limitations at his own discretion without any prior notice of any kind.
+
+THE RCU ENGINE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+IN CONNECTION WITH THE ENGINE OR THE USE OR OTHER DEALINGS IN THE ENGINE'S SOFTWARE.

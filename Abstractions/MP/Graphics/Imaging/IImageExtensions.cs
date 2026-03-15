@@ -1,0 +1,654 @@
+﻿
+using MP.IO;
+using System;
+using MP.Annotations;
+using MP.NativeInterop;
+using System.Runtime.CompilerServices;
+
+namespace MP.Graphics.Imaging
+{
+    /// <summary>
+    /// Defines extension methods for the <see cref="IImage"/> interface.
+    /// </summary>
+    public static unsafe class IImageExtensions
+    {
+        /// <summary>
+        /// Gets the size of a single pixel , when the image has the format specified by the <paramref name="format"/> parameter.
+        /// </summary>
+        /// <param name="format">The image pixel format to query.</param>
+        /// <returns>The size, in bytes, of a single pixel.</returns>
+        /// <exception cref="ArgumentException">The specified format is out of range of valid values.</exception>
+        public static System.Byte GetByteSize(this ImagePixelFormat format) => format switch {
+            ImagePixelFormat.R => 1,
+            ImagePixelFormat.RG => 2,
+            ImagePixelFormat.RGB => 3,
+            ImagePixelFormat.RGBA or
+            ImagePixelFormat.ARGB or 
+            ImagePixelFormat.BGRA => 4,
+            _ => throw new ArgumentException($"The value given is invalid: {format}"),
+        };
+
+        /// <summary>
+        /// Gets the size in bytes of the <see cref="IImage.NativePointer"/> property.
+        /// </summary>
+        /// <param name="image">The image interface to test.</param>
+        /// <returns>The size, in bytes , of the <see cref="IImage.NativePointer"/> property pointer.</returns>
+        public static System.Int64 GetMemoryByteLength(this IImage image)
+                => GetTotalPixels(image) * GetByteSize(image.PixelFormat);
+
+        /// <summary>Gets the number, of pixels, that this image object contains.</summary>
+        /// <param name="image">The image to inspect.</param>
+        /// <returns>The total pixels contained into this image object.</returns>
+        public static System.Int64 GetTotalPixels(this IImage image) => Math.Abs((long)image.Size.Width) * Math.Abs((long)image.Size.Height);
+
+        /// <summary>
+        /// From the given image , it takes the image pixels and flips them vertically. <br />
+        /// It can be also called on an already flipped vertically image to get the original representation of it.
+        /// </summary>
+        /// <param name="source">The image to flip it's bytes vertically.</param>
+        /// <returns>A new instance of the <see cref="IImage"/> interface that has it's pixels flipped vertically.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        [RequiresNativeLayer]
+        public static IImage FlipVertically(this IImage source)
+        {
+            if (source is null) { throw new ArgumentNullException(nameof(source)); }
+            DefaultImage ret = DefaultImage.CreateCopy(source);
+			/*
+			    The original code for this is located at stb_image.h file in https://github.com/nothings/stb
+			
+			    Copyright (c) 2017 Sean Barrett
+
+			    Permission is hereby granted, free of charge, to any person obtaining a copy of
+			    this software and associated documentation files (the "Software"), to deal in
+			    the Software without restriction, including without limitation the rights to
+			    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+			    of the Software, and to permit persons to whom the Software is furnished to do
+			    so, subject to the following conditions:
+
+			    The above copyright notice and this permission notice shall be included in all
+			    copies or substantial portions of the Software.
+
+			    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+			    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+			    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+			    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+			    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+			    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+			    SOFTWARE.
+			*/
+            System.Int32 row,
+                height = source.Size.Height, 
+                height_by_two = height >> 1,
+                bytes_per_row = source.Size.Width * source.PixelFormat.GetByteSize();
+            // mdcdi1315: Negate the flipping in the destination image. 
+            // If not flipped before, it will be flipped; otherwise it is unflipped.
+            ret.IsFlippedVertically = ! source.IsFlippedVertically;
+            System.Byte* bytes = ret.NativePointer;
+            IMemoryHandle temp = null;
+            try {
+                temp = SystemInfo.CreateNativeMemory(2048UL);
+                for (row = 0; row < height_by_two; row++)
+                {
+                    System.Byte* row0 = bytes + (row * bytes_per_row);
+                    System.Byte* row1 = bytes + ((height - row - 1) * bytes_per_row);
+                    System.Int32 bytes_left = bytes_per_row;
+                    while (bytes_left > 0)
+                    {
+                        System.UInt32 bytes_copy = (bytes_left < 2048) ? bytes_left.ToUInt32() : 2048U;
+                        Unsafe.CopyBlockUnaligned(temp.MemoryPointer, row0, bytes_copy);
+                        Unsafe.CopyBlockUnaligned(row0, row1, bytes_copy);
+                        Unsafe.CopyBlockUnaligned(row1, temp.MemoryPointer, bytes_copy);
+                        row0 += bytes_copy;
+                        row1 += bytes_copy;
+                        bytes_left -= bytes_copy.ToInt32();
+                    }
+                }
+            } finally {
+                temp?.Dispose();
+            }
+            return ret;
+        }
+
+        private static void RToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source++, destination += 4)
+            {
+                destination[0] = *source;
+                destination[1] = 0;
+                destination[2] = 0;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
+            {
+                destination[0] = *source;
+                destination[1] = source[1];
+                destination[2] = 0;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGBToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
+            {
+                destination[0] = *source;
+                destination[1] = source[1];
+                destination[2] = source[2];
+                destination[3] = 255;
+            }
+        }
+
+        private static void ARGBToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[1];
+                destination[1] = source[2];
+                destination[2] = source[3];
+                destination[3] = *source;
+            }
+        }
+
+        private static void BGRAToRGBA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[2]; 
+                destination[1] = source[1]; 
+                destination[2] = *source;
+                destination[3] = source[3];
+            }
+        }
+
+        /// <summary>
+        /// From the given image , it returns the same image that returns it's pixels packed as the RGBA format.
+        /// </summary>
+        /// <param name="source">The image to translate.</param>
+        /// <returns>A new independent image object that represents the translated image as RGBA.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        public static IImage TranslateToRGBA(this IImage source)
+        {
+            if (source is null) { throw new ArgumentNullException(nameof(source)); }
+            // Specify the transformed image, preparing it for accomondating the data.
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size , source.IsFlippedVertically , ImagePixelFormat.RGBA);
+            System.Byte* cpy = source.NativePointer;
+            System.Byte* outimg = ret.NativePointer;
+            // Specify source image run length.
+            // Will be used by the copy loops to determine how many times they should run.
+            long runlength = GetTotalPixels(source); 
+            switch (source.PixelFormat)
+            {
+                case ImagePixelFormat.R:
+                    RToRGBA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RG:
+                    RGToRGBA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RGB:
+                    RGBToRGBA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.ARGB:
+                    ARGBToRGBA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.BGRA:
+                    BGRAToRGBA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RGBA:
+                    // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
+                    Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
+                    break;
+            }
+            return ret;
+        }
+
+        private static void RToARGB(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++ , source++ , destination += 4)
+            {
+                destination[0] = 255;
+                destination[1] = *source;
+                destination[2] = 0;
+                destination[3] = 0;
+            }
+        }
+
+        private static void RGToARGB(System.Byte* source , System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
+            {
+                destination[0] = 255;
+                destination[1] = *source;
+                destination[2] = source[1];
+                destination[3] = 0;
+            }
+        }
+
+        private static void RGBToARGB(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
+            {
+                destination[0] = 255;
+                destination[1] = *source;
+                destination[2] = source[1];
+                destination[3] = source[2];
+            }
+        }
+
+        private static void RGBAToARGB(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[3];
+                destination[1] = *source;
+                destination[2] = source[1];
+                destination[3] = source[2];
+            }
+        }
+
+        private static void BGRAToARGB(System.Byte* source,  System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[3];
+                destination[1] = source[2]; 
+                destination[2] = source[1];
+                destination[3] = *source;    
+            }
+        }
+
+        /// <summary>
+        /// From the given image , it returns the same image that returns it's pixels packed as the ARGB format.
+        /// </summary>
+        /// <param name="source">The image to translate.</param>
+        /// <returns>A new independent image object that represents the translated image as ARGB.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        public static IImage TranslateToARGB(this IImage source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            // Specify the transformed image, preparing it for accomondating the data.
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size, source.IsFlippedVertically, ImagePixelFormat.ARGB);
+            System.Byte* cpy = source.NativePointer;
+            System.Byte* outimg = ret.NativePointer;
+            // Specify source image run length.
+            // Will be used by the copy loops to determine how many times they should run.
+            System.Int64 runlength = GetTotalPixels(source);
+            switch (source.PixelFormat)
+            {
+                case ImagePixelFormat.R:
+                    RToARGB(cpy , outimg , runlength);
+                    break;
+                case ImagePixelFormat.RG:
+                    RGToARGB(cpy , outimg , runlength);
+                    break;
+                case ImagePixelFormat.RGB:
+                    RGBToARGB(cpy , outimg , runlength);
+                    break;
+                case ImagePixelFormat.RGBA:
+                    RGBAToARGB(cpy , outimg , runlength);
+                    break;
+                case ImagePixelFormat.BGRA:
+                    BGRAToARGB(cpy , outimg , runlength);
+                    break;
+                case ImagePixelFormat.ARGB:
+                    // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
+                    Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
+                    break;
+            }
+            return ret;
+        }
+
+        private static void RToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source++, destination += 4)
+            {
+                destination[0] = 0;
+                destination[1] = 0;
+                destination[2] = *source;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
+            {
+                destination[0] = 0;
+                destination[1] = source[1];
+                destination[2] = *source;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGBToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
+            {
+                destination[0] = source[2];
+                destination[1] = source[1];
+                destination[2] = *source;
+                destination[3] = 255;
+            }
+        }
+
+        private static void RGBAToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[2];
+                destination[1] = source[1];
+                destination[2] = *source;
+                destination[3] = source[3];
+            }
+        }
+
+        private static void ARGBToBGRA(System.Byte* source, System.Byte* destination, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 4, destination += 4)
+            {
+                destination[0] = source[3];
+                destination[1] = source[2];
+                destination[2] = source[1];
+                destination[3] = *source;
+            }
+        }
+
+        /// <summary>
+        /// From the given image , it returns the same image that returns it's pixels packed as the BGRA format.
+        /// </summary>
+        /// <param name="source">The image to translate.</param>
+        /// <returns>A new independent image object that represents the translated image as BGRA.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        public static IImage TranslateToBGRA(this IImage source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            // Specify the transformed image, preparing it for accomondating the data.
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size, source.IsFlippedVertically, ImagePixelFormat.ARGB);
+            System.Byte* cpy = source.NativePointer;
+            System.Byte* outimg = ret.NativePointer;
+            // Specify source image run length.
+            // Will be used by the copy loops to determine how many times they should run.
+            System.Int64 runlength = GetTotalPixels(source);
+            switch (source.PixelFormat)
+            {
+                case ImagePixelFormat.R:
+                    RToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RG:
+                    RGToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RGB:
+                    RGBToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.RGBA:
+                    RGBAToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.ARGB:
+                    ARGBToBGRA(cpy, outimg, runlength);
+                    break;
+                case ImagePixelFormat.BGRA:
+                    // We can just directly do CopyBlockUnaligned, which it will be much faster than the other alternatives
+                    Unsafe.CopyBlockUnaligned(outimg, cpy, (runlength * 4L).ToUInt32());
+                    break;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Copies the current image representation to a new independent image object.
+        /// </summary>
+        /// <param name="source">The image to copy data from.</param>
+        /// <returns>The cloned image.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        public static IImage Clone(this IImage source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            return DefaultImage.CreateCopy(source);
+        }
+
+        /// <summary>Gets the pixel specified at the current image object.</summary>
+        /// <param name="source">The source image to set the result to.</param>
+        /// <param name="x">The x coordinate inside the image to get the pixel.</param>
+        /// <param name="y">The y coordinate inside the image to get the pixel.</param>
+        /// <returns>The retrieved pixel , casted to a <see cref="IColor"/> instance.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> and/or <paramref name="y"/> had invalid ranges.</exception>
+        /// <exception cref="ArgumentException">The <paramref name="source"/>'s <see cref="IImage.PixelFormat"/> property had an invalid value.</exception>
+        public static IColor GetPixel(this IImage source, System.Int32 x, System.Int32 y)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            if (x < 0 || y < 0) { throw new ArgumentOutOfRangeException(nameof(source), "Both X and Y parameters must not be negative."); }
+            if (x >= source.Size.Width || y >= source.Size.Height) { throw new ArgumentOutOfRangeException(nameof(source), "Both X and Y parameters must be inside the image bounds."); }
+            System.Byte* pbase = source.NativePointer + ((y * source.Size.Width + x) * source.PixelFormat.GetByteSize());
+            return source.PixelFormat switch {
+                ImagePixelFormat.R => new RGBColor(*pbase, 0, 0),
+                ImagePixelFormat.RG => new RGBColor(pbase[0], pbase[1], 0),
+                ImagePixelFormat.RGB => new RGBColor(pbase[0], pbase[1], pbase[2]),
+                ImagePixelFormat.RGBA => new RGBAColor(pbase[0], pbase[1], pbase[2], pbase[3]),
+                ImagePixelFormat.ARGB => new ARGBColor(pbase[0], pbase[1], pbase[2], pbase[3]),
+                ImagePixelFormat.BGRA => new BGRAColor(pbase[0], pbase[1], pbase[2], pbase[3]),
+                _ => throw new ArgumentException($"Invalid pixel format {source.PixelFormat}.", nameof(source)),
+            };
+        }
+
+        /// <summary>Sets the specified pixel on the current image object.</summary>
+        /// <param name="source">The image object where to set the new pixel to.</param>
+        /// <param name="x">The x coordinate location inside the image to set the pixel.</param>
+        /// <param name="y">The y coordinate location inside the image to set the pixel.</param>
+        /// <param name="pixel">The new color of the specified pixel.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> was null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> and/or <paramref name="y"/> had invalid ranges.</exception>
+        public static void SetPixel(this IImage source, System.Int32 x, System.Int32 y, IColor pixel)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            if (x < 0 || y < 0) { throw new ArgumentOutOfRangeException("", "Both X and Y parameters must not be negative."); }
+            if (x >= source.Size.Width || y >= source.Size.Height) { throw new ArgumentOutOfRangeException("", "Both X and Y parameters must be inside the image bounds."); }
+            System.Byte* pbase = source.NativePointer + ((y * source.Size.Width + x) * source.PixelFormat.GetByteSize());
+            switch (source.PixelFormat)
+            {
+                case ImagePixelFormat.R:
+                    *pbase = pixel.R;
+                    break;
+                case ImagePixelFormat.RG:
+                    pbase[0] = pixel.R;
+                    pbase[1] = pixel.G;
+                    break;
+                case ImagePixelFormat.RGB:
+                    pbase[0] = pixel.R;
+                    pbase[1] = pixel.G;
+                    pbase[2] = pixel.B;
+                    break;
+                case ImagePixelFormat.RGBA:
+                    pbase[0] = pixel.R;
+                    pbase[1] = pixel.G;
+                    pbase[2] = pixel.B;
+                    pbase[3] = pixel.A;
+                    break;
+                case ImagePixelFormat.ARGB:
+                    pbase[0] = pixel.A;
+                    pbase[1] = pixel.R;
+                    pbase[2] = pixel.G;
+                    pbase[3] = pixel.B;
+                    break;
+                case ImagePixelFormat.BGRA:
+                    pbase[0] = pixel.B;
+                    pbase[1] = pixel.G;
+                    pbase[2] = pixel.R;
+                    pbase[3] = pixel.A;
+                    break;
+            }
+        }
+
+        private delegate IColor GetPixelsTranslationDelegate(System.Byte* pointer);
+
+        private static IColor NativePointerToRColorTranslation(System.Byte* pointer) => new RGBColor(*pointer, 0 , 0);
+
+        private static IColor NativePointerToRGColorTranslation(System.Byte* pointer) => new RGBColor(*pointer, pointer[1], 0);
+
+        private static IColor NativePointerToRGBColorTranslation(System.Byte* pointer) => new RGBColor(*pointer, pointer[1], pointer[2]);
+
+        private static IColor NativePointerToRGBAColorTranslation(System.Byte* pointer) => new RGBAColor(*pointer, pointer[1], pointer[2] , pointer[3]);
+
+        private static IColor NativePointerToARGBColorTranslation(System.Byte* pointer) => new ARGBColor(*pointer, pointer[1], pointer[2], pointer[3]);
+
+        private static IColor NativePointerToBGRAColorTranslation(System.Byte* pointer) => new BGRAColor(*pointer, pointer[1], pointer[2], pointer[3]);
+
+        private static GetPixelsTranslationDelegate GetPixelFormatTransformation(ImagePixelFormat pix_format) => pix_format switch {
+            ImagePixelFormat.R => new(NativePointerToRColorTranslation),
+            ImagePixelFormat.RG => new(NativePointerToRGColorTranslation),
+            ImagePixelFormat.RGB => new(NativePointerToRGBColorTranslation),
+            ImagePixelFormat.RGBA => new(NativePointerToRGBAColorTranslation),
+            ImagePixelFormat.ARGB => new(NativePointerToARGBColorTranslation),
+            ImagePixelFormat.BGRA => new(NativePointerToBGRAColorTranslation),
+            _ => null,
+        };
+
+        /// <summary>
+        /// Gets the entire pixel array as a <see cref="IColor"/> 2-dimensional array defining the literal image coordinates.
+        /// </summary>
+        /// <param name="source">The source image to retrieve the image data.</param>
+        /// <returns>The created image data.</returns>
+        public static IColor[,] GetPixels2DPlane(this IImage source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            System.Int32
+                bs = source.PixelFormat.GetByteSize(),
+                width = source.Size.Width,
+                height = source.Size.Height;
+            IColor[,] colors = new IColor[width, height];
+            GetPixelsTranslationDelegate translation = GetPixelFormatTransformation(source.PixelFormat);
+            for (System.Int32 Y = 0; Y < height; Y++)
+            {
+                for (System.Int32 X = 0; X < width; X++)
+                {
+                    colors[X, Y] = translation(source.NativePointer + ((Y * width + X) * bs));
+                }
+            }
+            return colors;
+        }
+
+        /// <summary>
+        /// Saves the current raw pixel representation of the image to an existing stream. <br />
+        /// Note that it does not write any other properties , such as the image size, just the image bytes themselves.
+        /// </summary>
+        /// <param name="source">The image to retrieve the pixels from.</param>
+        /// <param name="stream">The stream to write the raw data to.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="stream"/> was null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="stream"/> was not writeable.</exception>
+        public static void SaveRawToStream(this IImage source, IDataStreamAccess stream)
+        {
+            const System.Int32 buffersize = 4096;
+            if (stream is null) { throw new ArgumentNullException(nameof(stream)); }
+            if (stream.CanWrite == false) { throw new ArgumentException("Stream must be writeable.", nameof(stream)); }
+            System.Int64 length = source.GetMemoryByteLength();
+            System.Int64 ch = length / buffersize, rem = length % buffersize;
+            System.Byte[] temp = new System.Byte[buffersize];
+            System.Byte* srcp = source.NativePointer;
+            while (ch > 0)
+            {
+                fixed (System.Byte* dst = temp)
+                {
+                    Unsafe.CopyBlockUnaligned(dst, srcp, buffersize);
+                }
+                srcp += buffersize;
+                stream.Write(temp, 0, temp.Length);
+            }
+            if (rem > 0)
+            {
+                fixed (System.Byte* dst = temp)
+                {
+                    Unsafe.CopyBlockUnaligned(dst, srcp, rem.ToUInt32());
+                }
+                stream.Write(temp, 0, (int)rem);
+            }
+        }
+    
+        private static void AddAlphaChannel_RGB_ARGB(System.Byte* source, System.Byte* destination, System.Byte alpha, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 3, destination += 4)
+            {
+                destination[0] = alpha;
+                destination[1] = *source;
+                destination[2] = source[1];
+                destination[3] = source[2];
+            }
+        }
+
+        private static void AddAlphaChannel_RG_ARGB(System.Byte* source, System.Byte* destination, System.Byte alpha, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source += 2, destination += 4)
+            {
+                destination[0] = alpha;
+                destination[1] = *source;
+                destination[2] = source[1];
+                destination[3] = 0;
+            }
+        }
+
+        private static void AddAlphaChannel_R_ARGB(System.Byte* source, System.Byte* destination, System.Byte alpha, System.Int64 len)
+        {
+            for (System.Int64 I = 0; I < len; I++, source++, destination += 4)
+            {
+                destination[0] = alpha;
+                destination[1] = *source;
+                destination[2] = 0;
+                destination[3] = 0;
+            }
+        }
+
+        /// <summary>Adds an alpha channel to the specified image.</summary>
+        /// <param name="image">The image to read the pixels from.</param>
+        /// <param name="alpha_value">The alpha channel value to apply to all the pixels.</param>
+        /// <returns>A new <see cref="IImage"/> object that is the copy of the <paramref name="image"/>, but with the specified alpha value in all of it's pixels.</returns>
+        /// <exception cref="ArgumentException"><paramref name="image"/> does already have an alpha channel specified.</exception>
+        public static IImage AddAlphaChannel(this IImage image, System.Byte alpha_value)
+        {
+            if (image.PixelFormat > ImagePixelFormat.RGB) {
+                throw new ArgumentException("The specified image has already alpha channel values.");
+            } else {
+                DefaultImage ret = DefaultImage.CreateUninitialized(image.Size, image.IsFlippedVertically, ImagePixelFormat.ARGB);
+                System.Int64 runlength = GetTotalPixels(image);
+
+                switch (image.PixelFormat)
+                {
+                    case ImagePixelFormat.R:
+                        AddAlphaChannel_R_ARGB(image.NativePointer, ret.NativePointer, alpha_value, runlength);
+                        break;
+                    case ImagePixelFormat.RG:
+                        AddAlphaChannel_RG_ARGB(image.NativePointer, ret.NativePointer, alpha_value, runlength);
+                        break;
+                    case ImagePixelFormat.RGB:
+                        AddAlphaChannel_RGB_ARGB(image.NativePointer, ret.NativePointer, alpha_value, runlength);
+                        break;
+                }
+
+                return ret;
+            }
+        }
+
+        /// <summary>Transforms all the specified image pixels by a transformation function.</summary>
+        /// <param name="source">The <see cref="IImage"/> object to transform it's pixels.</param>
+        /// <param name="transform">The function to apply on each pixel of the image.</param>
+        /// <returns>A new <see cref="IImage"/> object that is the copy of the current image, but with all of it's pixels transformed by the specified <paramref name="transform"/>.</returns>
+        public static IImage Transform(this IImage source, Func<IColor, ARGBColor> transform)
+        {
+            ImagePixelFormat pix_fmt = source.PixelFormat;
+            System.Int32 bs = pix_fmt.GetByteSize(), argb_size = ImagePixelFormat.ARGB.GetByteSize();
+            System.Int64 total_pixels = source.GetTotalPixels();
+            DefaultImage ret = DefaultImage.CreateUninitialized(source.Size, source.IsFlippedVertically, ImagePixelFormat.ARGB);
+            GetPixelsTranslationDelegate translation = GetPixelFormatTransformation(pix_fmt);
+            System.Byte* p_dest = ret.NativePointer, p_src = source.NativePointer;
+            for (System.Int64 I = 0L; I < total_pixels; I++, p_dest += argb_size, p_src += bs) { *((ARGBColor*)p_dest) = transform.Invoke(translation.Invoke(p_src)); }
+            return ret;
+        }
+
+        /// <summary>Inverts (by color) all the specified image pixels.</summary>
+        /// <remarks>The method internally calls the <see cref="Transform(IImage, Func{IColor, ARGBColor})"/> method and uses the <see cref="ColorHelpers.Invert(IColor)"/> method as a transformation function.</remarks>
+        /// <param name="source">The <see cref="IImage"/> object to invert all of it's pixels.</param>
+        /// <returns>A new <see cref="IImage"/> object that is the copy of the current image, but with all of it's pixels inverted by color.</returns>
+        public static IImage Invert(this IImage source) => Transform(source, new(ColorHelpers.Invert));
+    }
+}

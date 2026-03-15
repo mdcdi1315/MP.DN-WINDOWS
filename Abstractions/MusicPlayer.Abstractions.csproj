@@ -1,0 +1,105 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>Disable</Nullable>
+	<RootNamespace></RootNamespace>
+	<SignAssembly>True</SignAssembly>
+	<ImplicitUsings>Disable</ImplicitUsings>
+	<TargetFramework>net7.0</TargetFramework>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	<RoslynCompilerType>Core</RoslynCompilerType>
+	<AssemblyName>MP.AbstractionsLib</AssemblyName>
+	<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+	<EmitCompilerGeneratedFiles>True</EmitCompilerGeneratedFiles>
+	<AssemblyOriginatorKeyFile>AbstractionsKey.snk</AssemblyOriginatorKeyFile>
+	<MP_ANALYZERENABLED Condition="'$(MP_ANALYZERENABLED)' == ''">True</MP_ANALYZERENABLED>
+  </PropertyGroup>
+
+	<ItemGroup Condition="'$(MP_ANALYZERENABLED)' == 'true'">
+		<!-- Build the analyzer transitively but do not statically link it in the project. -->
+		<ProjectReference Include="../Abstractions-Analyzer/Analyzer.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="7.0.4" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="MP/NativeInterop/Windows/COM/*.comint" />
+
+		<Compile Include="AssemblyInfo.cs" />
+
+		<Compile Include="MP/*.cs" />
+
+		<Compile Include="Microsoft\Win32\SafeHandles\SafeBaseMemoryHandle.cs" />
+		<Compile Include="Microsoft\Win32\SafeHandles\AbstractFileStreamHandle.cs" />
+		<Compile Include="Microsoft\Win32\SafeHandles\SafeNativeMemoryEnumerator.cs" />
+
+		<Compile Include="MP/TagReading/*.cs" />
+		<Compile Include="MP/TagReading/Ogg/*.cs" />
+		<Compile Include="MP/TagReading/MP4/*.cs" />
+		<Compile Include="MP/TagReading/ID3/*.cs" />
+		<Compile Include="MP/TagReading/Flac/*.cs" />
+		<Compile Include="MP/SettingsTree/*.cs" />
+		<Compile Include="MP/SettingsTree/Attributes/*.cs" />
+		<Compile Include="MP/Graphics/*.cs" />
+		<Compile Include="MP/Graphics/Imaging/*.cs" />
+		<Compile Include="MP/Serialization/*.cs" />
+		<Compile Include="MP/Serialization/Xml/*.cs" />
+		<Compile Include="MP/Serialization/Json/*.cs" />
+		<Compile Include="MP/Serialization/MPSBF/*.cs" />
+		<Compile Include="MP/Serialization/Transcoders/*.cs" />
+		<Compile Include="MP/Serialization/Constraints/*.cs" />
+		<Compile Include="MP/Annotations/*.cs" />
+		<Compile Include="MP/Annotations/CodeAnalysis/*.cs" />
+		<Compile Include="MP/BinaryPlaylist/*.cs" />
+		<Compile Include="MP/AppLoading/*.cs" />
+		<Compile Include="MP/AppLoading/Events/*.cs" />
+		<Compile Include="MP/AudioLibrary/*.cs" />
+		<Compile Include="MP/AudioLibrary/Codecs/*.cs" />
+		<Compile Include="MP/AudioLibrary/Windows/*.cs" />
+		<Compile Include="MP/AudioLibrary/Windows/Wave/*.cs" />
+		<!--
+		<Compile Include="MP\Caches\*.cs" />
+		-->
+		<Compile Include="MP/CGISettings/*.cs" />
+		<Compile Include="MP/Collections/*.cs" />
+		<Compile Include="MP/Collections/Hashing/*.cs" />
+		<Compile Include="MP/ExceptionSystem/*.cs" />
+		<Compile Include="MP/Graphics/Text/*.cs" />
+		<Compile Include="MP/Graphics/OpenGL/*.cs" />
+		<Compile Include="MP/Graphics/Windowing/*.cs" />
+		<Compile Include="MP/Graphics/Windowing/Input/*.cs" />
+		<Compile Include="MP/Graphics/Imaging/WindowsBitmap/*.cs" />
+		<Compile Include="MP/NativeInterop/*.cs" />
+		<Compile Include="MP/NativeInterop/OSX/*.cs" />
+		<Compile Include="MP/NativeInterop/Windows/*.cs" />
+		<Compile Include="MP/NativeInterop/Windows/GDI/*.cs" />
+		<Compile Include="MP/NativeInterop/Windows/COM/*.cs" />
+		<Compile Include="MP/NativeInterop/OSX/ObjectiveC/*.cs" />
+		<Compile Include="MP/NativeInterop/OSX/BlocksRuntime/*.cs" />
+		<Compile Include="MP/IO/*.cs" />
+		<Compile Include="MP/IO/Buffers/*.cs" />
+		<Compile Include="MP/IO/DataStructuring/*.cs" />
+		<Compile Include="MP/IO/DataStructuring/Generation/*.cs" />
+		<Compile Include="MP/PlaylistManagement/*.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\CompressedFormatTagWriter.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\MP_TCF\ENTRY.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\MP_TCF\ENTRY_FLAGS.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\MP_TCF\HEADER.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\MP_TCF\ID3V2CMTBLOCK.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\MP_TCF\STRING_ENCODING.cs" />
+		<Compile Include="MP\PlaylistManagement\TagSupport\MP_TCF\VALUE_TYPE.cs" />
+		<Compile Include="MP/Random/*.cs" />
+		<Compile Include="MP/Resources/*.cs" />
+		<Compile Include="MP/Resources/Management/*.cs" />
+		<Compile Include="MP/Resources/Internationalization/*.cs" />
+		<Compile Include="MP/Threading/*.cs" />
+		<Compile Include="MP/Utilities/*.cs" />
+	</ItemGroup>
+	
+</Project>

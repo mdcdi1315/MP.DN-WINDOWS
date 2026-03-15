@@ -1,0 +1,82 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+		<Nullable>disable</Nullable>
+		<RootNamespace></RootNamespace>
+        <ImplicitUsings>disable</ImplicitUsings>
+		<TargetFramework>net8.0</TargetFramework>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<RoslynCompilerType>Core</RoslynCompilerType>
+	    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <EnableWindowsTargeting>True</EnableWindowsTargeting>
+		<AssemblyName>MusicPlayer.Backend.Windows</AssemblyName>
+		<EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+		<EmitCompilerGeneratedFiles>True</EmitCompilerGeneratedFiles>
+		<GenerateDocumentationFile>False</GenerateDocumentationFile>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="7.0.4" PrivateAssets="all" />
+		<ProjectReference Include="../Abstractions/MusicPlayer.Abstractions.csproj" />
+		<!-- Build the analyzer transitively but do not statically link it in the project. -->
+		<ProjectReference Include="../Abstractions-Analyzer/Analyzer.csproj" ReferenceOutputAssembly="false" />
+		<!-- And instead, pass the analyzer as-is to the compiler. -->
+		<!-- Additionally, passing the System.Text.Json.dll assembly as an analyzer so that is loaded in context. -->
+		<Analyzer Include="../Abstractions-Analyzer/bin/Debug/netstandard2.0/MP.AbstractionsLibAnalyzer.dll" />
+		<Analyzer Include="../Abstractions-Analyzer/bin/Debug/netstandard2.0/System.Text.Json.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="MP/Graphics/Text/DWrite/*.comint" />
+		<AdditionalFiles Include="MP/NativeInterop/Windows/COM/*.comint" />
+	</ItemGroup>
+
+    <ItemGroup>
+		<Compile Include="AssemblyInfo.cs" />
+		<Compile Include="MP\ExceptionSystem\*.cs" />
+		
+		<Compile Include="MP\Graphics\Text\DWrite\*.cs" />
+		<Compile Include="MP\NativeInterop\Windows\*.cs" />
+		<Compile Include="MP\NativeInterop\Windows\COM\*.cs" />
+		<Compile Include="MP\Graphics\GDIPlusLibrary.cs" />
+		<Compile Include="MP\Graphics\Imaging\GDIPlusBitmapReader.cs" />
+		<Compile Include="MP\Graphics\Windowing\GLFWImage.cs" />
+		<Compile Include="MP\Graphics\Windowing\GLFWLibrary.cs" />
+		<Compile Include="MP\Graphics\Windowing\GLFWWindow.cs" />
+		<Compile Include="MP\Graphics\Windowing\GLFWWindowCreationParameters.cs" />
+		<Compile Include="MP\IO\WindowsDirectory.cs" />
+		<Compile Include="MP\IO\WindowsIOHelpers.cs" />
+		<Compile Include="MP\IO\NativePathManipulations.cs" />
+		<Compile Include="MP\IO\SafeHandles\WindowsFileStreamHandle.cs" />
+		<Compile Include="MP\IO\WindowsFile.cs" />
+		<Compile Include="MP\IO\WindowsFileStream.cs" />
+		<Compile Include="MP\IO\WindowsFileSystem.cs" />
+		<Compile Include="MP\SystemIOStreamWrappedStream.cs" />
+		
+		
+		<Compile Include="MP\WindowsPlatformLayer.cs" />
+
+		<Compile Include="NativeInterop.Base.cs" />
+
+		<Compile Include="NativeInterop.GdiPlus.cs" />
+		<Compile Include="NativeInterop.GLFW.cs" />
+		<Compile Include="NativeInterop.Kernel32.File.cs" />
+		<Compile Include="NativeInterop.NtDll.cs" />
+		<Compile Include="NativeInterop.NtDll.Drive.cs" />
+		<Compile Include="NativeInterop.NtDll.File.cs" />
+		<Compile Include="NativeInterop.NtDll.GenericIO.cs" />
+		<Compile Include="NativeInterop.Ole32.cs" />
+		<Compile Include="NativeInterop.OleAut32.cs" />
+		<Compile Include="NativeInterop.PropSys.cs" />
+		<Compile Include="NativeInterop.ErrorsAndLibs.cs" />
+		<Compile Include="NativeInterop.Kernel32.Drive.cs" />
+		<Compile Include="NativeInterop.Kernel32.Memory.cs" />
+		<Compile Include="NativeInterop.Kernel32.SysInfo.cs" />
+		<Compile Include="NativeInterop.Kernel32.Handles.cs" />
+		<Compile Include="NativeInterop.Kernel32.Threading.cs" />
+		<Compile Include="NativeInterop.Kernel32.Localization.cs" />
+		<Compile Include="NativeInterop.Kernel32.LibraryLoader.cs" />
+		<Compile Include="NativeInterop.Kernel32.NativeException.cs" />
+	</ItemGroup>
+
+</Project>

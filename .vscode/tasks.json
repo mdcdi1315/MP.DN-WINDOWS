@@ -1,0 +1,207 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build - Debug Windows Intel 64",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+				"msbuild",
+				"\"${workspaceFolder}/Implementation/MusicPlayer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// Ask the native executable to run on Windows Intel 64.
+				"/property:RuntimeIdentifier=win-x64",
+				// Do not append the RID, request results directly.
+				"/property:AppendRuntimeIdentifierToOutputPath=false",
+				// Required when building outside Windows.
+				"/property:EnableWindowsTargeting=true",
+				// The target that needed to be executed. Here is `build`.
+                "/t:build",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Build - Debug Windows ARM 64",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+				"msbuild",
+				// The project to build.
+				"\"${workspaceFolder}/Implementation/MusicPlayer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// Ask the native executable to run on Windows ARM 64.
+				"/property:RuntimeIdentifier=win-arm64",
+				// Required when building outside Windows.
+				"/property:EnableWindowsTargeting=true",
+				// Do not append the RID, request results directly.
+				"/property:AppendRuntimeIdentifierToOutputPath=false",
+				// The target that needed to be executed. Here is `build`.
+                "/t:build",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Build - Release Windows Intel 64",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				// .NET executable sub-command.
+				"msbuild",
+				// The project to build.
+				"\"${workspaceFolder}/Implementation/MusicPlayer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// Ask the native executable to run on Windows Intel 64.
+				"/property:RuntimeIdentifier=win-x64",
+				// Required when building outside Windows.
+				"/property:EnableWindowsTargeting=true",
+				// Do not append the RID, request results directly.
+				"/property:AppendRuntimeIdentifierToOutputPath=false",
+				// Switch to Release channel.
+				"/property:Configruation=Release",
+				// The target that needed to be executed. Here is `build`.
+                "/t:build",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+			],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Build - Release Windows ARM 64",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				// .NET executable sub-command.
+				"msbuild",
+				// The project to build.
+				"\"${workspaceFolder}/Implementation/MusicPlayer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// Ask the native executable to run on Windows ARM 64.
+				"/property:RuntimeIdentifier=win-arm64",
+				// Required when building outside Windows.
+				"/property:EnableWindowsTargeting=true",
+				// Do not append the RID, request results directly.
+				"/property:AppendRuntimeIdentifierToOutputPath=false",
+				// Switch to Release channel.
+				"/property:Configruation=Release",
+				// The target that needed to be executed. Here is `build`.
+                "/t:build",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+			],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Publish - Framework-dependent Windows Intel 64",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				// .NET executable sub-command.
+				"msbuild",
+				// The project to build.
+				"\"${workspaceFolder}/Implementation/MusicPlayer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// Ask the native executable to run on Windows Intel 64.
+				"/property:RuntimeIdentifier=win-x64",
+				// Required when building outside Windows.
+				"/property:EnableWindowsTargeting=true",
+				// The target that needed to be executed. Here is `publish`.
+                "/t:publish",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+			],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Publish - Framework-dependent Windows ARM 64",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				// .NET executable sub-command.
+				"msbuild",
+				// The project to build.
+				"\"${workspaceFolder}/Implementation/MusicPlayer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// Ask the native executable to run on Windows ARM 64.
+				"/property:RuntimeIdentifier=win-arm64",
+				// Required when building outside Windows.
+				"/property:EnableWindowsTargeting=true",
+				// The target that needed to be executed. Here is `publish`.
+                "/t:publish",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+			],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Bootstrap Abstractions Library Analyzer",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				// .NET executable sub-command.
+				"msbuild",
+				// The project to build.
+				"\"${workspaceFolder}/Abstractions-Analyzer/Analyzer.csproj\"",
+                // Ask msbuild to generate full paths for file names.
+                "/property:GenerateFullPaths=true",
+				// The targets that needed to be executed. Here is `restore` and `build`.
+                "/t:restore",
+				"/t:build",
+                // Do not generate summary otherwise it leads to duplicate errors in Problems panel
+                "/consoleloggerparameters:NoSummary"
+			],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$msCompile"
+		}
+	]
+}

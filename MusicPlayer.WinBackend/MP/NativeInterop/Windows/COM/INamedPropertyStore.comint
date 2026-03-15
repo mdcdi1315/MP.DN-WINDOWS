@@ -1,0 +1,63 @@
+﻿{
+	"name": "INamedPropertyStore",
+	"namespace": "MP.NativeInterop.Windows.COM",
+	"iid": "71604B0F-97B0-4764-8577-2F13E98A1422",
+	"imports": [
+		"MP.NativeInterop.Windows.HRESULT",
+		"MP.NativeInterop.Windows.PROPVARIANT"
+	],
+	"methods": [
+		{
+			"name": "GetNamedValue",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "pszValue",
+					"type": "System.Char*"
+				},
+				{
+					"name": "ppropvar",
+					"type": "PROPVARIANT*"
+				}
+			]
+		},
+		{
+			"name": "SetNamedValue",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "pszValue",
+					"type": "System.Char*"
+				},
+				{
+					"name": "propvar",
+					"type": "PROPVARIANT*"
+				}
+			]
+		},
+		{
+			"name": "GetNameCount",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "pdwCount",
+					"type": "System.UInt32*"
+				}
+			]
+		},
+		{
+			"name": "GetNameAt",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "iProp",
+					"type": "System.UInt32"
+				},
+				{
+					"name": "pbstrName",
+					"type": "System.Char**" // BSTR*
+				}
+			]
+		}
+	]
+}

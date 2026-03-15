@@ -1,0 +1,39 @@
+﻿{
+	"name": "IPersistSerializedPropStorage2",
+	"namespace": "MP.NativeInterop.Windows.COM",
+	"iid": "77EFFA68-4F98-4366-BA72-573B3D880571",
+	"base_type": "MP.NativeInterop.Windows.COM.IPersistSerializedPropStorage",
+	"imports": [
+		"MP.NativeInterop.Windows.HRESULT"
+	],
+	"methods": [
+		{
+			"name": "GetPropertyStorageSize",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "pcb",
+					"type": "System.UInt32*"
+				}
+			]
+		},
+		{
+			"name": "GetPropertyStorageBuffer", // Fails if cb is smaller than the total size of the serialized data.
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "psps",
+					"type": "System.Byte**"
+				},
+				{
+					"name": "cb",
+					"type": "System.UInt32"
+				},
+				{
+					"name": "pcbWritten",
+					"type": "System.UInt32*"
+				}
+			]
+		}
+	]
+}

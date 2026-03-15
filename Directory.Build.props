@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Imports in and defines the first project file that is run on MSBuild. -->
+<Project InitialTargets="PrepareMPBuild">
+
+	<PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.vcxproj' AND '$([System.IO.File]::Exists(`$(MSBuildThisFileDirectory)ProjectKey.snk`))' == 'true'">
+		<AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">$(MSBuildThisFileDirectory)ProjectKey.snk</AssemblyOriginatorKeyFile>
+		<SignAssembly Condition="'$(SignAssembly)' == ''">true</SignAssembly>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<MP_UNSTABLE Condition="'$(MP_UNSTABLE)' == ''">False</MP_UNSTABLE>
+		<MP_BaseFileReferenceLoadingPath>$(MSBuildThisFileDirectory)</MP_BaseFileReferenceLoadingPath>
+		<MPBuildTasksProjBasePath>$(MSBuildThisFileDirectory)BuildTasks</MPBuildTasksProjBasePath>
+		<MPBuildTasksBasePath>$(MPBuildTasksProjBasePath)/MP_BUILDTASKS</MPBuildTasksBasePath>
+		<!-- Define warnings and errors that belong to unstable branches of Music Player Abstractions Library. These are required to be globally disabled so that the preliminary code defined in such branches can be freely injected. -->
+		<NoWarn Condition="'$(MP_UNSTABLE)' == 'True'">$(NoWarn);MPAL00001</NoWarn>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+	</PropertyGroup>
+	
+	<Import Project="$(MPBuildTasksProjBasePath)/MP.BuildTasks.targets" />
+
+	<!-- Builds the BuildTasks assembly before being referenced by any project. -->
+	<!-- Even the ReleaseBuilds file delegates to this. -->
+	<Target Name="PrepareMPBuild" 
+	Condition="'$(DesignTimeBuild)' != 'true' AND '$(MSBuildProjectName)' != 'MusicPlayer.BuildTasks' AND '$([System.IO.File]::Exists(`$(MPBuildTasksBasePath)/MP.BuildTasks.dll`))' == 'false'">
+		<MSBuild Projects="$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj" 
+				 Targets="Restore" 
+				 Properties="Configuration=Release;OutputPath=$(MPBuildTasksBasePath);DebugSymbols=false" 
+				 />
+		<Exec Command="dotnet msbuild &quot;$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj&quot; -t:Build -p:&quot;OutputPath=$(MPBuildTasksBasePath)&quot; -p:Configuration=Release -p:DebugSymbols=false" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
+		<Exec Command="&quot;$(MSBuildBinPath)/msbuild.exe&quot; &quot;$(MPBuildTasksProjBasePath)/MusicPlayer.BuildTasks.csproj&quot; -t:Build -p:&quot;OutputPath=$(MPBuildTasksBasePath)&quot; -p:Configuration=Release -p:DebugSymbols=false" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
+	</Target>
+
+	<!-- Special target for resetting any project on which this target is invoked -->
+	<Target Name="CleanCompletely">
+		<RemoveDir Directories="$(MSBuildProjectDirectory)/bin" />
+		<RemoveDir Directories="$(MSBuildProjectDirectory)/obj" />
+	</Target>
+	
+</Project>

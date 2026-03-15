@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <Nullable>disable</Nullable>
+	  <IsPackable>false</IsPackable>
+	  <LangVersion>10</LangVersion>
+	  <RootNamespace></RootNamespace>
+	  <SignAssembly>true</SignAssembly>
+	  <ImplicitUsings>disable</ImplicitUsings>
+	  <NoPackageAnalysis>true</NoPackageAnalysis>
+	  <PackageId>*$(MSBuildProjectFile)*</PackageId>
+	  <RoslynCompilerType>Core</RoslynCompilerType>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+	  <!-- Avoid ID conflicts with the abstractions library project. -->
+	  <DevelopmentDependency>true</DevelopmentDependency>
+	  <AssemblyName>MP.AbstractionsLibAnalyzer</AssemblyName>
+	  <EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+      <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="7.0.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="./AttributesAnalysis/*.cs" />
+    <Compile Include="./COMSourceGeneration/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="DataStructureGeneration\EnumStructureFieldData.cs" />
+    <Compile Include="DataStructureGeneration\FixedBufferFieldData.cs" />
+    <Compile Include="DataStructureGeneration\MPDataStructureGenerator.cs" />
+    <Compile Include="DataStructureGeneration\MPDataStructureGeneratorDiagnosticDescriptors.cs" />
+    <Compile Include="DataStructureGeneration\StringFieldEncoding.cs" />
+    <Compile Include="DataStructureGeneration\StructureFieldData.cs" />
+    <Compile Include="DataStructureGeneration\StructureFixedStringFieldData.cs" />
+    <Compile Include="DataStructureGeneration\StructureNumericFieldData.cs" />
+    <Compile Include="DataStructureGeneration\StructureVariableStringFieldData.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,21 @@
+﻿{
+	"name": "IPersist",
+	"namespace": "MP.NativeInterop.Windows.COM",
+	"iid": "0000010C-0000-0000-C000-000000000046",
+	"imports": [
+		"MP.NativeInterop.Windows.HRESULT",
+		"MP.NativeInterop.Windows.GUID"
+	],
+	"methods": [
+		{
+			"name": "GetClassID",
+			"return_type": "HRESULT",
+			"arguments": [
+				{
+					"name": "clsid",
+					"type": "GUID*"
+				}
+			]
+		}
+	]
+}
